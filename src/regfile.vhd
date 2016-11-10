@@ -67,8 +67,6 @@ begin
             when "11111" => regs(31) <= wdata;
             when others => null;
           end case;
-          addr := to_integer(unsigned(waddr));
-          regs(addr) <= wdata;
         end if;
       end if;
     end if;
