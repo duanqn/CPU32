@@ -37,6 +37,8 @@ signal op4:STD_LOGIC_VECTOR(4 downto 0);
 signal imm:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
 signal reg1_read:STD_LOGIC;
 signal reg2_read:STD_LOGIC;
+signal reg1:STD_LOGIC_VECTOR(31 downto 0);
+signal reg2:STD_LOGIC_VECTOR(31 downto 0);
 signal instvalid:STD_LOGIC;
 
 --instrs
@@ -59,6 +61,13 @@ constant EXE_SRLV:STD_LOGIC_VECTOR(5 downto 0) := "000110";
 constant EXE_SRA:STD_LOGIC_VECTOR(5 downto 0) := "000011";
 constant EXE_SRAV:STD_LOGIC_VECTOR(5 downto 0) := "000111";
 
+constant EXE_MOVZ:STD_LOGIC_VECTOR(5 downto 0) := "001010";
+constant EXE_MOVN:STD_LOGIC_VECTOR(5 downto 0) := "001011";
+constant EXE_MFHI:STD_LOGIC_VECTOR(5 downto 0) := "010000";
+constant EXE_MTHI:STD_LOGIC_VECTOR(5 downto 0) := "010001";
+constant EXE_MFLO:STD_LOGIC_VECTOR(5 downto 0) := "010010";
+constant EXE_MTLO:STD_LOGIC_VECTOR(5 downto 0) := "010011";
+
 --ALU OPs
 CONSTANT EXE_OR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100101";
 CONSTANT EXE_NOP_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000000";
@@ -80,6 +89,8 @@ begin
   op4<=inst_i(20 downto 16);
   reg1_read_o <= reg1_read;
   reg2_read_o <= reg2_read;
+  reg1_o <= reg1;
+  reg2_o <= reg2;
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
   begin
     if rst = '0' then
@@ -196,6 +207,32 @@ begin
                   reg1_read <= '1';
                   reg2_read <= '1';
                   instvalid <= '1';
+                when EXE_MFHI =>
+                  wreg_o <= '1';
+                  aluop_o <= EXE_MFHI_OP;
+                  alusel_o <= EXE_RES_MOVE;
+                  reg1_read <= '0';
+                  reg2_read <= '0';
+                  instvalid <= '1';
+                when EXE_MTHI =>
+                  wreg_o <= '1';
+                  aluop_o <= EXE_MTHI_OP;
+                  reg1_read <= '1';
+                  reg2_read <= '0';
+                  instvalid <= '1';
+                when EXE_MFLO =>
+                  wreg_o <= '1';
+                  aluop_o <= EXE_MFLO_OP;
+                  alusel_o <= EXE_RES_MOVE;
+                  reg1_read <= '0';
+                  reg2_read <= '0';
+                  instvalid <= '1';
+                when EXE_MTLO =>
+                  wreg_o <= '1';
+                  aluop_o <= EXE_MTLO_OP;
+                  reg1_read <= '1';
+                  reg2_read <= '0';
+                  instvalid <= '1';
                 when others => NULL;
               end case; -- op3
             when others => NULL;
@@ -240,17 +277,17 @@ begin
 
   begin
     if rst = '1' then
-      reg1_o <= x"00000000";
+      reg1 <= x"00000000";
     elsif reg1_read = '1' and ex_wreg_i = '1' and ex_wd_i = reg1_addr_o then  -- ex-id conflict
-      reg1_o <= ex_wdata_i;
+      reg1 <= ex_wdata_i;
     elsif reg1_read = '1' and mem_wreg_i = '1' and mem_wd_i = reg1_addr_o then  -- mem-id conflict
-      reg1_o <= mem_wdata_i;
+      reg1 <= mem_wdata_i;
     elsif reg1_read = '1' then
-      reg1_o <= reg1_data_i;
+      reg1 <= reg1_data_i;
     elsif reg1_read = '0' then
-      reg1_o <= imm;
+      reg1 <= imm;
     else
-      reg1_o <= x"00000000";
+      reg1 <= x"00000000";
     end if;
   end process;
 
@@ -258,17 +295,17 @@ begin
 
   begin
     if rst = '1' then
-      reg2_o <= x"00000000";
+      reg2 <= x"00000000";
     elsif reg2_read = '1' and ex_wreg_i = '1' and ex_wd_i = reg2_addr_o then  -- ex-id conflict
-      reg2_o <= ex_wdata_i;
+      reg2 <= ex_wdata_i;
     elsif reg2_read = '1' and mem_wreg_i = '1' and mem_wd_i = reg2_addr_o then  -- mem-id conflict
-      reg2_o <= mem_wdata_i;
+      reg2 <= mem_wdata_i;
     elsif reg2_read = '1' then
-      reg2_o <= reg2_data_i;
+      reg2 <= reg2_data_i;
     elsif reg2_read = '0' then
-      reg2_o <= imm;
+      reg2 <= imm;
     else
-      reg2_o <= x"00000000";
+      reg2 <= x"00000000";
     end if;
   end process;
 end decode;
