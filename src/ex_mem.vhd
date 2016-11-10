@@ -10,10 +10,16 @@ ENTITY ex_mem IS
     ex_wd: IN STD_LOGIC_VECTOR (4 downto 0);
     ex_wreg: IN STD_LOGIC;
     ex_wdata: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_hi: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_lo: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_whilo: IN STD_LOGIC;
 
     mem_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
     mem_wreg: OUT STD_LOGIC;
-    mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0)
+    mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_whilo: IN STD_LOGIC
   );
 end ex_mem;
 
@@ -29,10 +35,16 @@ end ex_mem;
             mem_wd_s <= "00000";
             mem_wreg_s <= '0';
             mem_wdata_s <= X"00000000";
+            mem_hi <= X"00000000";
+            mem_lo <= X"00000000";
+            mem_whilo <= '0';
           ELSE
             mem_wd_s <= ex_wd;
             mem_wreg_s <= ex_wreg;
             mem_wdata_s <= ex_wdata;
+            mem_hi <= ex_hi;
+            mem_lo <= ex_lo;
+            mem_whilo <= ex_whilo;
           END IF;
         END IF;
         mem_wd <= mem_wd_s;
