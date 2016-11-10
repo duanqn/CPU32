@@ -6,26 +6,26 @@ USE IEEE.STD_LOGIC_UNSIGNED.ALL;
 entity id is
   PORT(
     rst:in STD_LOGIC;
-    pc_i:in STD_LOGIC_VECTOR(31 downto 0);
-    inst_i:in STD_LOGIC_VECTOR(31 downto 0);
-    reg1_data_i:in STD_LOGIC_VECTOR(31 downto 0);
-    reg2_data_i:in STD_LOGIC_VECTOR(31 downto 0);
-    reg1_read_o:out STD_LOGIC;
-    reg2_read_o:out STD_LOGIC;
-    reg1_addr_o:out STD_LOGIC_VECTOR(4 downto 0); --size = 5
-    reg2_addr_o:out STD_LOGIC_VECTOR(4 downto 0); --size = 5
-    ex_wreg_i:in STD_LOGIC;
-    ex_wdata_i:in STD_LOGIC_VECTOR(31 downto 0);
-    ex_wd_i:in STD_LOGIC_VECTOR(4 downto 0);  --size = 5
-    mem_wreg_i:in STD_LOGIC;
-    mem_wdata_i:in STD_LOGIC_VECTOR(31 downto 0);
-    mem_wd_i:in STD_LOGIC_VECTOR(4 downto 0); --size = 5
+    pc_i:in STD_LOGIC_VECTOR(31 downto 0);  -- Program counter
+    inst_i:in STD_LOGIC_VECTOR(31 downto 0);  -- Instruction
+    reg1_data_i:in STD_LOGIC_VECTOR(31 downto 0); -- Result from register
+    reg2_data_i:in STD_LOGIC_VECTOR(31 downto 0); -- Result from register
+    reg1_read_o:out STD_LOGIC;  -- Control register reading
+    reg2_read_o:out STD_LOGIC;  -- Control register reading
+    reg1_addr_o:out STD_LOGIC_VECTOR(4 downto 0); --size = 5 Register address
+    reg2_addr_o:out STD_LOGIC_VECTOR(4 downto 0); --size = 5 Register address
+    ex_wreg_i:in STD_LOGIC; -- Data forwarding
+    ex_wdata_i:in STD_LOGIC_VECTOR(31 downto 0); -- Data forwarding
+    ex_wd_i:in STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Data forwarding
+    mem_wreg_i:in STD_LOGIC; -- Data forwarding
+    mem_wdata_i:in STD_LOGIC_VECTOR(31 downto 0); -- Data forwarding
+    mem_wd_i:in STD_LOGIC_VECTOR(4 downto 0); --size = 5 Data forwarding
     aluop_o:out STD_LOGIC_VECTOR(7 downto 0); --size = 8
     alusel_o:out STD_LOGIC_VECTOR(2 downto 0);  --size = 3
-    reg1_o:out STD_LOGIC_VECTOR(31 downto 0);
-    reg2_o:out STD_LOGIC_VECTOR(31 downto 0);
-    wd_o:out STD_LOGIC_VECTOR(4 downto 0);  --size = 5
-    wreg_o:out STD_LOGIC
+    reg1_o:out STD_LOGIC_VECTOR(31 downto 0); -- Operand 1
+    reg2_o:out STD_LOGIC_VECTOR(31 downto 0); -- Operand 2
+    wd_o:out STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Write-Destination (register)
+    wreg_o:out STD_LOGIC -- =1 -> need to write reg
   );
 end id;
 
