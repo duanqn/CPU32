@@ -7,11 +7,11 @@ ENTITY ex IS
   PORT(
     rst: IN STD_LOGIC;
 
-    aluop_i: IN STD_LOGIC_VECTOR (7 downto 0);
-    alusel_i: IN STD_LOGIC_VECTOR (2 downto 0);
-    reg1_i: IN STD_LOGIC_VECTOR (31 downto 0);
-    reg2_i: IN STD_LOGIC_VECTOR (31 downto 0);
-    wd_i: IN STD_LOGIC_VECTOR (4 downto 0);
+    aluop_i: IN STD_LOGIC_VECTOR(7 downto 0);
+    alusel_i: IN STD_LOGIC_VECTOR(2 downto 0);
+    reg1_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    reg2_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    wd_i: IN STD_LOGIC_VECTOR(4 downto 0);
     wreg_i: IN STD_LOGIC;
 
     hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
@@ -25,22 +25,22 @@ ENTITY ex IS
 
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     lo_o: OUT STD_LOGIC_VECTOR(31 downto 0);
-    
+    whilo_o: OUT STD_LOGIC;
 
-    wd_o: OUT STD_LOGIC_VECTOR (4 downto 0);
+    wd_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: OUT STD_LOGIC;
-    wdata_o: OUT STD_LOGIC_VECTOR (31 downto 0)
-
+    wdata_o: OUT STD_LOGIC_VECTOR(31 downto 0)
 
   );
 end ex;
 
   ARCHITECTURE behave OF ex IS
-    SIGNAL wd_s: STD_LOGIC_VECTOR (4 downto 0);
-    SIGNAL wdata_s: STD_LOGIC_VECTOR (31 downto 0);
-    SIGNAL wreg_s: STD_LOGIC;
-    SIGNAL logicout: STD_LOGIC_VECTOR (31 downto 0);
-    SIGNAL shiftres: STD_LOGIC_VECTOR (31 downto 0);
+
+    SIGNAL logicout: STD_LOGIC_VECTOR(31 downto 0);
+    SIGNAL shiftres: STD_LOGIC_VECTOR(31 downto 0);
+    SIGNAL moveres: STD_LOGIC_VECTOR(31 downto 0);
+    SIGNAL HI STD_LOGIC_VECTOR(31 downto 0);
+    SIGNAL LO STD_LOGIC_VECTOR(31 downto 0);
 
     -- macro
     CONSTANT EXE_OR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100101";
@@ -56,6 +56,49 @@ end ex;
     CONSTANT EXE_RES_SHIFT: STD_LOGIC_VECTOR(2 downto 0) := "010";
 
   BEGIN
+
+-- get HI and LO reg
+    PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, hi_o, hi_i)
+      BEGIN
+        IF(rst = '1') THEN
+          HI <= X"00000000";
+          LO <= X"00000000";
+        ELSIF (mem_whilo_i = '1') THEN
+          HI <= mem_hi_i;
+          LO <= mem_lo_i;
+        ELSIF (wb_whilo_i = '1') THEN
+          HI <= wb_hi_i;
+          LO <= wb_lo_i;
+        ELSE
+          HI <= hi_i;
+          LO <= lo_i;
+        END IF;
+      END PROCESS;
+
+-- about MFHI, MFLO
+    PROCESS(rst, aluop_i)
+      BEGIN
+        IF(rst = '1') THEN
+          moveres <= X"00000000";
+        ELSE
+          CASE aluop_i IS
+            WHEN EXE_MFHI_OP => moveres <= HI;
+            WHEN EXE_MFLO_OP => moveres <= LO;
+            WHEN others => moveres <= X"00000000";
+          END CASE;
+        END IF;
+      END PROCESS;
+
+-- about MTLO, MTHI
+    PROCESS(rst, aluop_i, reg1_i)
+      BEGIN
+        IF(rst = '1') THEN
+          whilo_o <= '0';
+          hi_o <= X"00000000";
+          lo_o <= X"00000000";
+        ELSIF
+
+-- get logicOut
     PROCESS(rst, aluop_i, reg2_i, reg1_i)
       BEGIN
         IF(rst = '1') THEN
@@ -71,6 +114,7 @@ end ex;
         END IF;
       END PROCESS;
 
+-- get shiftRes
     PROCESS(rst, aluop_i, reg1_i, reg2_i)
       BEGIN
         IF(rst = '1') THEN
@@ -287,6 +331,7 @@ end ex;
         CASE alusel_i IS
           WHEN EXE_RES_LOGIC => wdata_o <= logicout;
           WHEN EXE_RES_SHIFT => wdata_o <= shiftres;
+          WHEN EXE_RES_MOVE => wdata_o <= moveres;
           WHEN others => wdata_o <= X"00000000";
         END CASE;
       END PROCESS;
