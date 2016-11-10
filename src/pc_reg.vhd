@@ -12,11 +12,11 @@ entity pc_reg is
   );
 end pc_reg;
 
-architecture counter of pc is
+architecture counter of pc_reg is
 signal counter:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
-  pc <= counter;
   
 begin
+  pc <= counter;
   process(clk)
   variable ce_var:STD_LOGIC :='0';
   begin

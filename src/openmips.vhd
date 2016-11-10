@@ -18,7 +18,7 @@ architecture arch of openmips is
     clk: in STD_LOGIC;
     rst: in STD_LOGIC;
     pc: out STD_LOGIC_VECTOR(31 downto 0);
-    cd: out STD_LOGIC
+    ce: out STD_LOGIC
     );
   end component;
 
@@ -98,6 +98,8 @@ architecture arch of openmips is
 
   component ex
   port (
+    rst: in STD_LOGIC;
+	 
     aluop_i: in STD_LOGIC_VECTOR(7 downto 0);
     alusel_i: in STD_LOGIC_VECTOR(2 downto 0);
     reg1_i: in STD_LOGIC_VECTOR(31 downto 0);
@@ -217,7 +219,7 @@ begin
     rst => rst, pc_i => id_pc_i, inst_i => id_inst_i, 
     reg1_data_i => reg1_data, reg2_data_i => reg2_data, 
     reg1_read_o => reg1_read, reg2_read_o => reg2_read, 
-    reg1_addr_o => reg1_addr, reg2_addr_o >= reg2_addr, 
+    reg1_addr_o => reg1_addr, reg2_addr_o => reg2_addr, 
     aluop_o => id_aluop_o, alusel_o => id_alusel_o,
     reg1_o => id_reg1_o, reg2_o => id_reg2_o,
     wd_o => id_wd_o, wreg_o => id_wreg_o);

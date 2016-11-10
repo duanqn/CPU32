@@ -11,7 +11,7 @@ entity if_id is
     if_inst:in STD_LOGIC_VECTOR(31 downto 0);
     id_pc:out STD_LOGIC_VECTOR(31 downto 0);
     id_inst:out STD_LOGIC_VECTOR(31 downto 0)
-  )
+  );
 end if_id;
 
 architecture simple of if_id is
