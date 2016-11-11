@@ -24,10 +24,10 @@ ENTITY ex IS
     mem_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
     mem_whilo_i: IN STD_LOGIC;
 
+    stallreq: OUT STD_LOGIC;
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     lo_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     whilo_o: OUT STD_LOGIC;
-    stallreq_from_ex: OUT STD_LOGIC;
 
     wd_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: OUT STD_LOGIC;
