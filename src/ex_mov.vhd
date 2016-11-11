@@ -48,12 +48,20 @@ end ex;
     CONSTANT EXE_AND_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100100";
     CONSTANT EXE_NOR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100111";
     CONSTANT EXE_XOR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100110";
+
     CONSTANT EXE_SLL_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000100";
     CONSTANT EXE_SRL_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000110";
     CONSTANT EXE_SRA_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000111";
-    CONSTANT EXE_RES_LOGIC: STD_LOGIC_VECTOR(2 downto 0) := "001";
+
+    CONSTANT EXE_MFHI_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010000";
+    CONSTANT EXE_MTHI_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010001";
+    CONSTANT EXE_MFLO_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010010";
+    CONSTANT EXE_MTLO_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010011";
+    
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";
+    CONSTANT EXE_RES_LOGIC: STD_LOGIC_VECTOR(2 downto 0) := "001";
     CONSTANT EXE_RES_SHIFT: STD_LOGIC_VECTOR(2 downto 0) := "010";
+    CONSTANT EXE_RES_MOVE: STD_LOGIC_VECTOR(2 downto 0) := "011";
 
   BEGIN
 
@@ -92,11 +100,24 @@ end ex;
 -- about MTLO, MTHI
     PROCESS(rst, aluop_i, reg1_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF (rst = '1') THEN
           whilo_o <= '0';
           hi_o <= X"00000000";
           lo_o <= X"00000000";
-        ELSIF
+        ELSIF (aluop_i = EXE_MTHI_OP) THEN
+          whilo_o <= '1';
+          hi_o <= reg1_i;
+          lo_o <= LO;
+        ELSIF (aluop_i = EXE_MTLO_OP) THEN
+          whilo_o <= '1';
+          hi_o <= HI;
+          lo_o <= reg1_i;
+        ELSE
+          whilo_o <= '0';
+          hi_o <= X"00000000";
+          lo_o <= X"00000000";
+        END IF;
+      END PROCESS;
 
 -- get logicOut
     PROCESS(rst, aluop_i, reg2_i, reg1_i)

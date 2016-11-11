@@ -105,17 +105,6 @@ begin
       reg2_addr_o <= "00000";
       imm <= x"00000000";
     else
-      aluop_o <= "00000000";
-      alusel_o <= "000";
-      wd_o <= inst_i(15 downto 11);
-      wreg_o <= '0';
-      instvalid<='0';
-      reg1_read <= '0';
-      reg2_read <= '0';
-      reg1_addr_o <= inst_i(25 downto 21);
-      reg2_addr_o <= inst_i(20 downto 16);
-      imm <= x"00000000";
-
       case op is
         when EXE_ORI =>  --ORI
           wreg_o <= '1';
@@ -237,39 +226,49 @@ begin
               end case; -- op3
             when others => NULL;
           end case; -- op2
-        when others =>
-          NULL;
+          if inst_i(25 downto 21 = "00000") then -- inst_i(31 downto 21) = "00000000000"
+            if op3 = EXE_SLL then
+              wreg_o <= '1';
+              aluop_o <= EXE_SLL_OP;
+              alusel_o <= EXE_RES_SHIFT;
+              reg1_read_o <= '0';
+              reg2_read_o <= '1';
+              imm(4 downto 0) <= inst_i(10 downto 6);
+              wd_o <= inst_i(15 downto 11);
+              instvalid <= '1';
+            elsif op3 = EXE_SRL then
+              wreg_o <= '1';
+              aluop_o <= EXE_SRL_OP;
+              alusel_o <= EXE_RES_SHIFT;
+              reg1_read <= '0';
+              reg2_read <= '1';
+              imm(4 downto 0) <= inst_i(10 downto 6);
+              wd_o <= inst_i(15 downto 11);
+              instvalid <= '1';
+            elsif op3 = EXE_SRA then
+              wreg_o <= '1';
+              alu_op_o <= EXE_SRA_OP;
+              alu_sel_o <= EXE_RES_SHIFT;
+              reg1_read <= '0';
+              reg2_read <= '1';
+              imm(4 downto 0) <= inst_i(10 downto 6);
+              wd_o <= inst_i(15 downto 11);
+              instvalid <= '1';
+            end if;
+          end if;
+        when others =>  -- op
+          aluop_o <= "00000000";
+          alusel_o <= "000";
+          wd_o <= inst_i(15 downto 11);
+          wreg_o <= '0';
+          instvalid<='0';
+          reg1_read <= '0';
+          reg2_read <= '0';
+          reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= inst_i(20 downto 16);
+          imm <= x"00000000";
       end case; -- op
-      if (inst_i(31 downto 21) = "00000000000") then
-        if op3 = EXE_SLL then
-          wreg_o <= '1';
-          aluop_o <= EXE_SLL_OP;
-          alusel_o <= EXE_RES_SHIFT;
-          reg1_read_o <= '0';
-          reg2_read_o <= '1';
-          imm(4 downto 0) <= inst_i(10 downto 6);
-          wd_o <= inst_i(15 downto 11);
-          instvalid <= '1';
-        elsif op3 = EXE_SRL then
-          wreg_o <= '1';
-          aluop_o <= EXE_SRL_OP;
-          alusel_o <= EXE_RES_SHIFT;
-          reg1_read <= '0';
-          reg2_read <= '1';
-          imm(4 downto 0) <= inst_i(10 downto 6);
-          wd_o <= inst_i(15 downto 11);
-          instvalid <= '1';
-        elsif op3 = EXE_SRA then
-          wreg_o <= '1';
-          alu_op_o <= EXE_SRA_OP;
-          alu_sel_o <= EXE_RES_SHIFT;
-          reg1_read <= '0';
-          reg2_read <= '1';
-          imm(4 downto 0) <= inst_i(10 downto 6);
-          wd_o <= inst_i(15 downto 11);
-          instvalid <= '1';
-        end if;
-      end if;
+
     end if;
   end process;
 
