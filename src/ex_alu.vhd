@@ -82,6 +82,7 @@ end ex;
       reg2_i_mux <= (not reg2_i) + X"00000001";
     ELSE
       reg2_i_mux <= reg2_i;
+    END IF;
 
     result_sum <= reg1_i + reg2_i_mux;
 
@@ -89,7 +90,14 @@ end ex;
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
 
     IF (aluop_i = EXE_SLT_OP) THEN
-      reg1_lt_reg2 = ((reg1_i(31)) and (not reg2_i(31)))
+      reg1_lt_reg2 = ((reg1_i(31)) and (not reg2_i(31))) or 
+        ((not reg1_i(31)) and (not reg2_i(31)) and result_sum(31)) or 
+        (reg1_i(31) and reg2_i(31) and result_sum(31));
+    ELSE
+      reg1_lt_reg2 = (reg1_i < reg2_i);
+    END IF;
+
+
 
 -- get HI and LO reg
     PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, hi_o, hi_i)

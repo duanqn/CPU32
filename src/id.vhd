@@ -233,7 +233,7 @@ begin
               end case; -- op3
             when others => NULL;
           end case; -- op2
-          if inst_i(25 downto 21 = "00000") then -- inst_i(31 downto 21) = "00000000000"
+          if inst_i(25 downto 21) = "00000" then -- inst_i(31 downto 21) = "00000000000"
             if op3 = EXE_SLL then
               wreg_o <= '1';
               aluop_o <= EXE_SLL_OP;
