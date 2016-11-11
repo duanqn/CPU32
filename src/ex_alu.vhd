@@ -90,12 +90,25 @@ end ex;
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
 
     IF (aluop_i = EXE_SLT_OP) THEN
-      reg1_lt_reg2 = ((reg1_i(31)) and (not reg2_i(31))) or 
+      reg1_lt_reg2 <= ((reg1_i(31)) and (not reg2_i(31))) or 
         ((not reg1_i(31)) and (not reg2_i(31)) and result_sum(31)) or 
         (reg1_i(31) and reg2_i(31) and result_sum(31));
     ELSE
-      reg1_lt_reg2 = (reg1_i < reg2_i);
+      reg1_lt_reg2 <= (reg1_i < reg2_i);
     END IF;
+
+    reg1_i_not <= not reg1_i;
+
+    -- get arithmeticres
+    PROCESS(rst, aluop_i)
+      BEGIN
+        IF(rst = '1') THEN
+          arithmeticres <= X"00000000";
+        ELSIF 
+          CASE aluop_i IS
+            WHEN EXE_SLT_OP | EXE_SLTU_OP => arithmeticres <= reg1_lt_reg2;
+            WHEN EXE_ADDU_OP | 
+
 
 
 
