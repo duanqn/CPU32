@@ -1,6 +1,8 @@
 LIBRARY ieee;
 USE ieee.STD_LOGIC_1164.ALL;
 USE ieee.STD_LOGIC_UNSIGNED.ALL;
+use work.CPU32.all;
+
 
 ENTITY ex IS
   PORT(

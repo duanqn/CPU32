@@ -13,6 +13,7 @@ ENTITY mem_wb is
     mem_hi: in STD_LOGIC_VECTOR(31 downto 0);
     mem_lo: in STD_LOGIC_VECTOR(31 downto 0);
     mem_whilo: in STD_LOGIC;
+    stall: in STD_LOGIC_VECTOR(5 downto 0);
     
     -- output
 	  wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
@@ -38,7 +39,14 @@ begin
         wb_hi <= x"00000000";
         wb_lo <= x"00000000";
         wb_whilo <= '0';
-      else
+      elsif (stall(4) = '1' and stall(5) = '0') then 
+        wb_wd <= "00000";
+        wb_wreg <= '0';
+        wb_wdata <= x"00000000";
+        wb_hi <= x"00000000";
+        wb_lo <= x"00000000";
+        wb_whilo <= '0';
+      elsif (stall(4) = '0') then 
         wb_wd <= mem_wd;
         wb_wreg <= mem_wreg;
         wb_wdata <= mem_wdata;

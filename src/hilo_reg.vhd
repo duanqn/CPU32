@@ -1,3 +1,9 @@
+LIBRARY ieee;
+USE ieee.STD_LOGIC_1164.ALL;
+USE ieee.STD_LOGIC_UNSIGNED.ALL;
+USE ieee.numeric_std.ALL; 
+use work.CPU32.all;
+
 entity hilo_reg is
   PORT(
     clk:in STD_LOGIC;

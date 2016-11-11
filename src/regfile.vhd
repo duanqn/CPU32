@@ -1,6 +1,8 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
+use work.CPU32.all;
+
 ENTITY regfile is
   port(
     rst: in STD_LOGIC;
