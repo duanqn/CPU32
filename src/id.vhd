@@ -93,7 +93,7 @@ begin
   reg2_o <= reg2;
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
   begin
-    if rst = '0' then
+    if rst = '1' then
       aluop_o <= "00000000";
       alusel_o <= "000";
       wd_o <= "00000";
