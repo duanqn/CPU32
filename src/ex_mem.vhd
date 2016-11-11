@@ -21,7 +21,7 @@ ENTITY ex_mem IS
     mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);
-    mem_whilo: IN STD_LOGIC
+    mem_whilo: OUT STD_LOGIC
   );
 end ex_mem;
 
