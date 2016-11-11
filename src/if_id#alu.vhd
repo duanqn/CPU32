@@ -11,6 +11,7 @@ entity if_id is
     rst:in STD_LOGIC;
     if_pc:in STD_LOGIC_VECTOR(31 downto 0);
     if_inst:in STD_LOGIC_VECTOR(31 downto 0);
+    stall: in STD_LOGIC_VECTOR(5 downto 0);
     id_pc:out STD_LOGIC_VECTOR(31 downto 0);
     id_inst:out STD_LOGIC_VECTOR(31 downto 0)
   );
@@ -25,7 +26,10 @@ begin
       if rst = '1' then
         id_pc <= x"00000000";
         id_inst <= x"00000000";
-      else
+      elsif (stall(1) = '1' and stall(2) = '0') then
+        id_pc <= x"00000000";
+        id_inst <= x"00000000";
+      elsif (stall(1) = '0') then
         id_pc <= if_pc;
         id_inst <= if_inst;
       end if;

@@ -1,5 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+use work.CPU32.all;
+
 ENTITY mem is
 	port(rst: in STD_LOGIC;
 		-- 执行阶段的信号
