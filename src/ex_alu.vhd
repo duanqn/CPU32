@@ -50,11 +50,21 @@ end ex;
     CONSTANT EXE_MTHI_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010001";
     CONSTANT EXE_MFLO_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010010";
     CONSTANT EXE_MTLO_OP: STD_LOGIC_VECTOR(7 downto 0) := "00010011";
+
+    CONSTANT EXE_SLT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00101010";
+    CONSTANT EXE_SLTU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00101011";
+    CONSTANT EXE_ADDU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100001";
+    CONSTANT EXE_SUBU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100011";
+    CONSTANT EXE_ADDI_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001000";
+    CONSTANT EXE_ADDIU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001001";
+    CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "011000";
     
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";
     CONSTANT EXE_RES_LOGIC: STD_LOGIC_VECTOR(2 downto 0) := "001";
     CONSTANT EXE_RES_SHIFT: STD_LOGIC_VECTOR(2 downto 0) := "010";
     CONSTANT EXE_RES_MOVE: STD_LOGIC_VECTOR(2 downto 0) := "011";
+    CONSTANT EXE_RES_ARITHMETIC: STD_LOGIC_VECTOR(2 downto 0) := "100";
+    CONSTANT EXE_RES_MUL: STD_LOGIC_VECTOR(2 downto 0) := "101";
 
     --
     SIGNAL logicout: STD_LOGIC_VECTOR(31 downto 0);
@@ -106,10 +116,45 @@ end ex;
           arithmeticres <= X"00000000";
         ELSIF 
           CASE aluop_i IS
-            WHEN EXE_SLT_OP | EXE_SLTU_OP => arithmeticres <= reg1_lt_reg2;
-            WHEN EXE_ADDU_OP | 
+            WHEN EXE_SLT_OP | EXE_SLTU_OP => 
+              arithmeticres <= reg1_lt_reg2;
+            WHEN EXE_ADDU_OP | EXE_ADDI_OP | EXE_ADDIU_OP => 
+              arithmeticres <= result_sum;
+            WHEN EXE_SUBU_OP => 
+              arithmeticres <= result_sum;
+            WHEN others => 
+              arithmeticres <= X"00000000";
+          END CASE;
+        END IF;
+      END PROCESS;
 
+      --get multiplyres
+      IF (aluop_i = EXE_MULT_OP and reg1_i(31) = '1') THEN 
+        opdata1_mult <= not (reg1_i) + X"00000001";
+      ELSE
+        opdata1_mult <= reg1_i;
 
+      IF (aluop_i = EXE_MULT_OP and reg2_i(31) = '1') THEN 
+        opdata2_mult <= not (reg2_i) + X"00000001";
+      ELSE
+        opdata2_mult <= reg2_i;
+
+      hilo_temp <= opdata1_mult * opdata2_mult;
+
+      PROCESS(rst, aluop_i, reg1_i, reg2_i) 
+        BEGIN
+          IF (rst = '1') THEN 
+            mulres <= X"0000000000000000";
+          ELSIF (aluop_i = EXE_MULT_OP) THEN
+            IF (reg1_i(31) xor reg2_i(31) = 1) THEN
+              mulres <= (not hilo_temp) + X"0000000000000001";
+            ELSE
+              mulres <= hilo_temp;
+            END IF;
+          ELSE
+            mulres <= hilo_temp;
+          END IF;
+        END PROCESS;
 
 
 -- get HI and LO reg
@@ -144,13 +189,18 @@ end ex;
         END IF;
       END PROCESS;
 
--- about MTLO, MTHI
+
+-- about update hilo_reg
     PROCESS(rst, aluop_i, reg1_i)
       BEGIN
         IF (rst = '1') THEN
           whilo_o <= '0';
           hi_o <= X"00000000";
           lo_o <= X"00000000";
+        ELSIF (aluop_i = EXE_MULT_OP) THEN
+          whilo_o <= '1';
+          hi_o <= mulres(63 downto 32);
+          lo_o <= mulres(31 downto 0);
         ELSIF (aluop_i = EXE_MTHI_OP) THEN
           whilo_o <= '1';
           hi_o <= reg1_i;
@@ -395,13 +445,18 @@ end ex;
     PROCESS(alusel_i, wd_i, wreg_i)
       BEGIN
         wd_o <= wd_i;
-        wreg_o <= wreg_i;
+        IF ((aluop_i = EXE_ADDI_OP or aluop_i = EXE_SUBU_OP) and (ov_sum = '1')) THEN 
+          wreg_o <= '0';
+        ELSE
+          wreg_o <= wreg_i;
+        END IF;
         CASE alusel_i IS
           WHEN EXE_RES_LOGIC => wdata_o <= logicout;
           WHEN EXE_RES_SHIFT => wdata_o <= shiftres;
           WHEN EXE_RES_MOVE => wdata_o <= moveres;
+          WHEN EXE_RES_ARITHMETIC => wdata_o <= arithmeticres;
+          WHEN EXE_RES_MUL => wdata_o <= mulres(31 downto 0);
           WHEN others => wdata_o <= X"00000000";
         END CASE;
       END PROCESS;
-  END;
 
