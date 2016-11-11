@@ -27,7 +27,8 @@ entity id is
     reg1_o:out STD_LOGIC_VECTOR(31 downto 0); -- Operand 1
     reg2_o:out STD_LOGIC_VECTOR(31 downto 0); -- Operand 2
     wd_o:out STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Write-Destination (register)
-    wreg_o:out STD_LOGIC -- =1 -> need to write reg
+    wreg_o:out STD_LOGIC; -- =1 -> need to write reg
+    stallreq:out STD_LOGIC -- =1 -> stall pipeline
   );
 end id;
 
@@ -50,6 +51,7 @@ begin
   op4<=inst_i(20 downto 16);
   reg1_o <= reg1;
   reg2_o <= reg2;
+  stallreq <= '0';
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
   begin
     if rst = '1' then
