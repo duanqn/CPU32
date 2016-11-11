@@ -1,3 +1,7 @@
+LIBRARY ieee;
+USE ieee.STD_LOGIC_1164.ALL;
+USE ieee.STD_LOGIC_UNSIGNED.ALL;
+USE ieee.numeric_std.ALL; 
 package CPU32 is
   
     --instrs
@@ -48,7 +52,7 @@ package CPU32 is
     CONSTANT EXE_ADDU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100001";
     CONSTANT EXE_SUBU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100011";
     CONSTANT EXE_ADDIU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001001";
-    CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "011000";
+    CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00011000";
     
   -- selectors
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";
