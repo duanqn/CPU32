@@ -1,15 +1,22 @@
 LIBRARY ieee;
 USE ieee.STD_LOGIC_1164.ALL;
 USE ieee.STD_LOGIC_UNSIGNED.ALL;
-USE ieee.numeric_std.ALL; 
+USE ieee.numeric_std.ALL;
 package CPU32 is
-  
+
     --instrs
     constant EXE_ANDI:STD_LOGIC_VECTOR(5 downto 0) := "001100";
     constant EXE_ORI:STD_LOGIC_VECTOR(5 downto 0) := "001101";
     constant EXE_XORI:STD_LOGIC_VECTOR(5 downto 0) := "001110";
     constant EXE_LUI:STD_LOGIC_VECTOR(5 downto 0) := "001111";
     constant EXE_SPECIAL:STD_LOGIC_VECTOR(5 downto 0) := "000000";
+    constant EXE_REGIMM_INST:STD_LOGIC_VECTOR(5 downto 0) := "000001";
+    constant EXE_J:STD_LOGIC_VECTOR(5 downto 0) := "000010";
+    constant EXE_JAL:STD_LOGIC_VECTOR(5 downto 0) := "000011";
+    constant EXE_BEQ:STD_LOGIC_VECTOR(5 downto 0) := "000100";
+    constant EXE_BNE:STD_LOGIC_VECTOR(5 downto 0) := "000101";
+    constant EXE_BGTZ:STD_LOGIC_VECTOR(5 downto 0) := "000111";
+    constant EXE_BLEZ:STD_LOGIC_VECTOR(5 downto 0) := "000110";
 
     --funcs
     constant EXE_AND:STD_LOGIC_VECTOR(5 downto 0) := "100100";
@@ -31,7 +38,17 @@ package CPU32 is
     constant EXE_MFLO:STD_LOGIC_VECTOR(5 downto 0) := "010010";
     constant EXE_MTLO:STD_LOGIC_VECTOR(5 downto 0) := "010011";
 
-  -- ops
+    constant EXE_JR:STD_LOGIC_VECTOR(5 downto 0) := "001000";
+    constant EXE_JALR:STD_LOGIC_VECTOR(5 downto 0) := "001001";
+
+  -- op4
+    constant EXE_BGEZ:STD_LOGIC_VECTOR(4 downto 0) := "00001";
+    constant EXE_BGEZAL:STD_LOGIC_VECTOR(4 downto 0) := "10001";
+    constant EXE_BLTZ:STD_LOGIC_VECTOR(4 downto 0) := "00000";
+    constant EXE_BLTZAL:STD_LOGIC_VECTOR(4 downto 0) := "00000";
+
+
+  -- ALU ops
     CONSTANT EXE_OR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100101";
     CONSTANT EXE_NOP_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000000";
     CONSTANT EXE_AND_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100100";
@@ -53,7 +70,7 @@ package CPU32 is
     CONSTANT EXE_SUBU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100011";
     CONSTANT EXE_ADDIU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001001";
     CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00011000";
-    
+
   -- selectors
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";
     CONSTANT EXE_RES_LOGIC: STD_LOGIC_VECTOR(2 downto 0) := "001";
@@ -61,11 +78,7 @@ package CPU32 is
     CONSTANT EXE_RES_MOVE: STD_LOGIC_VECTOR(2 downto 0) := "011";
     CONSTANT EXE_RES_ARITHMETIC: STD_LOGIC_VECTOR(2 downto 0) := "100";
     CONSTANT EXE_RES_MUL: STD_LOGIC_VECTOR(2 downto 0) := "101";
-    CONSTANT EXE_RES_JUMP_BRANCH: STD_LOGIC_VECTOR(2 downto 0) := "110";
-
-  -- branch
-    CONSTANT BRANCH: STD_LOGIC := '1';
 
 
-  
+
 end CPU32;
