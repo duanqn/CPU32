@@ -219,58 +219,62 @@ begin
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
           end if;
-        when EXE_BGEZ =>
-          wreg_o <= '0';
-          aluop_o <= EXE_BGEZ_OP;
-          alusel_o <= EXE_RES_JUMP_BRANCH;
-          reg1_read_o <= '1';
-          reg2_read_o <= '0';
-          instvalid <= '1';
-          if (reg1_o(31) = '0') then
-            branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
-            branch_flag_o <= '1';
-            next_inst_in_delayslot_o <= '1';
-          end if;
-        when EXE_BGEZAL =>
-          wreg_o <= '1';
-          aluop_o <= EXE_BGEZAL_OP;
-          alusel_o <= EXE_RES_JUMP_BRANCH;
-          reg1_read_o <= '1';
-          reg2_read_o <= '0';
-          link_addr_o <= pc_plus_8;
-          wd_o <= "11111";
-          instvalid <= '1';
-          if (reg1_o(31) = '0') then
-            branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
-            branch_flag_o <= '1';
-            next_inst_in_delayslot_o <= '1';
-          end if;
-        when EXE_BLTZ =>
-          wreg_o <= '0';
-          aluop_o <= EXE_BGEZAL_OP;
-          alusel_o <= EXE_RES_JUMP_BRANCH;
-          reg1_read_o <= '1';
-          reg2_read_o <= '0';
-          instvalid <= '1';
-          if (reg1_o(31) = '1') then
-            branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
-            branch_flag_o <= '1';
-            next_inst_in_delayslot_o <= '1';
-          end if;
-        when EXE_BLTZAL =>
-          wreg_o <= '1';
-          aluop_o <= EXE_BLTZAL_OP;
-          alusel_o <= EXE_RES_JUMP_BRANCH;
-          reg1_read_o <= '1';
-          reg2_read_o <= '0';
-          link_addr_o <= pc_plus_8;
-          wd_o <= "11111";
-          instvalid <= '1';
-          if (reg1_o(31) = '0') then
-            branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
-            branch_flag_o <= '1';
-            next_inst_in_delayslot_o <= '1';
-          end if;
+
+        when EXE_REGIMM_INST =>
+          case op4 is
+            when EXE_BGEZ =>
+              wreg_o <= '0';
+              aluop_o <= EXE_BGEZ_OP;
+              alusel_o <= EXE_RES_JUMP_BRANCH;
+              reg1_read_o <= '1';
+              reg2_read_o <= '0';
+              instvalid <= '1';
+              if (reg1_o(31) = '0') then
+                branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+                branch_flag_o <= '1';
+                next_inst_in_delayslot_o <= '1';
+              end if;
+            when EXE_BGEZAL =>
+              wreg_o <= '1';
+              aluop_o <= EXE_BGEZAL_OP;
+              alusel_o <= EXE_RES_JUMP_BRANCH;
+              reg1_read_o <= '1';
+              reg2_read_o <= '0';
+              link_addr_o <= pc_plus_8;
+              wd_o <= "11111";
+              instvalid <= '1';
+              if (reg1_o(31) = '0') then
+                branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+                branch_flag_o <= '1';
+                next_inst_in_delayslot_o <= '1';
+              end if;
+            when EXE_BLTZ =>
+              wreg_o <= '0';
+              aluop_o <= EXE_BGEZAL_OP;
+              alusel_o <= EXE_RES_JUMP_BRANCH;
+              reg1_read_o <= '1';
+              reg2_read_o <= '0';
+              instvalid <= '1';
+              if (reg1_o(31) = '1') then
+                branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+                branch_flag_o <= '1';
+                next_inst_in_delayslot_o <= '1';
+              end if;
+            when EXE_BLTZAL =>
+              wreg_o <= '1';
+              aluop_o <= EXE_BLTZAL_OP;
+              alusel_o <= EXE_RES_JUMP_BRANCH;
+              reg1_read_o <= '1';
+              reg2_read_o <= '0';
+              link_addr_o <= pc_plus_8;
+              wd_o <= "11111";
+              instvalid <= '1';
+              if (reg1_o(31) = '0') then
+                branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
+                branch_flag_o <= '1';
+                next_inst_in_delayslot_o <= '1';
+              end if;
+          end case;
         ----------------------APPEND HERE----------------------
         when EXE_SPECIAL =>
           case op2 is
