@@ -1,9 +1,9 @@
 LIBRARY ieee;
 USE ieee.STD_LOGIC_1164.ALL;
 USE ieee.STD_LOGIC_UNSIGNED.ALL;
-USE ieee.numeric_std.ALL; 
+USE ieee.numeric_std.ALL;
 package CPU32 is
-  
+
     --instrs
     constant EXE_ANDI:STD_LOGIC_VECTOR(5 downto 0) := "001100";
     constant EXE_ORI:STD_LOGIC_VECTOR(5 downto 0) := "001101";
@@ -31,6 +31,9 @@ package CPU32 is
     constant EXE_MFLO:STD_LOGIC_VECTOR(5 downto 0) := "010010";
     constant EXE_MTLO:STD_LOGIC_VECTOR(5 downto 0) := "010011";
 
+    constant EXE_JR:STD_LOGIC_VECTOR(5 downto 0) := "001000";
+    constant EXE_JALR:STD_LOGIC_VECTOR(5 downto 0) := "001001";
+
   -- ops
     CONSTANT EXE_OR_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100101";
     CONSTANT EXE_NOP_OP: STD_LOGIC_VECTOR(7 downto 0) := "00000000";
@@ -53,7 +56,7 @@ package CPU32 is
     CONSTANT EXE_SUBU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00100011";
     CONSTANT EXE_ADDIU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001001";
     CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00011000";
-    
+
   -- selectors
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";
     CONSTANT EXE_RES_LOGIC: STD_LOGIC_VECTOR(2 downto 0) := "001";
@@ -63,5 +66,5 @@ package CPU32 is
     CONSTANT EXE_RES_MUL: STD_LOGIC_VECTOR(2 downto 0) := "101";
 
 
-  
+
 end CPU32;
