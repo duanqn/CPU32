@@ -61,8 +61,8 @@ begin
   op3<=inst_i(5 downto 0);
   op4<=inst_i(20 downto 16);
   stallreq <= '0';
-  pc_plus_8 <= pc_i + x"00001000";
-  pc_plus_4 <= pc_i + x"00000100";
+  pc_plus_8 <= pc_i + x"00000010";
+  pc_plus_4 <= pc_i + x"00000001";
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";
   inst_o <= inst_i;
 
@@ -528,7 +528,7 @@ begin
     end if;
   end process;
 
-  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
+  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load)
 
   begin
     if rst = '1' then
