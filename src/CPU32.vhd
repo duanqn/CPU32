@@ -18,12 +18,17 @@ package CPU32 is
     constant EXE_BLEZ:STD_LOGIC_VECTOR(5 downto 0) := "000110";
     constant EXE_BNE:STD_LOGIC_VECTOR(5 downto 0) := "000101";
 
+    constant EXE_SLTI:STD_LOGIC_VECTOR(5 downto 0) := "001010";
+    constant EXE_SLTIU:STD_LOGIC_VECTOR(5 downto 0) := "001011";
+    constant EXE_ADDIU:STD_LOGIC_VECTOR(5 downto 0) := "001001";
+
     constant EXE_LB:STD_LOGIC_VECTOR(5 downto 0) := "100000";
     constant EXE_LBU:STD_LOGIC_VECTOR(5 downto 0) := "100100";
     constant EXE_LHU:STD_LOGIC_VECTOR(5 downto 0) := "100101";
     constant EXE_LW:STD_LOGIC_VECTOR(5 downto 0) := "100011";
     constant EXE_SB:STD_LOGIC_VECTOR(5 downto 0) := "101000";
     constant EXE_SW:STD_LOGIC_VECTOR(5 downto 0) := "101011";
+
 
 
     --funcs
@@ -38,6 +43,13 @@ package CPU32 is
     constant EXE_SRLV:STD_LOGIC_VECTOR(5 downto 0) := "000110";
     constant EXE_SRA:STD_LOGIC_VECTOR(5 downto 0) := "000011";
     constant EXE_SRAV:STD_LOGIC_VECTOR(5 downto 0) := "000111";
+
+    constant EXE_SLT:STD_LOGIC_VECTOR(5 downto 0) := "101010";
+    constant EXE_SLTU:STD_LOGIC_VECTOR(5 downto 0) := "101011";
+
+    constant EXE_ADDU:STD_LOGIC_VECTOR(5 downto 0) := "100001";
+    constant EXE_SUBU:STD_LOGIC_VECTOR(5 downto 0) := "100011";
+    constant EXE_MULT:STD_LOGIC_VECTOR(5 downto 0) := "011000";
 
     constant EXE_MOVZ:STD_LOGIC_VECTOR(5 downto 0) := "001010";
     constant EXE_MOVN:STD_LOGIC_VECTOR(5 downto 0) := "001011";
