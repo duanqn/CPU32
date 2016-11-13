@@ -35,15 +35,12 @@ ENTITY mem is
 end mem;
 
 architecture arch of mem is
-  signal zero32: STD_LOGIC_VECTOR(31 downto 0);
   signal mem_we: STD_LOGIC;
 begin
 
   mem_we_o <= mem_we;
 
-  zero32 <= X"00000000";
-
-  identifier : process( rst, wd_i, wreg_i, wdata_i )
+  identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i)
   begin
     if(rst='1') then
       wd_o <= "00000";

@@ -10,7 +10,7 @@ ENTITY openmips is
 
     rom_data_i: in STD_LOGIC_VECTOR(31 downto 0);
     rom_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
-    rom_ce_o: out STD_LOGIC;
+    rom_ce_o: buffer STD_LOGIC;
 
     ram_data_i: in STD_LOGIC_VECTOR(31 downto 0);
     ram_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
@@ -200,9 +200,9 @@ architecture arch of openmips is
     ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);
     stall: IN STD_LOGIC_VECTOR(5 downto 0);
 
-    mem_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
-    mem_wreg: OUT STD_LOGIC;
-    mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_wd: BUFFER STD_LOGIC_VECTOR (4 downto 0);
+    mem_wreg: BUFFER STD_LOGIC;
+    mem_wdata: BUFFER STD_LOGIC_VECTOR (31 downto 0);
     mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_whilo: OUT STD_LOGIC;
@@ -370,8 +370,6 @@ architecture arch of openmips is
   signal ex_hi_i: STD_LOGIC_VECTOR(31 downto 0);
   signal ex_lo_i: STD_LOGIC_VECTOR(31 downto 0);
 
-  signal ex_id_aluop: STD_LOGIC_VECTOR(7 downto 0);
-
 begin
   rom_addr_o <= pc;
 
@@ -398,7 +396,7 @@ begin
     is_in_delayslot_i => is_in_delayslot, is_in_delayslot_o => id_is_in_delayslot,
     link_addr_o => id_link_address, next_inst_in_delayslot_o => next_inst_in_delayslot,
     branch_target_address_o => branch_target_address, branch_flag_o => branch_flag,
-    inst_o => id_inst, ex_aluop_i => ex_id_aluop);
+    inst_o => id_inst, ex_aluop_i => ex_aluop);
 
   regfile0: regfile port map(
     clk => clk, rst => rst,

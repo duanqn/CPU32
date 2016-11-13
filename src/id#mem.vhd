@@ -528,8 +528,7 @@ begin
     end if;
   end process;
 
-  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load)
-
+  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load, ex_wd_i, mem_wdata_i, ex_wdata_i)
   begin
     if rst = '1' then
       reg1_o <= x"00000000";
@@ -555,8 +554,7 @@ begin
     end if;
   end process;
 
-  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
-
+  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load, ex_wd_i, mem_wdata_i, ex_wdata_i)
   begin
     if rst = '1' then
       reg2_o <= x"00000000";
@@ -582,7 +580,7 @@ begin
     end if;
   end process;
 
-  process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
+  process(rst, is_in_delayslot_i)
 
   begin
     if rst = '1' then
