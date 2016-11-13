@@ -358,6 +358,7 @@ architecture arch of openmips is
   signal mem_lo_i: STD_LOGIC_VECTOR(31 downto 0);
   signal mem_aluop: STD_LOGIC_VECTOR(7 downto 0);
   signal mem_addr: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_reg2: STD_LOGIC_VECTOR(31 downto 0);
 
 
 -- MEM to MEM/WB
