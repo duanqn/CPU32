@@ -66,7 +66,6 @@ architecture arch of openmips is
 
     is_in_delayslot_i: in STD_LOGIC;
 
-    
     stallreq: out STD_LOGIC_VECTOR(5 downto 0);
     reg1_read_o: buffer STD_LOGIC;
     reg2_read_o: buffer STD_LOGIC;
@@ -80,11 +79,15 @@ architecture arch of openmips is
     wd_o: out STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: out STD_LOGIC;
 
+    inst_o:out STD_LOGIC_VECTOR(31 downto 0);
+
     is_in_delayslot_o: out STD_LOGIC;
     link_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
     next_inst_in_delayslot_o: out STD_LOGIC;
     branch_target_address_o: out STD_LOGIC_VECTOR(31 downto 0);
-    branch_flag_o: out STD_LOGIC
+    branch_flag_o: out STD_LOGIC;
+
+    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0)
     );
   end component;
 
@@ -139,6 +142,7 @@ architecture arch of openmips is
     id_link_address: in STD_LOGIC_VECTOR(31 downto 0);
     next_inst_in_delayslot_i: in STD_LOGIC;
 
+    id_inst: in STD_LOGIC_VECTOR(31 downto 0);
 
     ex_aluop: out STD_LOGIC_VECTOR(7 downto 0);
     ex_alusel: out STD_LOGIC_VECTOR(2 downto 0);
@@ -146,6 +150,8 @@ architecture arch of openmips is
     ex_reg2: out STD_LOGIC_VECTOR(31 downto 0);
     ex_wd: out STD_LOGIC_VECTOR(4 downto 0);
     ex_wreg: out STD_LOGIC;
+
+    ex_inst: out STD_LOGIC_VECTOR(31 downto 0);
 
     ex_is_in_delayslot: out STD_LOGIC;
     ex_link_address: out STD_LOGIC_VECTOR(31 downto 0);
@@ -177,6 +183,7 @@ architecture arch of openmips is
     is_in_delayslot_i: in STD_LOGIC;
     link_address_i: in STD_LOGIC_VECTOR(31 downto 0);
 
+    inst_i: in STD_LOGIC_VECTOR(31 downto 0);
 
     stallreq: out STD_LOGIC_VECTOR(5 downto 0);
 
@@ -186,7 +193,11 @@ architecture arch of openmips is
 
     wd_o: out STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: out STD_LOGIC;
-    wdata_o: out STD_LOGIC_VECTOR(31 downto 0)
+    wdata_o: out STD_LOGIC_VECTOR(31 downto 0);
+
+    aluop_o: OUT STD_LOGIC_VECTOR(7 downto 0);
+    mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+    reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0)
     );
   end component;
 
@@ -204,12 +215,20 @@ architecture arch of openmips is
     ex_whilo: in STD_LOGIC_VECTOR(31 downto 0);
     stall: in STD_LOGIC_VECTOR(5 downto 0);
 
+    ex_aluop: IN STD_LOGIC_VECTOR (7 downto 0);
+    ex_mem_addr: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);
+
     mem_wd: out STD_LOGIC_VECTOR(4 downto 0);
     mem_wreg: out STD_LOGIC;
     mem_wdata: out STD_LOGIC_VECTOR(31 downto 0);
     mem_hi: out STD_LOGIC_VECTOR(31 downto 0);
     mem_lo: out STD_LOGIC_VECTOR(31 downto 0);
-    mem_whilo: out STD_LOGIC
+    mem_whilo: out STD_LOGIC;
+
+    mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
+    mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0)
     );
   end component;
 
@@ -308,6 +327,7 @@ architecture arch of openmips is
   signal id_reg2_o: STD_LOGIC_VECTOR(31 downto 0);
   signal id_wreg_o: STD_LOGIC;
   signal id_wd_o: STD_LOGIC_VECTOR(4 downto 0);
+  signal id_inst: STD_LOGIC_VECTOR(31 downto 0);
 
 -- ID/EX to EX
   signal ex_aluop_i: STD_LOGIC_VECTOR(7 downto 0);
@@ -316,6 +336,7 @@ architecture arch of openmips is
   signal ex_reg2_i: STD_LOGIC_VECTOR(31 downto 0);
   signal ex_wreg_i: STD_LOGIC;
   signal ex_wd_i: STD_LOGIC_VECTOR(4 downto 0);
+  signal ex_inst: STD_LOGIC_VECTOR(31 downto 0);
 
 -- EX to EX/MEM
   signal ex_wreg_o: STD_LOGIC;
@@ -324,6 +345,9 @@ architecture arch of openmips is
   signal ex_whilo_o: STD_LOGIC;
   signal ex_hi_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ex_lo_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal ex_aluop: STD_LOGIC_VECTOR(7 downto 0);
+  signal ex_mem_addr: STD_LOGIC_VECTOR(31 downto 0);
+  signal ex_reg2: STD_LOGIC_VECTOR(31 downto 0);
 
 -- EX/MEM to MEM
   signal mem_wreg_i: STD_LOGIC;
@@ -332,6 +356,9 @@ architecture arch of openmips is
   signal mem_whilo_i: STD_LOGIC;
   signal mem_hi_i: STD_LOGIC_VECTOR(31 downto 0);
   signal mem_lo_i: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_aluop: STD_LOGIC_VECTOR(7 downto 0);
+  signal mem_addr: STD_LOGIC_VECTOR(31 downto 0);
+
 
 -- MEM to MEM/WB
   signal mem_wreg_o: STD_LOGIC;

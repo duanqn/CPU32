@@ -23,12 +23,12 @@ ENTITY ex_mem IS
     mem_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
     mem_wreg: OUT STD_LOGIC;
     mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0);
-    mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
-    mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);
-    mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);
-    mem_whilo: OUT STD_LOGIC
+    mem_whilo: OUT STD_LOGIC;
+    mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
+    mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0)
   );
 end ex_mem;
 

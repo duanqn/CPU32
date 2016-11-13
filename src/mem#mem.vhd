@@ -126,7 +126,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           wdata_o <= mem_data_i;
-          mem_sel_o <= '1111';
+          mem_sel_o <= "1111";
           mem_ce_o <= '1';
 
         when EXE_SB_OP => 
