@@ -29,7 +29,7 @@ architecture arch of openmips is
     rst: in STD_LOGIC;
     stall: in STD_LOGIC_VECTOR(5 downto 0);
     pc: buffer STD_LOGIC_VECTOR(31 downto 0);
-    ce: buffer STD_LOGIC
+    ce: buffer STD_LOGIC;
     branch_target_address_i: in STD_LOGIC_VECTOR(31 downto 0);
     branch_flag_i: in STD_LOGIC
     );
@@ -465,11 +465,7 @@ begin
     mem_hi => mem_hi_i, mem_lo => mem_lo_i, stall => stall, 
     ex_aluop => ex_aluop, ex_mem_addr => ex_mem_addr, ex_reg2 => ex_reg2,
     mem_aluop => mem_aluop, mem_mem_addr => mem_addr, mem_reg2 => mem_reg2);
-
-  signal mem_aluop: STD_LOGIC_VECTOR(7 downto 0);
-  signal mem_addr: STD_LOGIC_VECTOR(31 downto 0);
-  signal mem_reg2: STD_LOGIC_VECTOR(31 downto 0);
-
+  
   mem0: mem port map(
     rst => rst, 
     wd_i => mem_wd_i, wreg_i => mem_wreg_i,
