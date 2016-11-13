@@ -78,7 +78,7 @@ end ex;
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
 
 
-    process(aluop_i, reg1_i, reg2_i)
+    process(aluop_i, reg1_i, reg2_i, result_sum)
     BEGIN
       IF (aluop_i = EXE_SLT_OP) THEN
         reg1_lt_reg2 <= ((reg1_i(31)) and (not reg2_i(31))) or
@@ -96,7 +96,7 @@ end ex;
     reg1_i_not <= not reg1_i;
 
     -- get arithmeticres
-    PROCESS(rst, aluop_i)
+    PROCESS(rst, aluop_i, result_sum, reg1_lt_reg2)
       BEGIN
         IF(rst = '1') THEN
           arithmeticres <= X"00000000";
@@ -135,7 +135,7 @@ end ex;
 
       hilo_temp <= opdata1_mult * opdata2_mult;
 
-      PROCESS(rst, aluop_i, reg1_i, reg2_i)
+      PROCESS(rst, aluop_i, reg1_i, reg2_i, hilo_temp)
         BEGIN
           IF (rst = '1') THEN
             mulres <= X"0000000000000000";
@@ -170,7 +170,7 @@ end ex;
       END PROCESS;
 
 -- about MFHI, MFLO
-    PROCESS(rst, aluop_i)
+    PROCESS(rst, aluop_i, HI, LO)
       BEGIN
         IF(rst = '1') THEN
           moveres <= X"00000000";
@@ -185,7 +185,7 @@ end ex;
 
 
 -- about update hilo_reg
-    PROCESS(rst, aluop_i, reg1_i)
+    PROCESS(rst, aluop_i, reg1_i, mulres, HI, LO)
       BEGIN
         IF (rst = '1') THEN
           whilo_o <= '0';
@@ -436,7 +436,7 @@ end ex;
         END IF;
       END PROCESS;
 
-    PROCESS(alusel_i, wd_i, wreg_i)
+    PROCESS(alusel_i, wd_i, wreg_i, logicout, shiftres, moveres, arithmeticres, mulres, link_address_i)
       BEGIN
         wd_o <= wd_i;
         wreg_o <= wreg_i;
