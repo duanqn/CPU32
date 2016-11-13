@@ -39,10 +39,10 @@ begin
       if (ce = '0') then
         pc <= x"00000000";
       elsif (stall(0) = '0') then
-        if (branch_flag_i = BRANCH) then 
+        if (branch_flag_i = '1') then
           pc <= branch_target_address_i;
         else
-          pc <= pc + x"00000004";
+          pc <= pc + x"00000001";
         end if;
       end if;
     end if;
