@@ -157,7 +157,7 @@ begin
           mem_addr_o <= X"00000000";
           mem_sel_o <= "1111";
           mem_ce_o <= '0';
-       ‘   mem_data_o <= X"00000000";
+          mem_data_o <= X"00000000";
       end case ;
     end if;
   end process ; -- identifier
