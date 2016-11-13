@@ -290,16 +290,16 @@ architecture arch of openmips is
   component ctrl
   port (
     rst: IN STD_LOGIC;
-    stallreq_from_id: IN STD_LOGIC;
-    stallreq_from_ex: IN STD_LOGIC;
+    stallreq_from_id: IN STD_LOGIC_VECTOR(5 downto 0);
+    stallreq_from_ex: IN STD_LOGIC_VECTOR(5 downto 0);
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
   
 -- stall
   signal stall: STD_LOGIC_VECTOR(5 downto 0);
-  signal stallreq_from_ex: STD_LOGIC;
-  signal stallreq_from_id: STD_LOGIC;
+  signal stallreq_from_ex: STD_LOGIC_VECTOR(5 downto 0);
+  signal stallreq_from_id: STD_LOGIC_VECTOR(5 downto 0);
 
 -- branch
 -- ID to PC
