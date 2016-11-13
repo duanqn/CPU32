@@ -3,7 +3,8 @@ USE ieee.std_logic_1164.ALL;
 use work.CPU32.all;
 
 ENTITY mem is
-	port(rst: in STD_LOGIC;
+	port(
+    rst: in STD_LOGIC;
 		wd_i: in STD_LOGIC_VECTOR(4 downto 0);
 		wreg_i: in STD_LOGIC;
 		wdata_i: in STD_LOGIC_VECTOR(31 downto 0);
@@ -156,7 +157,7 @@ begin
           mem_addr_o <= X"00000000";
           mem_sel_o <= "1111";
           mem_ce_o <= '0';
-          mem_data_o <= X"00000000";
+       ‘   mem_data_o <= X"00000000";
       end case ;
     end if;
   end process ; -- identifier
