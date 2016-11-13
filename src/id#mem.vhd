@@ -28,7 +28,7 @@ entity id is
     reg2_o:buffer STD_LOGIC_VECTOR(31 downto 0); -- Operand 2
     wd_o:out STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Write-Destination (register)
     wreg_o:out STD_LOGIC; -- =1 -> need to write reg
-    is_in_delay_slot:in STD_LOGIC;
+    is_in_delayslot_i:in STD_LOGIC;
     next_inst_in_delayslot_o:out STD_LOGIC;
     branch_flag_o:out STD_LOGIC;
     branch_target_address_o:out STD_LOGIC_VECTOR(31 downto 0);
@@ -83,7 +83,7 @@ begin
       link_addr_o <= x"00000000";
       branch_target_address_o <= x"00000000";
       branch_flag_o <= '0';
-      next_inst_in_delay_slot_o <= '0';
+      next_inst_in_delayslot_o <= '0';
     else
       case op is
         when EXE_ORI =>  --ORI
@@ -406,28 +406,28 @@ begin
                 when EXE_SLT => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SLT_OP;
-                  alusel_o <= EXE_RES_ARITHMATIC;
+                  alusel_o <= EXE_RES_ARITHMETIC;
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
                   instvalid <= '1';
                 when EXE_SLTU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SLT_OP;
-                  alusel_o <= EXE_RES_ARITHMATIC;
+                  alusel_o <= EXE_RES_ARITHMETIC;
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
                   instvalid <= '1';
                 when EXE_ADDU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_ADDU_OP;
-                  alusel_o <= EXE_RES_ARITHMATIC;
+                  alusel_o <= EXE_RES_ARITHMETIC;
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
                   instvalid <= '1';
                 when EXE_SUBU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SUBU_OP;
-                  alusel_o <= EXE_RES_ARITHMATIC;
+                  alusel_o <= EXE_RES_ARITHMETIC;
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
                   instvalid <= '1';
@@ -444,7 +444,7 @@ begin
                   reg1_read_o <= '1';
                   reg2_read_o <= '0';
                   link_addr_o <= x"00000000";
-                  branch_target_address <= reg1_o;
+                  branch_target_address_o <= reg1_o;
                   branch_flag_o <= '1';
                   next_inst_in_delayslot_o <= '1';
                   instvalid <= '1';
@@ -456,7 +456,7 @@ begin
                   reg2_read_o <= '0';
                   wd_o <= inst_i(15 downto 11);
                   link_addr_o <= pc_plus_8;
-                  branch_target_address_o <= '1';
+                  branch_target_address_o <= reg1_o;
                   branch_flag_o <= '1';
                   next_inst_in_delayslot_o <= '1';
                   instvalid <= '1';
@@ -511,7 +511,7 @@ begin
           link_addr_o <= x"00000000";
           branch_target_address_o <= x"00000000";
           branch_flag_o <= '0';
-          next_inst_in_delay_slot_o <= '0';
+          next_inst_in_delayslot_o <= '0';
       end case; -- op
 
     end if;

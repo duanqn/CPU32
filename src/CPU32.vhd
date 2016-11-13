@@ -82,8 +82,8 @@ package CPU32 is
     CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00011000";
 
     constant EXE_BGEZ_OP:STD_LOGIC_VECTOR(4 downto 0) := "01000001";
-    constant EXE_J_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000010"; 
-    constant EXE_JAL_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000011"; 
+    constant EXE_J_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000010";
+    constant EXE_JAL_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000011";
     constant EXE_BEQ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000100";
     constant EXE_BLEZ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000110";
     constant EXE_BGTZ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000111";
@@ -108,6 +108,7 @@ package CPU32 is
     CONSTANT EXE_RES_ARITHMETIC: STD_LOGIC_VECTOR(2 downto 0) := "100";
     CONSTANT EXE_RES_MUL: STD_LOGIC_VECTOR(2 downto 0) := "101";
     CONSTANT EXE_RES_JUMP_BRANCH: STD_LOGIC_VECTOR(2 downto 0) := "110";
+    CONSTANT EXE_RES_LOAD_STORE: STD_LOGIC_VECTOR(2 downto 0) := "111";
 
 
 
