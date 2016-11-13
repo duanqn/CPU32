@@ -49,61 +49,51 @@ architecture arch of openmips is
 
   component id
   port(
-    rst: in STD_LOGIC;
-    pc_i: in STD_LOGIC_VECTOR(31 downto 0);
-    inst_i: in STD_LOGIC_VECTOR(31 downto 0);
-    
-    reg1_data_i: in STD_LOGIC_VECTOR(31 downto 0);
-    reg2_data_i: in STD_LOGIC_VECTOR(31 downto 0);
-
-    ex_wreg_i: in STD_LOGIC;
-    ex_wdata_i: in STD_LOGIC_VECTOR(31 downto 0);
-    ex_wd_i: in STD_LOGIC_VECTOR(4 downto 0);
-
-    mem_wreg_i: in STD_LOGIC;
-    mem_wdata_i: in STD_LOGIC_VECTOR(31 downto 0);
-    mem_wd_i: in STD_LOGIC_VECTOR(4 downto 0);
-
-    is_in_delayslot_i: in STD_LOGIC;
-
-    stallreq: out STD_LOGIC;
-    reg1_read_o: buffer STD_LOGIC;
-    reg2_read_o: buffer STD_LOGIC;
-    reg1_addr_o: buffer STD_LOGIC_VECTOR(4 downto 0);
-    reg2_addr_o: buffer STD_LOGIC_VECTOR(4 downto 0);
-
-    aluop_o: out STD_LOGIC_VECTOR(7 downto 0);
-    alusel_o: out STD_LOGIC_VECTOR(2 downto 0);
-    reg1_o: out STD_LOGIC_VECTOR(31 downto 0);
-    reg2_o: out STD_LOGIC_VECTOR(31 downto 0);
-    wd_o: out STD_LOGIC_VECTOR(4 downto 0);
-    wreg_o: out STD_LOGIC;
-
+    rst:in STD_LOGIC;
+    pc_i:in STD_LOGIC_VECTOR(31 downto 0);  -- Program counter
+    inst_i:in STD_LOGIC_VECTOR(31 downto 0);  -- Instruction
+    reg1_data_i:in STD_LOGIC_VECTOR(31 downto 0); -- Result from register
+    reg2_data_i:in STD_LOGIC_VECTOR(31 downto 0); -- Result from register
+    reg1_read_o:buffer STD_LOGIC;  -- Control register reading
+    reg2_read_o:buffer STD_LOGIC;  -- Control register reading
+    reg1_addr_o:buffer STD_LOGIC_VECTOR(4 downto 0); --size = 5 Register address
+    reg2_addr_o:buffer STD_LOGIC_VECTOR(4 downto 0); --size = 5 Register address
+    ex_wreg_i:in STD_LOGIC; -- Data forwarding
+    ex_wdata_i:in STD_LOGIC_VECTOR(31 downto 0); -- Data forwarding
+    ex_wd_i:in STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Data forwarding
+    mem_wreg_i:in STD_LOGIC; -- Data forwarding
+    mem_wdata_i:in STD_LOGIC_VECTOR(31 downto 0); -- Data forwarding
+    mem_wd_i:in STD_LOGIC_VECTOR(4 downto 0); --size = 5 Data forwarding
+    aluop_o:out STD_LOGIC_VECTOR(7 downto 0); --size = 8
+    alusel_o:out STD_LOGIC_VECTOR(2 downto 0);  --size = 3
+    reg1_o:buffer STD_LOGIC_VECTOR(31 downto 0); -- Operand 1
+    reg2_o:buffer STD_LOGIC_VECTOR(31 downto 0); -- Operand 2
+    wd_o:out STD_LOGIC_VECTOR(4 downto 0);  --size = 5 Write-Destination (register)
+    wreg_o:out STD_LOGIC; -- =1 -> need to write reg
+    is_in_delayslot_i:in STD_LOGIC;
+    next_inst_in_delayslot_o:out STD_LOGIC;
+    branch_flag_o:out STD_LOGIC;
+    branch_target_address_o:out STD_LOGIC_VECTOR(31 downto 0);
+    link_addr_o:out STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_o:out STD_LOGIC;
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
-
-    is_in_delayslot_o: out STD_LOGIC;
-    link_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
-    next_inst_in_delayslot_o: out STD_LOGIC;
-    branch_target_address_o: out STD_LOGIC_VECTOR(31 downto 0);
-    branch_flag_o: out STD_LOGIC;
-
+    stallreq:out STD_LOGIC; -- =1 -> stall pipeline
     ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0)
     );
   end component;
 
   component regfile
   port(
-    clk: in STD_LOGIC;
     rst: in STD_LOGIC;
+    clk: in STD_LOGIC;
     
     we: in STD_LOGIC;
     waddr: in STD_LOGIC_VECTOR(4 downto 0);
     wdata: in STD_LOGIC_VECTOR(31 downto 0);
-
+    
     re1: in STD_LOGIC;
     raddr1: in STD_LOGIC_VECTOR(4 downto 0);
     rdata1: out STD_LOGIC_VECTOR(31 downto 0);
-
     re2: in STD_LOGIC;
     raddr2: in STD_LOGIC_VECTOR(4 downto 0);
     rdata2: out STD_LOGIC_VECTOR(31 downto 0)
@@ -112,88 +102,81 @@ architecture arch of openmips is
 
   component hilo_reg
   port(
-    clk: in STD_LOGIC;
-    rst: in STD_LOGIC;
-
-    we: in STD_LOGIC;
-    hi_i: in STD_LOGIC_VECTOR(31 downto 0);
-    lo_i: in STD_LOGIC_VECTOR(31 downto 0);
-
-    hi_o: out STD_LOGIC_VECTOR(31 downto 0);
-    lo_o: out STD_LOGIC_VECTOR(31 downto 0)
+    clk:in STD_LOGIC;
+    rst:in STD_LOGIC;
+    we:in STD_LOGIC;
+    hi_i:in STD_LOGIC_VECTOR(31 downto 0);
+    lo_i:in STD_LOGIC_VECTOR(31 downto 0);
+    hi_o:out STD_LOGIC_VECTOR(31 downto 0);
+    lo_o:out STD_LOGIC_VECTOR(31 downto 0)
     );
   end component;
 
   component id_ex
   port(
-    clk: in STD_LOGIC;
-    rst: in STD_LOGIC;
+    clk: IN STD_LOGIC;
+    rst: IN STD_LOGIC;
+    id_aluop: IN STD_LOGIC_VECTOR (7 downto 0);
+    id_alusel: IN STD_LOGIC_VECTOR (2 downto 0);
+    id_reg1: IN STD_LOGIC_VECTOR (31 downto 0);
+    id_reg2: IN STD_LOGIC_VECTOR (31 downto 0);
+    id_wd: IN STD_LOGIC_VECTOR (4 downto 0);
+    id_wreg: IN STD_LOGIC;
+    stall: IN STD_LOGIC_VECTOR(5 downto 0);
 
-    id_aluop: in STD_LOGIC_VECTOR(7 downto 0);
-    id_alusel: in STD_LOGIC_VECTOR(2 downto 0);
-    id_reg1: in STD_LOGIC_VECTOR(31 downto 0);
-    id_reg2: in STD_LOGIC_VECTOR(31 downto 0);
-    id_wd: in STD_LOGIC_VECTOR(4 downto 0);
-    id_wreg: in STD_LOGIC;
+    id_link_address: IN STD_LOGIC_VECTOR(31 downto 0);
+    id_is_in_delayslot: IN STD_LOGIC;
+    next_inst_in_delayslot_i: IN STD_LOGIC;
 
-    stall: in STD_LOGIC_VECTOR(5 downto 0);
+    id_inst:in STD_LOGIC_VECTOR(31 downto 0);
+    ex_inst:out STD_LOGIC_VECTOR(31 downto 0);
 
-    id_is_in_delayslot: in STD_LOGIC;
-    id_link_address: in STD_LOGIC_VECTOR(31 downto 0);
-    next_inst_in_delayslot_i: in STD_LOGIC;
+    ex_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
+    ex_alusel: OUT STD_LOGIC_VECTOR (2 downto 0);
+    ex_reg1: OUT STD_LOGIC_VECTOR (31 downto 0);
+    ex_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);
+    ex_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
+    ex_wreg: OUT STD_LOGIC;
 
-    id_inst: in STD_LOGIC_VECTOR(31 downto 0);
-
-    ex_aluop: out STD_LOGIC_VECTOR(7 downto 0);
-    ex_alusel: out STD_LOGIC_VECTOR(2 downto 0);
-    ex_reg1: out STD_LOGIC_VECTOR(31 downto 0);
-    ex_reg2: out STD_LOGIC_VECTOR(31 downto 0);
-    ex_wd: out STD_LOGIC_VECTOR(4 downto 0);
-    ex_wreg: out STD_LOGIC;
-
-    ex_inst: out STD_LOGIC_VECTOR(31 downto 0);
-
-    ex_is_in_delayslot: out STD_LOGIC;
-    ex_link_address: out STD_LOGIC_VECTOR(31 downto 0);
-    is_in_delayslot_o: out STD_LOGIC
+    ex_link_address: OUT STD_LOGIC_VECTOR(31 downto 0);
+    ex_is_in_delayslot: OUT STD_LOGIC;
+    is_in_delayslot_o: OUT STD_LOGIC
     );
   end component;
 
   component ex
   port (
-    rst: in STD_LOGIC;
-	 
-    aluop_i: in STD_LOGIC_VECTOR(7 downto 0);
-    alusel_i: in STD_LOGIC_VECTOR(2 downto 0);
-    reg1_i: in STD_LOGIC_VECTOR(31 downto 0);
-    reg2_i: in STD_LOGIC_VECTOR(31 downto 0);
-    wd_i: in STD_LOGIC_VECTOR(4 downto 0);
-    wreg_i: in STD_LOGIC;
+    rst: IN STD_LOGIC;
 
-    hi_i: in STD_LOGIC_VECTOR(31 downto 0);
-    lo_i: in STD_LOGIC_VECTOR(31 downto 0);
+    aluop_i: IN STD_LOGIC_VECTOR(7 downto 0);
+    alusel_i: IN STD_LOGIC_VECTOR(2 downto 0);
+    reg1_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    reg2_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    wd_i: IN STD_LOGIC_VECTOR(4 downto 0);
+    wreg_i: IN STD_LOGIC;
 
-    wb_hi_i: in STD_LOGIC_VECTOR(31 downto 0);
-    wb_lo_i: in STD_LOGIC_VECTOR(31 downto 0);
-    wb_whilo_i: in STD_LOGIC;
+    hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    wb_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    wb_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    wb_whilo_i: IN STD_LOGIC;
+    mem_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    mem_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    mem_whilo_i: IN STD_LOGIC;
 
-    mem_hi_i: in STD_LOGIC_VECTOR(31 downto 0);
-    mem_lo_i: in STD_LOGIC_VECTOR(31 downto 0);
-    mem_whilo_i: in STD_LOGIC;
-    is_in_delayslot_i: in STD_LOGIC;
-    link_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+    link_address_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_i: IN STD_LOGIC;
 
-    inst_i: in STD_LOGIC_VECTOR(31 downto 0);
+    inst_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
-    stallreq: out STD_LOGIC;
+    stallreq: OUT STD_LOGIC;
+    hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+    lo_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+    whilo_o: OUT STD_LOGIC;
 
-    hi_o: out STD_LOGIC_VECTOR(31 downto 0);
-    lo_o: out STD_LOGIC_VECTOR(31 downto 0);
-    whilo_o: out STD_LOGIC; 
-
-    wd_o: out STD_LOGIC_VECTOR(4 downto 0);
-    wreg_o: out STD_LOGIC;
-    wdata_o: out STD_LOGIC_VECTOR(31 downto 0);
+    wd_o: OUT STD_LOGIC_VECTOR(4 downto 0);
+    wreg_o: OUT STD_LOGIC;
+    wdata_o: OUT STD_LOGIC_VECTOR(31 downto 0);
 
     aluop_o: OUT STD_LOGIC_VECTOR(7 downto 0);
     mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -203,29 +186,26 @@ architecture arch of openmips is
 
   component ex_mem
   port (
-    clk: in STD_LOGIC;
-    rst: in STD_LOGIC;
+    clk: IN STD_LOGIC;
+    rst: IN STD_LOGIC;
 
-    ex_wd: in STD_LOGIC_VECTOR(4 downto 0);
-    ex_wreg: in STD_LOGIC;
-    ex_wdata: in STD_LOGIC_VECTOR(31 downto 0);
-
-    ex_hi: in STD_LOGIC_VECTOR(31 downto 0);
-    ex_lo: in STD_LOGIC_VECTOR(31 downto 0);
-    ex_whilo: in STD_LOGIC;
-    stall: in STD_LOGIC_VECTOR(5 downto 0);
-
+    ex_wd: IN STD_LOGIC_VECTOR (4 downto 0);
+    ex_wreg: IN STD_LOGIC;
+    ex_wdata: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_hi: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_lo: IN STD_LOGIC_VECTOR (31 downto 0);
+    ex_whilo: IN STD_LOGIC;
     ex_aluop: IN STD_LOGIC_VECTOR (7 downto 0);
     ex_mem_addr: IN STD_LOGIC_VECTOR (31 downto 0);
     ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);
+    stall: IN STD_LOGIC_VECTOR(5 downto 0);
 
-    mem_wd: out STD_LOGIC_VECTOR(4 downto 0);
-    mem_wreg: out STD_LOGIC;
-    mem_wdata: out STD_LOGIC_VECTOR(31 downto 0);
-    mem_hi: out STD_LOGIC_VECTOR(31 downto 0);
-    mem_lo: out STD_LOGIC_VECTOR(31 downto 0);
-    mem_whilo: out STD_LOGIC;
-
+    mem_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
+    mem_wreg: OUT STD_LOGIC;
+    mem_wdata: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);
+    mem_whilo: OUT STD_LOGIC;
     mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
     mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0)
@@ -266,18 +246,18 @@ architecture arch of openmips is
 
   component mem_wb
   port (
-    clk: in STD_LOGIC;
     rst: in STD_LOGIC;
-
+    clk: in STD_LOGIC;
+    -- input
     mem_wd: in STD_LOGIC_VECTOR(4 downto 0);
     mem_wreg: in STD_LOGIC;
     mem_wdata: in STD_LOGIC_VECTOR(31 downto 0);
-
     mem_hi: in STD_LOGIC_VECTOR(31 downto 0);
     mem_lo: in STD_LOGIC_VECTOR(31 downto 0);
     mem_whilo: in STD_LOGIC;
     stall: in STD_LOGIC_VECTOR(5 downto 0);
-
+    
+    -- output
     wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
     wb_wreg: out STD_LOGIC;
     wb_wdata: out STD_LOGIC_VECTOR(31 downto 0);
