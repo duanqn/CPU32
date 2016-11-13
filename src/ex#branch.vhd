@@ -63,24 +63,35 @@ end ex;
 
   BEGIN
     -- get reg2_i's complement
-    IF (aluop_i = EXE_SUBU_OP or aluop_i = EXE_SLT_OP) THEN
-      reg2_i_mux <= (not reg2_i) + X"00000001";
-    ELSE
-      reg2_i_mux <= reg2_i;
-    END IF;
+    process(aluop_i, reg2_i)
+      BEGIN
+        IF (aluop_i = EXE_SUBU_OP or aluop_i = EXE_SLT_OP) THEN
+          reg2_i_mux <= (not reg2_i) + X"00000001";
+        ELSE
+          reg2_i_mux <= reg2_i;
+        END IF;
+      end process;
 
     result_sum <= reg1_i + reg2_i_mux;
 
     -- about overflow
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
 
-    IF (aluop_i = EXE_SLT_OP) THEN
-      reg1_lt_reg2 <= ((reg1_i(31)) and (not reg2_i(31))) or
-        ((not reg1_i(31)) and (not reg2_i(31)) and result_sum(31)) or
-        (reg1_i(31) and reg2_i(31) and result_sum(31));
-    ELSE
-      reg1_lt_reg2 <= (reg1_i < reg2_i);
-    END IF;
+
+    process(aluop_i, reg1_i, reg2_i)
+    BEGIN
+      IF (aluop_i = EXE_SLT_OP) THEN
+        reg1_lt_reg2 <= ((reg1_i(31)) and (not reg2_i(31))) or
+          ((not reg1_i(31)) and (not reg2_i(31)) and result_sum(31)) or
+          (reg1_i(31) and reg2_i(31) and result_sum(31));
+      ELSE
+        if(reg1_i < reg2_i) then
+          reg1_lt_reg2 <= '1';
+        else
+          reg1_lt_reg2 <= '0';
+        end if;     
+      END IF;
+    end process;
 
     reg1_i_not <= not reg1_i;
 
@@ -104,15 +115,23 @@ end ex;
       END PROCESS;
 
       --get multiplyres
-      IF (aluop_i = EXE_MULT_OP and reg1_i(31) = '1') THEN
-        opdata1_mult <= not (reg1_i) + X"00000001";
-      ELSE
-        opdata1_mult <= reg1_i;
+      process(aluop_i, reg1_i)
+      begin
+        IF (aluop_i = EXE_MULT_OP and reg1_i(31) = '1') THEN
+          opdata1_mult <= not (reg1_i) + X"00000001";
+        ELSE
+          opdata1_mult <= reg1_i;
+        end if;
+      end process;
 
-      IF (aluop_i = EXE_MULT_OP and reg2_i(31) = '1') THEN
-        opdata2_mult <= not (reg2_i) + X"00000001";
-      ELSE
-        opdata2_mult <= reg2_i;
+      process(aluop_i, reg2_i)
+      begin
+        IF (aluop_i = EXE_MULT_OP and reg2_i(31) = '1') THEN
+          opdata2_mult <= not (reg2_i) + X"00000001";
+        ELSE
+          opdata2_mult <= reg2_i;
+        end if;
+      end process;
 
       hilo_temp <= opdata1_mult * opdata2_mult;
 
