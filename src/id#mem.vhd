@@ -311,7 +311,7 @@ begin
               end if;
             when EXE_BLTZAL =>
               wreg_o <= '1';
-              aluop_o <= EXE_BLTZAL_OP;
+              aluop_o <= EXE_BGEZAL_OP;
               alusel_o <= EXE_RES_JUMP_BRANCH;
               reg1_read_o <= '1';
               reg2_read_o <= '0';
