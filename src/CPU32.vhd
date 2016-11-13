@@ -93,24 +93,6 @@ package CPU32 is
     CONSTANT EXE_ADDIU_OP: STD_LOGIC_VECTOR(7 downto 0) := "00001001";
     CONSTANT EXE_MULT_OP: STD_LOGIC_VECTOR(7 downto 0) := "00011000";
 
-<<<<<<< HEAD
-    constant EXE_BGEZ_OP:STD_LOGIC_VECTOR(4 downto 0) := "01000001";
-    constant EXE_J_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000010";
-    constant EXE_JAL_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000011";
-    constant EXE_BEQ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000100";
-    constant EXE_BLEZ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000110";
-    constant EXE_BGTZ_OP:STD_LOGIC_VECTOR(5 downto 0) := "01000111";
-    constant EXE_JR_OP:STD_LOGIC_VECTOR(5 downto 0) := "01001000";
-    constant EXE_JALR_OP:STD_LOGIC_VECTOR(5 downto 0) := "01001001";
-    constant EXE_BGEZAL_OP:STD_LOGIC_VECTOR(4 downto 0) := "01010001";
-
-    constant EXE_LB_OP:STD_LOGIC_VECTOR(5 downto 0) := "01100000";
-    constant EXE_LBU_OP:STD_LOGIC_VECTOR(5 downto 0) := "01100100";
-    constant EXE_LHU_OP:STD_LOGIC_VECTOR(5 downto 0) := "01100101";
-    constant EXE_LW_OP:STD_LOGIC_VECTOR(5 downto 0) := "01100011";
-    constant EXE_SB_OP:STD_LOGIC_VECTOR(5 downto 0) := "01101000";
-    constant EXE_SW_OP:STD_LOGIC_VECTOR(5 downto 0) := "01101011";
-=======
     constant EXE_BGEZ_OP:STD_LOGIC_VECTOR(7 downto 0) := "01000001";
     constant EXE_J_OP:STD_LOGIC_VECTOR(7 downto 0) := "01000010";
     constant EXE_JAL_OP:STD_LOGIC_VECTOR(7 downto 0) := "01000011";
@@ -127,7 +109,6 @@ package CPU32 is
     constant EXE_LW_OP:STD_LOGIC_VECTOR(7 downto 0) := "01100011";
     constant EXE_SB_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101000";
     constant EXE_SW_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101011";
->>>>>>> dqn
 
 
 
