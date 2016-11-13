@@ -332,6 +332,8 @@ begin
                 branch_flag_o <= '1';
                 next_inst_in_delayslot_o <= '1';
               end if;
+            when others =>
+              NULL;
           end case;
         when EXE_SPECIAL =>
           case op2 is
