@@ -35,7 +35,8 @@ entity id is
     link_addr_o:out STD_LOGIC_VECTOR(31 downto 0);
     is_in_delayslot_o:out STD_LOGIC;
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
-    stallreq:out STD_LOGIC -- =1 -> stall pipeline
+    stallreq:out STD_LOGIC; -- =1 -> stall pipeline
+    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0)
   );
 end id;
 
@@ -45,27 +46,35 @@ signal op2:STD_LOGIC_VECTOR(4 downto 0);
 signal op3:STD_LOGIC_VECTOR(5 downto 0);
 signal op4:STD_LOGIC_VECTOR(4 downto 0);
 signal imm:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
-signal reg1_read:STD_LOGIC;
-signal reg2_read:STD_LOGIC;
-signal reg1:STD_LOGIC_VECTOR(31 downto 0);
-signal reg2:STD_LOGIC_VECTOR(31 downto 0);
 signal instvalid:STD_LOGIC;
 signal pc_plus_8: STD_LOGIC_VECTOR(31 downto 0);
 signal pc_plus_4: STD_LOGIC_VECTOR(31 downto 0);
 signal imm_sll2_signedext: STD_LOGIC_VECTOR(31 downto 0);
+
+signal stallreq_for_reg1_loadrelate: STD_LOGIC;
+signal stallreq_for_reg2_loadrelate: STD_LOGIC;
+signal pre_inst_is_load: STD_LOGIC;
 
 begin
   op<=inst_i(31 downto 26);
   op2<=inst_i(10 downto 6);
   op3<=inst_i(5 downto 0);
   op4<=inst_i(20 downto 16);
-  reg1_o <= reg1;
-  reg2_o <= reg2;
   stallreq <= '0';
   pc_plus_8 <= pc_i + x"00001000";
   pc_plus_4 <= pc_i + x"00000100";
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";
   inst_o <= inst_i;
+
+
+  process(ex_aluop_i)
+  begin
+    if(ex_aluop_i = EXE_LB_OP or ex_aluop_i = EXE_LBU_OP or ex_aluop_i = EXE_LHU_OP or ex_aluop_i = EXE_LW_OP) then
+      pre_inst_is_load <= '1';
+    else
+      pre_inst_is_load <= '0';
+    end if;
+  end process;
 
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i)
   begin
@@ -521,17 +530,26 @@ begin
 
   begin
     if rst = '1' then
-      reg1 <= x"00000000";
+      reg1_o <= x"00000000";
+      stallreq_for_reg1_loadrelate <= '0';
+    elsif (pre_inst_is_load = '1' and ex_wd_i = reg1_addr_o and reg1_read_o = '1') then
+      reg1_o <= x"00000000";
+      stallreq_for_reg1_loadrelate <= '1';
     elsif reg1_read_o = '1' and ex_wreg_i = '1' and ex_wd_i = reg1_addr_o then  -- ex-id conflict
-      reg1 <= ex_wdata_i;
+      reg1_o <= ex_wdata_i;
+      stallreq_for_reg1_loadrelate <= '0';
     elsif reg1_read_o = '1' and mem_wreg_i = '1' and mem_wd_i = reg1_addr_o then  -- mem-id conflict
-      reg1 <= mem_wdata_i;
+      reg1_o <= mem_wdata_i;
+      stallreq_for_reg1_loadrelate <= '0';
     elsif reg1_read_o = '1' then
-      reg1 <= reg1_data_i;
+      reg1_o <= reg1_data_i;
+      stallreq_for_reg1_loadrelate <= '0';
     elsif reg1_read_o = '0' then
-      reg1 <= imm;
+      reg1_o <= imm;
+      stallreq_for_reg1_loadrelate <= '0';
     else
-      reg1 <= x"00000000";
+      reg1_o <= x"00000000";
+      stallreq_for_reg1_loadrelate <= '0';
     end if;
   end process;
 
@@ -539,17 +557,26 @@ begin
 
   begin
     if rst = '1' then
-      reg2 <= x"00000000";
+      reg2_o <= x"00000000";
+      stallreq_for_reg2_loadrelate <= '0';
+    elsif (pre_inst_is_load = '1' and ex_wd_i = reg2_addr_o and reg2_read_o = '1') then
+      reg2_o <= x"00000000";
+      stallreq_for_reg2_loadrelate <= '1';
     elsif reg2_read_o = '1' and ex_wreg_i = '1' and ex_wd_i = reg2_addr_o then  -- ex-id conflict
-      reg2 <= ex_wdata_i;
+      reg2_o <= ex_wdata_i;
+      stallreq_for_reg2_loadrelate <= '0';
     elsif reg2_read_o = '1' and mem_wreg_i = '1' and mem_wd_i = reg2_addr_o then  -- mem-id conflict
-      reg2 <= mem_wdata_i;
+      reg2_o <= mem_wdata_i;
+      stallreq_for_reg2_loadrelate <= '0';
     elsif reg2_read_o = '1' then
-      reg2 <= reg2_data_i;
+      reg2_o <= reg2_data_i;
+      stallreq_for_reg2_loadrelate <= '0';
     elsif reg2_read_o = '0' then
-      reg2 <= imm;
+      reg2_o <= imm;
+      stallreq_for_reg2_loadrelate <= '0';
     else
-      reg2 <= x"00000000";
+      reg2_o <= x"00000000";
+      stallreq_for_reg2_loadrelate <= '0';
     end if;
   end process;
 
