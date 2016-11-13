@@ -14,48 +14,60 @@ ENTITY id_ex IS
     id_reg2: IN STD_LOGIC_VECTOR (31 downto 0);
     id_wd: IN STD_LOGIC_VECTOR (4 downto 0);
     id_wreg: IN STD_LOGIC;
+    stall: IN STD_LOGIC_VECTOR(5 downto 0);
+
+    id_link_address: IN STD_LOGIC_VECTOR(31 downto 0);
+    id_is_in_delayslot: IN STD_LOGIC;
+    next_inst_in_delayslot_i: IN STD_LOGIC;
+
+    id_inst:in STD_LOGIC_VECTOR(31 downto 0);
+    ex_inst:out STD_LOGIC_VECTOR(31 downto 0);
 
     ex_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
     ex_alusel: OUT STD_LOGIC_VECTOR (2 downto 0);
     ex_reg1: OUT STD_LOGIC_VECTOR (31 downto 0);
     ex_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);
     ex_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
-    ex_wreg: OUT STD_LOGIC
+    ex_wreg: OUT STD_LOGIC;
+
+    ex_link_address: OUT STD_LOGIC_VECTOR(31 downto 0);
+    ex_is_in_delayslot: OUT STD_LOGIC;
+    is_in_delayslot_o: OUT STD_LOGIC
   );
 end id_ex;
 
 ARCHITECTURE behave OF id_ex IS
-  SIGNAL ex_aluop_s: STD_LOGIC_VECTOR (7 downto 0);
-  SIGNAL ex_alusel_s: STD_LOGIC_VECTOR (2 downto 0);
-  SIGNAL ex_reg1_s: STD_LOGIC_VECTOR (31 downto 0);
-  SIGNAL ex_reg2_s: STD_LOGIC_VECTOR (31 downto 0);
-  SIGNAL ex_wd_s: STD_LOGIC_VECTOR (4 downto 0);
-  SIGNAL ex_wreg_s: STD_LOGIC;
 BEGIN
 PROCESS(clk, rst)
   BEGIN
-    if(clk'event and clk='1')then
-      if(rst='1')then
-        ex_aluop_s <= "00000000";
-        ex_alusel_s <= "000";
-        ex_reg1_s <= X"00000000";
-        ex_reg2_s <= X"00000000";
-        ex_wd_s <= "00000";
-        ex_wreg_s <= '0';
-      else
-        ex_aluop_s <= id_aluop;
-        ex_alusel_s <= id_alusel;
-        ex_reg1_s <= id_reg1;
-        ex_reg2_s <= id_reg2;
-        ex_wd_s <= id_wd;
-        ex_wreg_s <= id_wreg;
+    if (clk'event and clk = '1') then
+      if (rst = '1') then
+        ex_aluop <= "00000000";
+        ex_alusel <= "000";
+        ex_reg1 <= X"00000000";
+        ex_reg2 <= X"00000000";
+        ex_wd <= "00000";
+        ex_wreg <= '0';
+      elsif (stall(2) = '1' and stall(3) = '0') then
+        ex_aluop <= "00000000";
+        ex_alusel <= "000";
+        ex_reg1 <= X"00000000";
+        ex_reg2 <= X"00000000";
+        ex_wd <= "00000";
+        ex_wreg <= '0';
+      elsif (stall(2) = '0') then
+        ex_aluop <= id_aluop;
+        ex_alusel <= id_alusel;
+        ex_reg1 <= id_reg1;
+        ex_reg2 <= id_reg2;
+        ex_wd <= id_wd;
+        ex_wreg <= id_wreg;
+        ex_link_address <= id_link_address;
+        ex_is_in_delayslot <= id_is_in_delayslot;
+        is_in_delayslot_o <= next_inst_in_delayslot_i;
+
+        ex_inst <= id_inst;
+      end if;
     end if;
-  end if;
-  ex_aluop <= ex_aluop_s;
-  ex_alusel <= ex_alusel_s;
-  ex_reg1 <= ex_reg1_s;
-  ex_reg2 <= ex_reg2_s;
-  ex_wd <= ex_wd_s;
-  ex_wreg <= ex_wreg_s;
-END PROCESS;
+  END PROCESS;
 END;
