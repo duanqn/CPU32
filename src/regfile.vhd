@@ -8,17 +8,17 @@ ENTITY regfile is
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
     
-    -- 写端口
+    -- write
     we: in STD_LOGIC;
     waddr: in STD_LOGIC_VECTOR(4 downto 0);
     wdata: in STD_LOGIC_VECTOR(31 downto 0);
     
-    -- 读端口1
+    -- read1
     re1: in STD_LOGIC;
     raddr1: in STD_LOGIC_VECTOR(4 downto 0);
     rdata1: out STD_LOGIC_VECTOR(31 downto 0);
 
-    -- 读端口2
+    -- read2
     re2: in STD_LOGIC;
     raddr2: in STD_LOGIC_VECTOR(4 downto 0);
     rdata2: out STD_LOGIC_VECTOR(31 downto 0));

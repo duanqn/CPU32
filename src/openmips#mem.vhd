@@ -28,22 +28,22 @@ architecture arch of openmips is
     clk: in STD_LOGIC;
     rst: in STD_LOGIC;
     stall: in STD_LOGIC_VECTOR(5 downto 0);
-    pc: buffer STD_LOGIC_VECTOR(31 downto 0);
-    ce: buffer STD_LOGIC;
+    branch_flag_i: in STD_LOGIC;
     branch_target_address_i: in STD_LOGIC_VECTOR(31 downto 0);
-    branch_flag_i: in STD_LOGIC
+    pc: buffer STD_LOGIC_VECTOR(31 downto 0);
+    ce: buffer STD_LOGIC
     );
   end component;
 
   component if_id
   port(
-    clk: in STD_LOGIC;
-    rst: in STD_LOGIC;
-    if_pc: in STD_LOGIC_VECTOR(31 downto 0);
-    if_inst: in STD_LOGIC_VECTOR(31 downto 0);
+    clk:in STD_LOGIC;
+    rst:in STD_LOGIC;
+    if_pc:in STD_LOGIC_VECTOR(31 downto 0);
+    if_inst:in STD_LOGIC_VECTOR(31 downto 0);
     stall: in STD_LOGIC_VECTOR(5 downto 0);
-    id_pc: out STD_LOGIC_VECTOR(31 downto 0);
-    id_inst: out STD_LOGIC_VECTOR(31 downto 0)
+    id_pc:out STD_LOGIC_VECTOR(31 downto 0);
+    id_inst:out STD_LOGIC_VECTOR(31 downto 0)
     );
   end component;
 
@@ -66,7 +66,7 @@ architecture arch of openmips is
 
     is_in_delayslot_i: in STD_LOGIC;
 
-    stallreq: out STD_LOGIC_VECTOR(5 downto 0);
+    stallreq: out STD_LOGIC;
     reg1_read_o: buffer STD_LOGIC;
     reg2_read_o: buffer STD_LOGIC;
     reg1_addr_o: buffer STD_LOGIC_VECTOR(4 downto 0);
@@ -185,7 +185,7 @@ architecture arch of openmips is
 
     inst_i: in STD_LOGIC_VECTOR(31 downto 0);
 
-    stallreq: out STD_LOGIC_VECTOR(5 downto 0);
+    stallreq: out STD_LOGIC;
 
     hi_o: out STD_LOGIC_VECTOR(31 downto 0);
     lo_o: out STD_LOGIC_VECTOR(31 downto 0);
@@ -290,16 +290,16 @@ architecture arch of openmips is
   component ctrl
   port (
     rst: IN STD_LOGIC;
-    stallreq_from_id: IN STD_LOGIC_VECTOR(5 downto 0);
-    stallreq_from_ex: IN STD_LOGIC_VECTOR(5 downto 0);
+    stallreq_from_id: IN STD_LOGIC;
+    stallreq_from_ex: IN STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
   
 -- stall
   signal stall: STD_LOGIC_VECTOR(5 downto 0);
-  signal stallreq_from_ex: STD_LOGIC_VECTOR(5 downto 0);
-  signal stallreq_from_id: STD_LOGIC_VECTOR(5 downto 0);
+  signal stallreq_from_ex: STD_LOGIC;
+  signal stallreq_from_id: STD_LOGIC;
 
 -- branch
 -- ID to PC
