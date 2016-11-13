@@ -89,7 +89,7 @@ end ex;
           reg1_lt_reg2 <= '1';
         else
           reg1_lt_reg2 <= '0';
-        end if;     
+        end if;
       END IF;
     end process;
 
@@ -100,10 +100,10 @@ end ex;
       BEGIN
         IF(rst = '1') THEN
           arithmeticres <= X"00000000";
-        ELSIF
+        ELSE
           CASE aluop_i IS
             WHEN EXE_SLT_OP | EXE_SLTU_OP =>
-              arithmeticres <= reg1_lt_reg2;
+              arithmeticres <= "0000000000000000000000000000000"&reg1_lt_reg2;
             WHEN EXE_ADDU_OP | EXE_ADDIU_OP =>
               arithmeticres <= result_sum;
             WHEN EXE_SUBU_OP =>
@@ -140,7 +140,7 @@ end ex;
           IF (rst = '1') THEN
             mulres <= X"0000000000000000";
           ELSIF (aluop_i = EXE_MULT_OP) THEN
-            IF (reg1_i(31) xor reg2_i(31) = 1) THEN
+            IF ((reg1_i(31) xor reg2_i(31)) = '1') THEN
               mulres <= (not hilo_temp) + X"0000000000000001";
             ELSE
               mulres <= hilo_temp;
@@ -152,7 +152,7 @@ end ex;
 
 
 -- get HI and LO reg
-    PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, hi_o, hi_i)
+    PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, lo_i, hi_i)
       BEGIN
         IF(rst = '1') THEN
           HI <= X"00000000";
@@ -266,7 +266,7 @@ end ex;
                 when "11101" => shiftres <= reg2_i(2 downto 0) & "00000000000000000000000000000";
                 when "11110" => shiftres <= reg2_i(1 downto 0) & "000000000000000000000000000000";
                 when "11111" => shiftres <= reg2_i(0 downto 0) & "0000000000000000000000000000000";
-                when others => null;
+                when others => shiftres <= X"00000000";
               END CASE;
             WHEN EXE_SRL_OP =>
               CASE reg1_i(4 downto 0) is
@@ -301,7 +301,7 @@ end ex;
                 when "11101" => shiftres <= "00000000000000000000000000000" & reg2_i(31 downto 29);
                 when "11110" => shiftres <= "000000000000000000000000000000" & reg2_i(31 downto 30);
                 when "11111" => shiftres <= "0000000000000000000000000000000" & reg2_i(31 downto 31);
-                when others => null;
+                when others => shiftres <= X"00000000";
               END CASE;
             WHEN EXE_SRA_OP =>
               CASE reg1_i(4 downto 0) is
@@ -429,7 +429,7 @@ end ex;
                   if reg2_i(31) = '0' then shiftres <= "0000000000000000000000000000000" & reg2_i(31 downto 31);
                   ELSE shiftres  <= "1111111111111111111111111111111" & reg2_i(31 downto 31);
                   END if;
-                when others => null;
+                when others => shiftres <= X"00000000";
               END CASE;
             WHEN others => shiftres <= X"00000000";
           END CASE;
