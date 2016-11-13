@@ -415,7 +415,8 @@ begin
     wd_o => id_wd_o, wreg_o => id_wreg_o, stallreq => stallreq_from_id,
     is_in_delayslot_i => is_in_delayslot, is_in_delayslot_o => id_is_in_delayslot,
     link_addr_o => id_link_address, next_inst_in_delayslot_o => next_inst_in_delayslot,
-    branch_target_address_o => branch_target_address, branch_flag_o => branch_flag);
+    branch_target_address_o => branch_target_address, branch_flag_o => branch_flag,
+    inst_o => id_inst);
 
   regfile0: regfile port map(
     clk => clk, rst => rst,
@@ -436,7 +437,8 @@ begin
     ex_wd => ex_wd_i, ex_wreg => ex_wreg_i, stall => stall,
     id_is_in_delayslot => id_is_in_delayslot, id_link_address => id_link_address,
     next_inst_in_delayslot_i => next_inst_in_delayslot, ex_is_in_delayslot => ex_is_in_delayslot,
-    ex_link_address => ex_link_address, is_in_delayslot_o => is_in_delayslot);
+    ex_link_address => ex_link_address, is_in_delayslot_o => is_in_delayslot,
+    id_inst => id_inst, ex_inst => ex_inst);
 
   ex0: ex port map(
     rst => rst,
@@ -450,7 +452,8 @@ begin
     wd_o => ex_wd_o, wreg_o => ex_wreg_o,
     wdata_o => ex_wdata_o, whilo_o => ex_whilo_o,
     hi_o => ex_hi_o, lo_o => ex_lo_o, stallreq => stallreq_from_ex,
-    is_in_delayslot_i => ex_is_in_delayslot, link_address_i => ex_link_address);
+    is_in_delayslot_i => ex_is_in_delayslot, link_address_i => ex_link_address,
+    aluop_o => ex_aluop, mem_addr_o => ex_mem_addr, reg2_o => ex_reg2);
 
   ex_mem0: ex_mem port map(
     clk => clk, rst => rst,
@@ -459,7 +462,13 @@ begin
     ex_hi => ex_hi_o, ex_lo => ex_lo_o,
     mem_wd => mem_wd_i, mem_wreg => mem_wreg_i,
     mem_wdata => mem_wdata_i, mem_whilo => mem_whilo_i,
-    mem_hi => mem_hi_i, mem_lo => mem_lo_i, stall => stall);
+    mem_hi => mem_hi_i, mem_lo => mem_lo_i, stall => stall, 
+    ex_aluop => ex_aluop, ex_mem_addr => ex_mem_addr, ex_reg2 => ex_reg2,
+    mem_aluop => mem_aluop, mem_mem_addr => mem_addr, mem_reg2 => mem_reg2);
+
+  signal mem_aluop: STD_LOGIC_VECTOR(7 downto 0);
+  signal mem_addr: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_reg2: STD_LOGIC_VECTOR(31 downto 0);
 
   mem0: mem port map(
     rst => rst, 
@@ -471,7 +480,8 @@ begin
     mem_data_o => ram_data_o, mem_ce_o => ram_ce_o,
     wd_o => mem_wd_o, wreg_o => mem_wreg_o,
     wdata_o => mem_wdata_o, whilo_o => mem_whilo_o,
-    hi_o => mem_hi_o, lo_o => mem_lo_o);
+    hi_o => mem_hi_o, lo_o => mem_lo_o,
+    aluop_i => mem_aluop, mem_addr_i => mem_addr, reg2_i => mem_reg2);
 
   mem_wb0: mem_wb port map(
     clk => clk, rst => rst,
