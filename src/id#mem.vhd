@@ -32,7 +32,7 @@ entity id is
     next_inst_in_delayslot_o:out STD_LOGIC;
     branch_flag_o:out STD_LOGIC;
     branch_target_address_o:out STD_LOGIC_VECTOR(31 downto 0);
-    link_addr_o:STD_LOGIC_VECTOR(31 downto 0);
+    link_addr_o:out STD_LOGIC_VECTOR(31 downto 0);
     is_in_delayslot_o:out STD_LOGIC;
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
     stallreq:out STD_LOGIC -- =1 -> stall pipeline
