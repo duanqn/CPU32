@@ -2,6 +2,8 @@ library IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_ARITH.ALL;
 USE IEEE.STD_LOGIC_UNSIGNED.ALL;
+use work.CPU32.all;
+
 
 entity pc_reg is
   PORT(
@@ -14,7 +16,7 @@ end pc_reg;
 
 architecture counter of pc_reg is
 signal counter:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
-  
+
 begin
   pc <= counter;
   process(clk)
@@ -27,7 +29,7 @@ begin
         ce_var := '1';
       end if;
       ce<=ce_var;
-      if ce_var = '1' then
+      if ce_var = '0' then
         counter <= x"00000000";
       else
         counter <= counter + x"00000001";
