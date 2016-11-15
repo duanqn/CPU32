@@ -7,10 +7,14 @@ use work.CPU32.all;
 
 entity pc_reg is
   PORT(
-    clk:in STD_LOGIC;
-    rst:in STD_LOGIC;
-    pc:out STD_LOGIC_VECTOR(31 downto 0);
-    ce:out STD_LOGIC
+    clk: in STD_LOGIC;
+    rst: in STD_LOGIC;
+    stall: in STD_LOGIC_VECTOR(5 downto 0);
+    branch_flag_i: in STD_LOGIC;
+    branch_target_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+
+    pc: buffer STD_LOGIC_VECTOR(31 downto 0);
+    ce: buffer STD_LOGIC
   );
 end pc_reg;
 
@@ -18,22 +22,29 @@ architecture counter of pc_reg is
 signal counter:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
 
 begin
-  pc <= counter;
   process(clk)
-  variable ce_var:STD_LOGIC :='0';
   begin
-    if clk'event and clk='1' then
-      if rst = '1' then
-        ce_var := '0';
+    if (clk'event and clk = '1') then
+      if (rst = '1') then
+        ce <= '0';
       else
-        ce_var := '1';
-      end if;
-      ce<=ce_var;
-      if ce_var = '0' then
-        counter <= x"00000000";
-      else
-        counter <= counter + x"00000001";
+        ce <= '1';
       end if;
     end if;
   end process;
+
+  PROCESS(clk)
+  begin
+    if (clk'event and clk = '1') then
+      if (ce = '0') then
+        pc <= x"00000000";
+      elsif (stall(0) = '0') then
+        if (branch_flag_i = '1') then
+          pc <= branch_target_address_i;
+        else
+          pc <= pc + x"00000001";
+        end if;
+      end if;
+    end if;
+  end PROCESS;
 end counter;

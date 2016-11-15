@@ -8,17 +8,17 @@ ENTITY regfile is
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
     
-    -- 写端口
+    -- write
     we: in STD_LOGIC;
     waddr: in STD_LOGIC_VECTOR(4 downto 0);
     wdata: in STD_LOGIC_VECTOR(31 downto 0);
     
-    -- 读端口1
+    -- read1
     re1: in STD_LOGIC;
     raddr1: in STD_LOGIC_VECTOR(4 downto 0);
     rdata1: out STD_LOGIC_VECTOR(31 downto 0);
 
-    -- 读端口2
+    -- read2
     re2: in STD_LOGIC;
     raddr2: in STD_LOGIC_VECTOR(4 downto 0);
     rdata2: out STD_LOGIC_VECTOR(31 downto 0));
@@ -74,7 +74,7 @@ begin
     end if;
   end process ; -- write_operation
 
-  read_1_operation : process(rst, raddr1, we, re1)
+  read_1_operation : process(rst, raddr1, we, re1, waddr, wdata, regs)
   variable addr: integer;
   begin
     if (rst = '1') then
@@ -123,7 +123,7 @@ begin
     end if;      
   end process ; -- read_1_operation
 
-  read_2_operation : process(rst, raddr2, we, re2)
+  read_2_operation : process(rst, raddr2, we, re2, waddr, wdata, regs)
   variable addr: integer;
   begin
     if (rst = '1') then

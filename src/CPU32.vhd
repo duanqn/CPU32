@@ -65,7 +65,7 @@ package CPU32 is
     constant EXE_BGEZ:STD_LOGIC_VECTOR(4 downto 0) := "00001";
     constant EXE_BGEZAL:STD_LOGIC_VECTOR(4 downto 0) := "10001";
     constant EXE_BLTZ:STD_LOGIC_VECTOR(4 downto 0) := "00000";
-    constant EXE_BLTZAL:STD_LOGIC_VECTOR(4 downto 0) := "00000";
+    constant EXE_BLTZAL:STD_LOGIC_VECTOR(4 downto 0) := "10000";
 
 
 
