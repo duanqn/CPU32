@@ -476,7 +476,7 @@ begin
                   instvalid <= '1';
                 when EXE_SLTU => -- op3
                   wreg_o <= '1';
-                  aluop_o <= EXE_SLT_OP;
+                  aluop_o <= EXE_SLTU_OP;
                   alusel_o <= EXE_RES_ARITHMETIC;
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
