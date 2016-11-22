@@ -26,46 +26,8 @@ end regfile;
 
 architecture arch of regfile is
   type REGISTERS is array (0 to 31) of STD_LOGIC_VECTOR(31 downto 0);
-  signal regs: REGISTERS;
+  signal regs: REGISTERS := (others=>(others => '0'));
 begin
-
-  reset_operation : process( rst)
-  begin
-    if(rst = '1') then
-        regs(0) = X"00000000";
-        regs(1) = X"00000000";
-        regs(2) = X"00000000";
-        regs(3) = X"00000000";
-        regs(4) = X"00000000";
-        regs(5) = X"00000000";
-        regs(6) = X"00000000";
-        regs(7) = X"00000000";
-        regs(8) = X"00000000";
-        regs(9) = X"00000000";
-        regs(10) = X"00000000";
-        regs(11) = X"00000000";
-        regs(12) = X"00000000";
-        regs(13) = X"00000000";
-        regs(14) = X"00000000";
-        regs(15) = X"00000000";
-        regs(16) = X"00000000";
-        regs(17) = X"00000000";
-        regs(18) = X"00000000";
-        regs(19) = X"00000000";
-        regs(20) = X"00000000";
-        regs(21) = X"00000000";
-        regs(22) = X"00000000";
-        regs(23) = X"00000000";
-        regs(24) = X"00000000";
-        regs(25) = X"00000000";
-        regs(26) = X"00000000";
-        regs(27) = X"00000000";
-        regs(28) = X"00000000";
-        regs(29) = X"00000000";
-        regs(30) = X"00000000";
-        regs(31) = X"00000000";
-    end if;
-  end process ; 
 
   write_operation : process(clk)
   variable addr: integer;
