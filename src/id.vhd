@@ -228,7 +228,7 @@ begin
           reg2_read_o <= '0';
 			    reg1_addr_o <= inst_i(25 downto 21);
           instvalid <= '1';
-          if (reg1_o(31) = '0' and not (reg1_o = x"00000000")) then
+          if (reg1_o(31) = '0' and (not (reg1_o = x"00000000"))) then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
@@ -261,7 +261,7 @@ begin
 			    reg1_addr_o <= inst_i(25 downto 21);
 			    reg2_addr_o <= inst_i(20 downto 16);
           instvalid <= '1';
-          if not reg1_o = reg2_o then
+          if reg1_o /= reg2_o then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
