@@ -13,17 +13,14 @@ ENTITY clock IS
   END clock;
 
 ARCHITECTURE arch OF ctrl IS
-signal clks: STD_LOGIC_VECTOR(1 downto 0) := "00";
 BEGIN
 
-  PROCESS(clks)
+  PROCESS(clk)
     BEGIN
-      if (rst = '0') THEN
-        clks <= "00";
-      ELSIF rising_edge(clk) THEN
-        clks <= clks - 1;
+      if(rst = '0') then 
+        clk_new <= '0';
+      elsif (clk'event and clk = '1') then
+        clk_new <= not clk_new; 
       END IF;
     END PROCESS;
-
-    clk_new <= clks(1); 
 END ARCHITECTURE; -- arch

@@ -23,6 +23,15 @@ end openmips;
 
 architecture arch of openmips is
 
+  component clock
+  port(
+    rst: in STD_LOGIC;
+    clk: in STD_LOGIC;
+    clk_new: out STD_LOGIC
+    );
+  end component;
+
+
   component pc_reg
   port(
     clk: in STD_LOGIC;
@@ -275,6 +284,9 @@ architecture arch of openmips is
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
+
+-- clock 
+  signal clk_new: STD_LOGIC := '0'
   
 -- stall
   signal stall: STD_LOGIC_VECTOR(5 downto 0);
@@ -373,14 +385,18 @@ architecture arch of openmips is
 begin
   rom_addr_o <= pc;
 
+  clock0: clock port map(
+    clk => clk, rst => rst, clk_new => clk_new
+    );
+
   pc_reg0: pc_reg port map(
-    clk => clk, rst => rst, pc => pc, ce => rom_ce_o, 
+    clk => clk_new, rst => rst, pc => pc, ce => rom_ce_o, 
     stall => stall, branch_target_address_i => branch_target_address,
     branch_flag_i => branch_flag);
 
   
 
-  if_id0: if_id port map(clk => clk, rst => rst, if_pc => pc, if_inst => rom_data_i, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall);
+  if_id0: if_id port map(clk => clk_new, rst => rst, if_pc => pc, if_inst => rom_data_i, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall);
 
   id0: id port map(
     rst => rst, pc_i => id_pc_i, inst_i => id_inst_i, 
@@ -399,7 +415,7 @@ begin
     inst_o => id_inst, ex_aluop_i => ex_aluop);
 
   regfile0: regfile port map(
-    clk => clk, rst => rst,
+    clk => clk_new, rst => rst,
     we => wb_wreg_i, waddr => wb_wd_i, 
     wdata => wb_wdata_i, re1 => reg1_read,
     raddr1 => reg1_addr, rdata1 => reg1_data,
@@ -408,7 +424,7 @@ begin
 
 
   id_ex0: id_ex port map(
-    clk => clk, rst => rst,
+    clk => clk_new, rst => rst,
     id_aluop => id_aluop_o, id_alusel => id_alusel_o,
     id_reg1 => id_reg1_o, id_reg2 => id_reg2_o,
     id_wd => id_wd_o, id_wreg => id_wreg_o,
@@ -436,7 +452,7 @@ begin
     inst_i => ex_inst, aluop_o => ex_aluop, mem_addr_o => ex_mem_addr, reg2_o => ex_reg2);
 
   ex_mem0: ex_mem port map(
-    clk => clk, rst => rst,
+    clk => clk_new, rst => rst,
     ex_wd => ex_wd_o, ex_wreg => ex_wreg_o, 
     ex_wdata => ex_wdata_o, ex_whilo => ex_whilo_o,
     ex_hi => ex_hi_o, ex_lo => ex_lo_o,
@@ -460,7 +476,7 @@ begin
     aluop_i => mem_aluop, mem_addr_i => mem_addr, reg2_i => mem_reg2);
 
   mem_wb0: mem_wb port map(
-    clk => clk, rst => rst,
+    clk => clk_new, rst => rst,
     mem_wd => mem_wd_o, mem_wreg => mem_wreg_o,
     mem_wdata => mem_wdata_o, mem_whilo => mem_whilo_o,
     mem_hi => mem_hi_o, mem_lo => mem_lo_o,
@@ -469,7 +485,7 @@ begin
     wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall);
 
   hilo_reg0: hilo_reg port map(
-    clk => clk, rst => rst,
+    clk => clk_new, rst => rst,
     we => wb_whilo_i, hi_i => wb_hi_i,
     lo_i => wb_lo_i, hi_o => ex_hi_i,
     lo_o => ex_lo_i);

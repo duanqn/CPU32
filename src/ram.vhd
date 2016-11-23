@@ -18,8 +18,7 @@ entity ram is
          ram_data: inout std_logic_vector(31 downto 0);
          ram_ce: out std_logic;
          ram_oe: out std_logic;
-         ram_we: out std_logic;
-         
+         ram_we: out std_logic
     );
 end ram;
 
