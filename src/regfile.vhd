@@ -26,14 +26,14 @@ end regfile;
 
 architecture arch of regfile is
   type REGISTERS is array (0 to 31) of STD_LOGIC_VECTOR(31 downto 0);
-  signal regs: REGISTERS;
+  signal regs: REGISTERS := (others=>(others => '0'));
 begin
 
   write_operation : process(clk)
   variable addr: integer;
   begin
     if (clk'event and clk = '1') then
-      if (rst = '1') then
+      if (rst = '0') then
         if(we = '1' and waddr /= "00000") then
           case waddr is
             when "00001" => regs(1) <= wdata;
