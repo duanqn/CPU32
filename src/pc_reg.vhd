@@ -42,7 +42,7 @@ begin
         if (branch_flag_i = '1') then
           pc <= branch_target_address_i;
         else
-          pc <= pc + x"00000001";
+          pc <= pc + x"00000004";
         end if;
       end if;
     end if;
