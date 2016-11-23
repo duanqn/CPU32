@@ -42,7 +42,7 @@ begin
 
   identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i)
   begin
-    if(rst='1') then
+    if(rst='0') then
       wd_o <= "00000";
       wreg_o <= '0';
       wdata_o <= x"00000000";

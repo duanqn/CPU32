@@ -38,7 +38,7 @@ end ex_mem;
     PROCESS(clk, rst, stall)
       BEGIN
 		IF (clk'event and clk = '1') THEN                    -- ±÷”…œ…˝—ÿ
-          IF (rst = '1') THEN
+          IF (rst = '0') THEN
             mem_wd <= "00000";
             mem_wreg <= '0';
             mem_wdata <= X"00000000";

@@ -25,7 +25,7 @@ begin
   process(clk)
   begin
     if (clk'event and clk = '1') then
-      if (rst = '1') then
+      if (rst = '0') then
         ce <= '0';
       else
         ce <= '1';

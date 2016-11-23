@@ -26,7 +26,7 @@ begin
     hi_o <= hi_val;
     lo_o <= lo_val;
     if clk'event and clk = '1' then
-      if rst = '1' then
+      if rst = '0' then
         hi_val := x"00000000";
         lo_val := x"00000000";
       elsif we = '1' then

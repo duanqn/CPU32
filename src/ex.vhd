@@ -107,7 +107,7 @@ end ex;
     -- get arithmeticres
     PROCESS(rst, aluop_i, result_sum, reg1_lt_reg2)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           arithmeticres <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -146,7 +146,7 @@ end ex;
 
       PROCESS(rst, aluop_i, reg1_i, reg2_i, hilo_temp)
         BEGIN
-          IF (rst = '1') THEN
+          IF (rst = '0') THEN
             mulres <= X"0000000000000000";
           ELSIF (aluop_i = EXE_MULT_OP) THEN
             IF ((reg1_i(31) xor reg2_i(31)) = '1') THEN
@@ -163,7 +163,7 @@ end ex;
 -- get HI and LO reg
     PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, lo_i, hi_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           HI <= X"00000000";
           LO <= X"00000000";
         ELSIF (mem_whilo_i = '1') THEN
@@ -181,7 +181,7 @@ end ex;
 -- about MFHI, MFLO
     PROCESS(rst, aluop_i, HI, LO)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           moveres <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -196,7 +196,7 @@ end ex;
 -- about update hilo_reg
     PROCESS(rst, aluop_i, reg1_i, mulres, HI, LO)
       BEGIN
-        IF (rst = '1') THEN
+        IF (rst = '0') THEN
           whilo_o <= '0';
           hi_o <= X"00000000";
           lo_o <= X"00000000";
@@ -222,7 +222,7 @@ end ex;
 -- get logicOut
     PROCESS(rst, aluop_i, reg2_i, reg1_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           logicout <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -238,7 +238,7 @@ end ex;
 -- get shiftRes
     PROCESS(rst, aluop_i, reg1_i, reg2_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           shiftres <= X"00000000";
         ELSE
           CASE aluop_i IS

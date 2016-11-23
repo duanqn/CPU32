@@ -32,7 +32,7 @@ begin
   identifier : process(clk)
   begin
     if (clk'event and clk = '1') then
-      if (rst = '1') then
+      if (rst = '0') then
         wb_wd <= "00000";
         wb_wreg <= '0';
         wb_wdata <= x"00000000";

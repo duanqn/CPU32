@@ -41,7 +41,7 @@ BEGIN
 PROCESS(clk, rst)
   BEGIN
     if (clk'event and clk = '1') then
-      if (rst = '1') then
+      if (rst = '0') then
         ex_aluop <= "00000000";
         ex_alusel <= "000";
         ex_reg1 <= X"00000000";

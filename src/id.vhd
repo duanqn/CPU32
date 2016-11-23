@@ -78,7 +78,7 @@ begin
 
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, op, op2, op3, op4, pc_plus_4, pc_plus_8, imm_sll2_signedext, reg1_o, reg2_o)
   begin
-    if rst = '1' then
+    if rst = '0' then
       aluop_o <= "00000000";
       alusel_o <= "000";
       wd_o <= "00000";
@@ -599,7 +599,7 @@ begin
 
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load, ex_wd_i, mem_wdata_i, ex_wdata_i, reg1_read_o, imm, reg1_addr_o, ex_wreg_i, mem_wreg_i, mem_wd_i)
   begin
-    if rst = '1' then
+    if rst = '0' then
       reg1_o <= x"00000000";
       stallreq_for_reg1_loadrelate <= '0';
     elsif (pre_inst_is_load = '1' and ex_wd_i = reg1_addr_o and reg1_read_o = '1') then
@@ -625,7 +625,7 @@ begin
 
   process(rst, pc_i, inst_i, reg1_data_i, reg2_data_i, pre_inst_is_load, ex_wd_i, mem_wdata_i, ex_wdata_i, reg2_read_o, imm, reg2_addr_o, ex_wreg_i, mem_wreg_i, mem_wd_i)
   begin
-    if rst = '1' then
+    if rst = '0' then
       reg2_o <= x"00000000";
       stallreq_for_reg2_loadrelate <= '0';
     elsif (pre_inst_is_load = '1' and ex_wd_i = reg2_addr_o and reg2_read_o = '1') then
@@ -652,7 +652,7 @@ begin
   process(rst, is_in_delayslot_i)
 
   begin
-    if rst = '1' then
+    if rst = '0' then
       is_in_delayslot_o <= '0';
     else
       is_in_delayslot_o <= is_in_delayslot_i;

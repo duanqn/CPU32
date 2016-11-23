@@ -17,7 +17,7 @@ ARCHITECTURE arch OF ctrl IS
 BEGIN
   PROCESS(rst, stallreq_from_ex, stallreq_from_id)
     BEGIN
-      if (rst = '1') THEN
+      if (rst = '0') THEN
         stall <= "000000";
       ELSIF (stallreq_from_ex = '1') THEN
         stall <= "001111";
