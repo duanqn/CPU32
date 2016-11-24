@@ -62,10 +62,14 @@ begin
       mem_sel_o <= "0000";
       mem_data_o <= X"00000000";
       mem_ce_o <= '0';
+<<<<<<< HEAD
 			cp0_reg_we_o <= '0';
 			cp0_reg_write_addr_o <= "00000";
 			cp0_reg_data_o <= X"00000000";
 
+=======
+      stallreq <= '0';
+>>>>>>> pxy
     else
       wd_o <= wd_i;
       wreg_o <= wreg_i;
@@ -81,6 +85,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
+          stallreq <= '1';
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 8 => mem_data_i(31)) & mem_data_i(31 downto 24);
@@ -102,6 +107,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
+          stallreq <= '1';
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(31 downto 24);
@@ -123,6 +129,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
+          stallreq <= '1';
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 16 => '0') & mem_data_i(31 downto 16);
@@ -140,12 +147,18 @@ begin
           wdata_o <= mem_data_i;
           mem_sel_o <= "1111";
           mem_ce_o <= '1';
+<<<<<<< HEAD
 
         when EXE_SB_OP =>
+=======
+          stallreq <= '1';
+        when EXE_SB_OP => 
+>>>>>>> pxy
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
           mem_data_o <= reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0);
           mem_ce_o <= '1';
+          stallreq <= '1';
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               mem_sel_o <= "1000";
@@ -164,12 +177,18 @@ begin
           mem_data_o <= reg2_i;
           mem_sel_o <= "1111";
           mem_ce_o <= '1';
+<<<<<<< HEAD
         when others =>
+=======
+          stallreq <= '1';
+        when others => 
+>>>>>>> pxy
           mem_we <= '0';
           mem_addr_o <= X"00000000";
           mem_sel_o <= "1111";
           mem_ce_o <= '0';
           mem_data_o <= X"00000000";
+          stallreq <= '0';
       end case ;
     end if;
   end process ; -- identifier

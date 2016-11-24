@@ -8,16 +8,12 @@ ENTITY openmips is
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
 
-    rom_data_i: in STD_LOGIC_VECTOR(31 downto 0);
-    rom_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
-    rom_ce_o: buffer STD_LOGIC;
+    phy_addr: out std_logic_vector(31 downto 0);
+    phy_data: out std_logic_vector(31 downto 0);
+    storage_data: in std_logic_vector(31 downto 0);
+    phy_we: out std_logic;
+    phy_ce: out std_logic
 
-    ram_data_i: in STD_LOGIC_VECTOR(31 downto 0);
-    ram_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
-    ram_data_o: out STD_LOGIC_VECTOR(31 downto 0);
-    ram_we_o: out STD_LOGIC;
-    ram_sel_o: out STD_LOGIC_VECTOR(3 downto 0);
-    ram_ce_o: out STD_LOGIC
     );
 end openmips;
 
@@ -27,7 +23,7 @@ architecture arch of openmips is
   port(
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
-    clk_new: out STD_LOGIC
+    clk_new: BUFFER STD_LOGIC
     );
   end component;
 
@@ -281,17 +277,85 @@ architecture arch of openmips is
     rst: IN STD_LOGIC;
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
+    stallreq_from_mem: IN STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
 
+  component memcontrol
+  port (
+    --up
+    rst: in STD_LOGIC;
+    clk: in STD_LOGIC;
+
+    inst_data_i: out STD_LOGIC_VECTOR(31 downto 0);
+    inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
+    inst_ce_o: out STD_LOGIC;
+
+    ram_data_i: out STD_LOGIC_VECTOR(31 downto 0);
+    ram_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
+    ram_data_o: in STD_LOGIC_VECTOR(31 downto 0);
+    ram_we_o: in STD_LOGIC;
+    ram_sel_o: in STD_LOGIC_VECTOR(3 downto 0);
+    ram_ce_o: in STD_LOGIC;
+
+    --mix
+    stallreq: out STD_LOGIC;
+
+    --down
+    ope_addr: out std_logic_vector(31 downto 0);
+    write_data: out std_logic_vector(31 downto 0);
+    read_data: in std_logic_vector(31 downto 0);
+    ope_we: out std_logic;
+    ope_ce: out std_logic
+    );
+  end component;
+
+  component mmu 
+  port (
+    --up
+    ope_addr: in std_logic_vector(31 downto 0);
+    ope_data: in std_logic_vector(31 downto 0);
+    result_data: out std_logic_vector(31 downto 0);
+    ope_we: in std_logic;
+    ope_ce: in std_logic;
+
+    --down
+    phy_addr: out std_logic_vector(31 downto 0);
+    phy_data: out std_logic_vector(31 downto 0);
+    storage_data: in std_logic_vector(31 downto 0);
+    phy_we: out std_logic;
+    phy_ce: out std_logic
+    );
+  end component;
+
+-- about memcontrol -- CPU
+  signal inst_data: STD_LOGIC_VECTOR(31 downto 0);
+  signal inst_addr: STD_LOGIC_VECTOR(31 downto 0);
+  signal inst_ce: STD_LOGIC;
+
+  signal ram_data_i: STD_LOGIC_VECTOR(31 downto 0);
+  signal ram_addr_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal ram_data_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal ram_we_o: STD_LOGIC;
+  signal ram_sel_o: STD_LOGIC_VECTOR(3 downto 0);
+  signal ram_ce_o: STD_LOGIC;
+
+-- about memcontrol -- mmu
+  signal ope_data: STD_LOGIC_VECTOR(31 downto 0);
+  signal ope_addr: STD_LOGIC_VECTOR(31 downto 0);
+  signal ope_ce: STD_LOGIC;
+  signal ope_we: STD_LOGIC;
+  signal mmu_result_data: STD_LOGIC_VECTOR(31 downto 0);
+
 -- clock 
-  signal clk_new: STD_LOGIC := '0'
+  signal clk_new: STD_LOGIC := '0';
   
 -- stall
   signal stall: STD_LOGIC_VECTOR(5 downto 0);
   signal stallreq_from_ex: STD_LOGIC;
   signal stallreq_from_id: STD_LOGIC;
+  signal stallreq_from_mem: STD_LOGIC;
 
 -- branch
 -- ID to PC
@@ -383,20 +447,20 @@ architecture arch of openmips is
   signal ex_lo_i: STD_LOGIC_VECTOR(31 downto 0);
 
 begin
-  rom_addr_o <= pc;
+  inst_addr <= pc;
 
   clock0: clock port map(
     clk => clk, rst => rst, clk_new => clk_new
     );
 
   pc_reg0: pc_reg port map(
-    clk => clk_new, rst => rst, pc => pc, ce => rom_ce_o, 
+    clk => clk_new, rst => rst, pc => pc, ce => inst_ce, 
     stall => stall, branch_target_address_i => branch_target_address,
     branch_flag_i => branch_flag);
 
   
 
-  if_id0: if_id port map(clk => clk_new, rst => rst, if_pc => pc, if_inst => rom_data_i, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall);
+  if_id0: if_id port map(clk => clk_new, rst => rst, if_pc => pc, if_inst => inst_data, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall);
 
   id0: id port map(
     rst => rst, pc_i => id_pc_i, inst_i => id_inst_i, 
@@ -491,7 +555,20 @@ begin
     lo_o => ex_lo_i);
 
   ctrl0: ctrl port map(
-    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall);
+    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem);
 
+  memcontrol0: memcontrol port map(
+    rst => rst, clk => clk_new, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
+    ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_sel_o => ram_sel_o, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
+    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
+    );
+
+  mmu0: mmu port map(
+    ope_addr => ope_addr, ope_data => ope_data, result_data => mmu_result_data, ope_ce => ope_ce, ope_we => ope_we, 
+    phy_addr => phy_addr, phy_data => phy_data, storage_data => storage_data, phy_we => phy_we, phy_ce => phy_ce
+    );
 
 end architecture ; -- arch
+
+
+  
