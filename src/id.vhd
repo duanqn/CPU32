@@ -60,7 +60,7 @@ begin
   op2<=inst_i(10 downto 6);
   op3<=inst_i(5 downto 0);
   op4<=inst_i(20 downto 16);
-  stallreq <= '0';
+  stallreq <= stallreq_for_reg1_loadrelate or stallreq_for_reg2_loadrelate;
   pc_plus_8 <= pc_i + x"00000008";
   pc_plus_4 <= pc_i + x"00000004";
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";

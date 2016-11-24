@@ -5,20 +5,30 @@ use work.CPU32.all;
 
     
 entity ram is
-    Port(clk: in std_logic;
-         rst: in std_logic;
+    Port(
+
+      -- up
+      clk: in std_logic;
+      rst: in std_logic;
          
-         ope_addr: in std_logic_vector(19 downto 0);
-         write_data: in std_logic_vector(31 downto 0);
-         read_data: out std_logic_vector(31 downto 0);
-         ope_we: in std_logic;
-         ope_ce: in std_logic;
+      ope_addr_raw: in std_logic_vector(20 downto 0);
+      write_data: in std_logic_vector(31 downto 0);
+      read_data: out std_logic_vector(31 downto 0);
+      ope_we: in std_logic;
+      ope_ce: in std_logic;
            
-         ram_addr: out std_logic_vector(19 downto 0);
-         ram_data: inout std_logic_vector(31 downto 0);
-         ram_ce: out std_logic;
-         ram_oe: out std_logic;
-         ram_we: out std_logic
+      -- down
+      baseram_addr: out std_logic_vector(19 downto 0);
+      baseram_data: inout std_logic_vector(31 downto 0);
+      baseram_ce: out std_logic;
+      baseram_oe: out std_logic;
+      baseram_we: out std_logic;
+
+      extraram_addr: out std_logic_vector(19 downto 0);
+      extraram_data: inout std_logic_vector(31 downto 0);
+      extraram_ce: out std_logic;
+      extraram_oe: out std_logic;
+      extraram_we: out std_logic
     );
 end ram;
 
@@ -26,53 +36,111 @@ architecture Behavioral of ram is
     signal state: std_logic_vector(4 downto 0);
     -- fsm: read ram 1: 00000 -> 00001 -> 00000
     --     write ram 1: 00000 -> 10000 -> 00000
+    --     read ram 2: 00000 -> 00010 -> 00000
+    --     write ram 2: 00000 -> 01000 -> 00000
+    signal ope_ce1: std_logic;
+    signal ope_ce2: std_logic;
+    signal ope_addr: std_logic_vector(19 downto 0);
+
 begin
+    identifier : process(ope_addr_raw, ope_ce)
+    begin
+      if(ope_ce = '1') then 
+        ope_addr <= ope_addr_raw(19 downto 0);
+        if(ope_addr_raw(20) = '1') then
+          ope_ce2 <= '1';
+          ope_ce1 <= '0';
+        else 
+          ope_ce1 <= '1';
+          ope_ce2 <= '0';
+        end if;
+      else
+        ope_ce2 <= '0';
+        ope_ce1 <= '0';
+      end if;
+    end process ; -- identifier
+
     process(clk, rst)
     begin
         if (rst = '0') then
             read_data <= (others => '0');
             ram_addr <= (others => '0');
             state <= (others => '0');
-            ram_data <= (others => 'Z');
-            ram_ce <= '1';
-            ram_oe <= '1';
-            ram_we <= '1';
+            baseram_data <= (others => 'Z');
+            baseram_ce <= '1';
+            baseram_oe <= '1';
+            baseram_we <= '1';
+            extraram_data <= (others => 'Z');
+            extraram_ce <= '1';
+            extraram_oe <= '1';
+            extraram_we <= '1';
+
         elsif (clk'event and clk = '1') then
             case state is
-                when "00000" => ram_data <= (others => 'Z');
-                                if (ope_we = '1' and ope_ce = '1') then
+                when "00000" => baseram_data <= (others => 'Z');
+                                extraram_data <= (others => 'Z');
+                                if (ope_we = '1' and ope_ce1 = '1') then
                                     -- read  ram(ram1)
-                                    ram_ce <= '0';
-                                    ram_oe <= '0';
-                                    ram_addr <= ope_addr;
+                                    baseram_ce <= '0';
+                                    baseram_oe <= '0';
+                                    baseram_addr <= ope_addr;
                                     state <= "00001";
-                                elsif (ope_we = '0' and ope_ce = '1') then
+                                elsif (ope_we = '0' and ope_ce1 = '1') then
                                     -- write  ram(ram1)
-                                    ram_oe <= '1';
-                                    ram_ce <= '0';
-                                    ram_we <= '0';
-                                    ram_addr <= ope_addr;
-                                    ram_data <= write_data;
+                                    baseram_oe <= '1';
+                                    baseram_ce <= '0';
+                                    baseram_we <= '0';
+                                    baseram_addr <= ope_addr;
+                                    baseram_data <= write_data;
                                     state <= "10000";
+                                elsif (ope_we = '0' and ope_ce2 = '1') then
+                                    -- write  ram(ram2)
+                                    extraram_oe <= '1';
+                                    extraram_ce <= '0';
+                                    extraram_we <= '0';
+                                    extraram_addr <= ope_addr;
+                                    extraram_data <= write_data;
+                                    state <= "01000";
+                                elsif (ope_we = '1' and ope_ce2 = '1') then
+                                    -- read  ram(ram2)
+                                    extraram_ce <= '0';
+                                    extraram_oe <= '0';
+                                    extraram_addr <= ope_addr;
+                                    state <= "00010";
                                 else
                                     state <= "00000";
                                 end if;
                 -- read ram 1
-                when "00001" => read_data <= ram_data;
-                                ram_ce <= '1';
-                                ram_oe <= '1';
+                when "00001" => read_data <= baseram_data;
+                                baseram_ce <= '1';
+                                baseram_oe <= '1';
                                 state <= "00000";
 
-                -- write ram 1, stage 1, select ram, set write address and data
-                when "10000" => ram_we <= '1';
-                                ram_ce <= '1';
+                -- write ram 1
+                when "10000" => baseram_we <= '1';
+                                baseram_ce <= '1';
+                                state <= "00000";
+
+                -- read ram 2
+                when "00010" => read_data <= extraram_data;
+                                extraram_ce <= '1';
+                                extraram_oe <= '1';
+                                state <= "00000";
+
+                -- write ram 2
+                when "01000" => extraram_we <= '1';
+                                extraram_ce <= '1';
                                 state <= "00000";
 
                 when others =>  state <= (others => '0');
-                                ram_data <= (others => 'Z');
-                                ram_ce <= '1';
-                                ram_oe <= '1';
-                                ram_we <= '1';
+                                baseram_data <= (others => 'Z');
+                                baseram_ce <= '1';
+                                baseram_oe <= '1';
+                                baseram_we <= '1';
+                                extraram_data <= (others => 'Z');
+                                extraram_ce <= '1';
+                                extraram_oe <= '1';
+                                extraram_we <= '1';
             end case;
         end if;
     end process;
