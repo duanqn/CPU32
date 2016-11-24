@@ -27,7 +27,7 @@ architecture arch of openmips is
   port(
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
-    clk_new: out STD_LOGIC
+    clk_new: BUFFER STD_LOGIC
     );
   end component;
 
@@ -286,7 +286,7 @@ architecture arch of openmips is
   end component;
 
 -- clock 
-  signal clk_new: STD_LOGIC := '0'
+  signal clk_new: STD_LOGIC := '0';
   
 -- stall
   signal stall: STD_LOGIC_VECTOR(5 downto 0);

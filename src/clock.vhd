@@ -8,11 +8,11 @@ ENTITY clock IS
   PORT(
     rst: IN STD_LOGIC;
     clk: IN STD_LOGIC;
-    clk_new: OUT STD_LOGIC
+    clk_new: BUFFER STD_LOGIC
     );
   END clock;
 
-ARCHITECTURE arch OF ctrl IS
+ARCHITECTURE arch OF clock IS
 BEGIN
 
   PROCESS(clk)
