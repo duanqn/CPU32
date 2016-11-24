@@ -666,6 +666,44 @@ begin
             end if;
           end if;
 
+        when EXE_CP0 =>
+          if (inst_i(25 downto 21) = "00000" AND inst_i(10 downto 3)) then
+            aluop_o <= EXE_MFC0_OP;
+            alusel_o <= EXE_RES_MOVE;
+            wd_o <= inst_i(20 downto 16);
+            wreg_o <= '1';
+            instvalid <= '1';
+            reg1_read_o <= '0';
+            reg2_read_o <= '0';
+            branch_flag_o <= '0';
+            next_inst_in_delayslot_o <= '0';
+          elsif (inst_i(25 downto 21) = "00100" AND inst_i(10 downto 3)) then
+            aluop_o <= EXE_MTC0_OP;
+            alusel_o <= EXE_RES_NOP;
+            wreg_o <= '0';
+            instvalid <= '1';
+            reg1_read_o <= '1';
+            reg1_addr_o <= inst_i(20 downto 16);
+            reg2_read_o <= '0';
+            branch_flag_o <= '0';
+            next_inst_in_delayslot_o <= '0';
+          else
+            aluop_o <= "00000000";
+            alusel_o <= "000";
+            wd_o <= inst_i(15 downto 11);
+            wreg_o <= '0';
+            instvalid<='0';
+            reg1_read_o <= '0';
+            reg2_read_o <= '0';
+            reg1_addr_o <= inst_i(25 downto 21);
+            reg2_addr_o <= inst_i(20 downto 16);
+            imm <= x"00000000";
+            link_addr_o <= x"00000000";
+            branch_target_address_o <= x"00000000";
+            branch_flag_o <= '0';
+            next_inst_in_delayslot_o <= '0'
+          end if;
+
         when others =>  -- op
           aluop_o <= "00000000";
           alusel_o <= "000";

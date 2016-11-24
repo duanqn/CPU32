@@ -29,6 +29,7 @@ package CPU32 is
     constant EXE_SB:STD_LOGIC_VECTOR(5 downto 0) := "101000";
     constant EXE_SW:STD_LOGIC_VECTOR(5 downto 0) := "101011";
 
+    constant EXE_CP0:STD_LOGIC_VECTOR(5 downto 0) := "010000";
 
 
     --funcs
@@ -110,6 +111,8 @@ package CPU32 is
     constant EXE_SB_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101000";
     constant EXE_SW_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101011";
 
+    constant EXE_MFC0_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101100";
+    constant EXE_MTC0_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101101";
 
 
   -- selectors

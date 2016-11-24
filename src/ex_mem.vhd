@@ -9,35 +9,41 @@ ENTITY ex_mem IS
     clk: IN STD_LOGIC;
     rst: IN STD_LOGIC;
 
-    ex_wd: IN STD_LOGIC_VECTOR (4 downto 0);              --5bit  执行阶段的指令执行后要写入的目的寄存器地址
-    ex_wreg: IN STD_LOGIC;                                --1bit  执行阶段的指令执行后是否有要写入的目的寄存器
-    ex_wdata: IN STD_LOGIC_VECTOR (31 downto 0);          --32bit 执行阶段的指令执行后是否有要写入的目的寄存器的值
-    ex_hi: IN STD_LOGIC_VECTOR (31 downto 0);             --32bit 执行阶段的指令要写入HI寄存器的值
-    ex_lo: IN STD_LOGIC_VECTOR (31 downto 0);             --32bit 执行阶段的指令要写入LO寄存器的值
-    ex_whilo: IN STD_LOGIC;                               --1bit  执行阶段的指令是否要写HI、LO寄存器
-    ex_aluop: IN STD_LOGIC_VECTOR (7 downto 0);           --8bit  执行阶段的指令要进行的运算的子类型
-    ex_mem_addr: IN STD_LOGIC_VECTOR (31 downto 0);       --32bit 执行阶段的加载、存储指令对应的存储器地址
-    ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);           --32bit 执行阶段的存储指令要存储的数据
+    ex_wd: IN STD_LOGIC_VECTOR (4 downto 0);              --5bit  执锟叫阶段碉拷指锟斤拷执锟叫猴拷要写锟斤拷锟斤拷目锟侥寄达拷锟斤拷锟斤拷址
+    ex_wreg: IN STD_LOGIC;                                --1bit  执锟叫阶段碉拷指锟斤拷执锟叫猴拷锟角凤拷锟斤拷要写锟斤拷锟斤拷目锟侥寄达拷锟斤拷
+    ex_wdata: IN STD_LOGIC_VECTOR (31 downto 0);          --32bit 执锟叫阶段碉拷指锟斤拷执锟叫猴拷锟角凤拷锟斤拷要写锟斤拷锟斤拷目锟侥寄达拷锟斤拷锟斤拷值
+    ex_hi: IN STD_LOGIC_VECTOR (31 downto 0);             --32bit 执锟叫阶段碉拷指锟斤拷要写锟斤拷HI锟侥达拷锟斤拷锟斤拷值
+    ex_lo: IN STD_LOGIC_VECTOR (31 downto 0);             --32bit 执锟叫阶段碉拷指锟斤拷要写锟斤拷LO锟侥达拷锟斤拷锟斤拷值
+    ex_whilo: IN STD_LOGIC;                               --1bit  执锟叫阶段碉拷指锟斤拷锟角凤拷要写HI锟斤拷LO锟侥达拷锟斤拷
+    ex_aluop: IN STD_LOGIC_VECTOR (7 downto 0);           --8bit  执锟叫阶段碉拷指锟斤拷要锟斤拷锟叫碉拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+    ex_mem_addr: IN STD_LOGIC_VECTOR (31 downto 0);       --32bit 执锟叫阶段的硷拷锟截★拷锟芥储指锟斤拷锟斤拷应锟侥存储锟斤拷锟斤拷址
+    ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);           --32bit 执锟叫阶段的存储指锟斤拷要锟芥储锟斤拷锟斤拷锟斤拷
+    ex_cp0_reg_we: IN STD_LOGIC;
+    ex_cp0_reg_wirte_addr: IN STD_LOGIC_VECTOR (4 downto 0);
+    ex_cp0_reg_data: IN STD_LOGIC_VECTOR (31 downto 0);
     stall: IN STD_LOGIC_VECTOR(5 downto 0);
 
-    mem_wd: BUFFER STD_LOGIC_VECTOR (4 downto 0);         --5bit  访存阶段的指令要写入目的寄存器的值
-    mem_wreg: BUFFER STD_LOGIC;                           --1bit  访存阶段的指令是否有要写入的目的寄存器
-    mem_wdata: BUFFER STD_LOGIC_VECTOR (31 downto 0);     --32bit 访存阶段的指令要写入目的寄存器的值
-    mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);           --32bit 访存阶段的指令要写入HI寄存器的值
-    mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);           --32bit 访存阶段的指令要写入LO寄存器的值
-    mem_whilo: OUT STD_LOGIC;                             --1bit  访存阶段的指令是否要写入HI、LO寄存器
-    mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);         --8bit  访存阶段的指令要进行运算的子类型
-    mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);     --32bit 访存阶段的加载、存储指令对应的存储器地址
-    mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0)          --32bit 访存阶段的存储指令要存储的数据
+    mem_wd: BUFFER STD_LOGIC_VECTOR (4 downto 0);         --5bit  锟矫达拷锟阶段碉拷指锟斤拷要写锟斤拷目锟侥寄达拷锟斤拷锟斤拷值
+    mem_wreg: BUFFER STD_LOGIC;                           --1bit  锟矫达拷锟阶段碉拷指锟斤拷锟角凤拷锟斤拷要写锟斤拷锟斤拷目锟侥寄达拷锟斤拷
+    mem_wdata: BUFFER STD_LOGIC_VECTOR (31 downto 0);     --32bit 锟矫达拷锟阶段碉拷指锟斤拷要写锟斤拷目锟侥寄达拷锟斤拷锟斤拷值
+    mem_hi: OUT STD_LOGIC_VECTOR (31 downto 0);           --32bit 锟矫达拷锟阶段碉拷指锟斤拷要写锟斤拷HI锟侥达拷锟斤拷锟斤拷值
+    mem_lo: OUT STD_LOGIC_VECTOR (31 downto 0);           --32bit 锟矫达拷锟阶段碉拷指锟斤拷要写锟斤拷LO锟侥达拷锟斤拷锟斤拷值
+    mem_whilo: OUT STD_LOGIC;                             --1bit  锟矫达拷锟阶段碉拷指锟斤拷锟角凤拷要写锟斤拷HI锟斤拷LO锟侥达拷锟斤拷
+    mem_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);         --8bit  锟矫达拷锟阶段碉拷指锟斤拷要锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷
+    mem_mem_addr: OUT STD_LOGIC_VECTOR (31 downto 0);     --32bit 锟矫达拷锟阶段的硷拷锟截★拷锟芥储指锟斤拷锟斤拷应锟侥存储锟斤拷锟斤拷址
+    mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);         --32bit 锟矫达拷锟阶段的存储指锟斤拷要锟芥储锟斤拷锟斤拷锟斤拷
+    mem_cp0_reg_we: OUT STD_LOGIC;
+    mem_cp0_reg_write_addr: OUT STD_LOGIC_VECTOR (4 downto 0);
+    mem_cp0_reg_data: OUT STD_LOGIC_VECTOR (31 downto 0)
   );
 end ex_mem;
 
   ARCHITECTURE behave OF ex_mem IS
-    
+
   BEGIN
     PROCESS(clk, rst, stall)
       BEGIN
-		IF (clk'event and clk = '1') THEN                    --时钟上升沿
+		IF (clk'event and clk = '1') THEN                    --时锟斤拷锟斤拷锟斤拷锟斤拷
           IF (rst = '0') THEN
             mem_wd <= "00000";
             mem_wreg <= '0';
@@ -45,10 +51,13 @@ end ex_mem;
             mem_hi <= X"00000000";
             mem_lo <= X"00000000";
             mem_whilo <= '0';
-				mem_aluop <= "00000000";
-				mem_mem_addr <= X"00000000";
-				mem_reg2 <= X"00000000";
-          
+				    mem_aluop <= "00000000";
+				    mem_mem_addr <= X"00000000";
+				    mem_reg2 <= X"00000000";
+            mem_cp0_reg_we <= '0';
+            mem_cp0_reg_write_addr <= "00000";
+            mem_cp0_reg_data <= X"00000000";
+
 			 ELSIF (stall(3) = '1' and stall(4) = '0') THEN
             mem_wd <= "00000";
             mem_wreg <= '0';
@@ -56,10 +65,13 @@ end ex_mem;
             mem_hi <= X"00000000";
             mem_lo <= X"00000000";
             mem_whilo <= '0';
-				mem_aluop <= "00000000";
-				mem_mem_addr <= X"00000000";
-				mem_reg2 <= X"00000000";
-				
+				    mem_aluop <= "00000000";
+				    mem_mem_addr <= X"00000000";
+				    mem_reg2 <= X"00000000";
+				    mem_cp0_reg_we <= '0';
+            mem_cp0_reg_write_addr <= "00000";
+            mem_cp0_reg_data <= X"00000000";
+
           ELSIF (stall(3) = '0') THEN
             mem_wd <= ex_wd;
             mem_wreg <= ex_wreg;
@@ -70,6 +82,10 @@ end ex_mem;
             mem_aluop <= ex_aluop;
             mem_mem_addr <= ex_mem_addr;
             mem_reg2 <= ex_reg2;
+            mem_cp0_reg_we <= ex_cp0_reg_we;
+            mem_cp0_reg_write_addr <= ex_cp0_reg_wirte_addr;
+            mem_cp0_reg_data <= ex_cp0_reg_data;
+
           END IF;
         END IF;
       END PROCESS;
