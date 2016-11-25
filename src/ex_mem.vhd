@@ -19,7 +19,7 @@ ENTITY ex_mem IS
     ex_mem_addr: IN STD_LOGIC_VECTOR (31 downto 0);       --32bit ִ�н׶εļ��ء��洢ָ����Ӧ�Ĵ洢����ַ
     ex_reg2: IN STD_LOGIC_VECTOR (31 downto 0);           --32bit ִ�н׶εĴ洢ָ��Ҫ�洢������
     ex_cp0_reg_we: IN STD_LOGIC;
-    ex_cp0_reg_wirte_addr: IN STD_LOGIC_VECTOR (4 downto 0);
+    ex_cp0_reg_write_addr: IN STD_LOGIC_VECTOR (4 downto 0);
     ex_cp0_reg_data: IN STD_LOGIC_VECTOR (31 downto 0);
     stall: IN STD_LOGIC_VECTOR(5 downto 0);
 
@@ -83,7 +83,7 @@ end ex_mem;
             mem_mem_addr <= ex_mem_addr;
             mem_reg2 <= ex_reg2;
             mem_cp0_reg_we <= ex_cp0_reg_we;
-            mem_cp0_reg_write_addr <= ex_cp0_reg_wirte_addr;
+            mem_cp0_reg_write_addr <= ex_cp0_reg_write_addr;
             mem_cp0_reg_data <= ex_cp0_reg_data;
 
           END IF;
