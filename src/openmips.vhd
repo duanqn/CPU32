@@ -195,7 +195,7 @@ architecture arch of openmips is
     mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
-    cp0_rge_we_o: OUT STD_LOGIC;
+    cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
     );
@@ -631,7 +631,7 @@ begin
     wb_wdata => wb_wdata_i, wb_whilo => wb_whilo_i,
     wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall,
     mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
-    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_data_i);
+    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i);
 
   hilo_reg0: hilo_reg port map(
     clk => clk_new, rst => rst,
@@ -652,6 +652,7 @@ begin
     ope_addr => ope_addr, ope_data => ope_data, result_data => mmu_result_data, ope_ce => ope_ce, ope_we => ope_we,
     phy_addr => phy_addr, phy_data => phy_data, storage_data => storage_data, phy_we => phy_we, phy_ce => phy_ce
     );
+    
   cp0_reg0: cp0_reg port map(
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
     raddr_i => ex_cp0, data_o => cp0_reg_data_i

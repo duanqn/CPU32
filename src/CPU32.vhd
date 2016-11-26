@@ -114,6 +114,8 @@ package CPU32 is
     constant EXE_MFC0_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101100";
     constant EXE_MTC0_OP:STD_LOGIC_VECTOR(7 downto 0) := "01101101";
 
+    constant EXE_SYSCALL_OP: STD_LOGIC_VECTOR(7 downto 0) := "10000000";
+    constant EXE_ERET_OP: STD_LOGIC_VECTOR(7 downto 0) := "10000001";
 
   -- selectors
     CONSTANT EXE_RES_NOP: STD_LOGIC_VECTOR(2 downto 0) := "000";

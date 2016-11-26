@@ -24,7 +24,7 @@ ENTITY mem_wb is
     wb_wdata: out STD_LOGIC_VECTOR(31 downto 0);
     wb_hi: out STD_LOGIC_VECTOR(31 downto 0);
     wb_lo: out STD_LOGIC_VECTOR(31 downto 0);
-    wb_whilo: out STD_LOGIC
+    wb_whilo: out STD_LOGIC;
     wb_cp0_reg_we: out STD_LOGIC;
     wb_cp0_reg_write_addr: out STD_LOGIC_VECTOR(4 downto 0);
     wb_cp0_reg_data: out STD_LOGIC_VECTOR(31 downto 0)
