@@ -10,6 +10,7 @@ ENTITY ctrl IS
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
+    stallreq_from_wait_for_data: IN STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   END ctrl;
@@ -26,6 +27,8 @@ BEGIN
         stall <= "000111";
       ELSIF (stallreq_from_mem = '1') THEN
         stall <= "001111";
+      ELSIF (stallreq_from_wait_for_data = '1') THEN
+        stall <= "111111";
       ELSE 
         stall <= "000000";
       END IF;
