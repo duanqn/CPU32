@@ -77,7 +77,7 @@ begin
   read_1_operation : process(rst, raddr1, we, re1, waddr, wdata, regs)
   variable addr: integer;
   begin
-    if (rst = '1') then
+    if (rst = '0') then
       rdata1 <= x"00000000";
     elsif (raddr1 = "00000") then
       rdata1 <= x"00000000";
@@ -126,7 +126,7 @@ begin
   read_2_operation : process(rst, raddr2, we, re2, waddr, wdata, regs)
   variable addr: integer;
   begin
-    if (rst = '1') then
+    if (rst = '0') then
       rdata2 <= x"00000000";
     elsif (raddr2 = "00000") then
       rdata2 <= x"00000000";

@@ -23,7 +23,7 @@ begin
   process(clk)
   begin
     if clk'event and clk = '1' then
-      if rst = '1' then
+      if rst = '0' then
         id_pc <= x"00000000";
         id_inst <= x"00000000";
       elsif (stall(1) = '1' and stall(2) = '0') then

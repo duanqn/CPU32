@@ -17,17 +17,27 @@ ENTITY ex IS
 
     hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
+
     wb_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     wb_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
     wb_whilo_i: IN STD_LOGIC;
+    wb_cp0_reg_we: IN STD_LOGIC;
+    wb_CP0_reg_write_addr: IN STD_LOGIC_VECTOR(4 downto 0);
+    wb_cp0_reg_data: IN STD_LOGIC_VECTOR(31 downto 0);
+
     mem_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     mem_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
     mem_whilo_i: IN STD_LOGIC;
+    mem_cp0_reg_we: IN STD_LOGIC;
+    mem_cp0_reg_write_addr: IN STD_LOGIC_VECTOR(4 downto 0);
+    mem_cp0_reg_data: IN STD_LOGIC_VECTOR(31 downto 0);
 
     link_address_i: IN STD_LOGIC_VECTOR(31 downto 0);
     is_in_delayslot_i: IN STD_LOGIC;
 
     inst_i: IN STD_LOGIC_VECTOR(31 downto 0);
+
+    cp0_reeg_data_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
     stallreq: OUT STD_LOGIC;
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -40,7 +50,12 @@ ENTITY ex IS
 
     aluop_o: OUT STD_LOGIC_VECTOR(7 downto 0);
     mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
-    reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0)
+    reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+
+    cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
+    cp0_rge_we_o: OUT STD_LOGIC;
+    cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
+    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
   );
 end ex;
 
@@ -107,7 +122,7 @@ end ex;
     -- get arithmeticres
     PROCESS(rst, aluop_i, result_sum, reg1_lt_reg2)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           arithmeticres <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -146,7 +161,7 @@ end ex;
 
       PROCESS(rst, aluop_i, reg1_i, reg2_i, hilo_temp)
         BEGIN
-          IF (rst = '1') THEN
+          IF (rst = '0') THEN
             mulres <= X"0000000000000000";
           ELSIF (aluop_i = EXE_MULT_OP) THEN
             IF ((reg1_i(31) xor reg2_i(31)) = '1') THEN
@@ -163,7 +178,7 @@ end ex;
 -- get HI and LO reg
     PROCESS(rst, mem_lo_i, mem_hi_i, mem_whilo_i, wb_hi_i, wb_lo_i, wb_whilo_i, lo_i, hi_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           HI <= X"00000000";
           LO <= X"00000000";
         ELSIF (mem_whilo_i = '1') THEN
@@ -181,12 +196,19 @@ end ex;
 -- about MFHI, MFLO
     PROCESS(rst, aluop_i, HI, LO)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           moveres <= X"00000000";
         ELSE
           CASE aluop_i IS
             WHEN EXE_MFHI_OP => moveres <= HI;
             WHEN EXE_MFLO_OP => moveres <= LO;
+            WHEN EXE_MFC0_OP => cp0_reg_read_addr_o <= inst_i(15 downto 11);
+                                moveres <= cp0_reeg_data_i;
+                                if (mem_cp0_reg_we = '1' AND mem_cp0_reg_write_addr = inst_i(15 downto 11)) then
+                                  moveres <= mem_cp0_reg_data;
+                                elsif (wb_cp0_reg_we = '1' AND wb_CP0_reg_write_addr = inst_i(15 downto 11)) then
+                                  moveres <= wb_cp0_reg_data;
+                                end if;
             WHEN others => moveres <= X"00000000";
           END CASE;
         END IF;
@@ -196,7 +218,7 @@ end ex;
 -- about update hilo_reg
     PROCESS(rst, aluop_i, reg1_i, mulres, HI, LO)
       BEGIN
-        IF (rst = '1') THEN
+        IF (rst = '0') THEN
           whilo_o <= '0';
           hi_o <= X"00000000";
           lo_o <= X"00000000";
@@ -222,7 +244,7 @@ end ex;
 -- get logicOut
     PROCESS(rst, aluop_i, reg2_i, reg1_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           logicout <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -238,7 +260,7 @@ end ex;
 -- get shiftRes
     PROCESS(rst, aluop_i, reg1_i, reg2_i)
       BEGIN
-        IF(rst = '1') THEN
+        IF(rst = '0') THEN
           shiftres <= X"00000000";
         ELSE
           CASE aluop_i IS
@@ -460,5 +482,21 @@ end ex;
           WHEN others => wdata_o <= X"00000000";
         END CASE;
       END PROCESS;
-
+-- mtc0
+    PROCESS(rst, cp0_reg_data_o, cp0_reg_write_addr_o, cp0_reg_we_o, inst_i, reg1_i)
+      BEGIN
+        IF(rst = '0') THEN
+          cp0_reg_write_addr_o <= "00000";
+          cp0_reg_we_o <= '0';
+          cp0_reg_data_o <= X"00000000";
+        ELSIF (aluop_i = EXE_MTC0_OP) THEN
+          cp0_reg_write_addr_o <= inst_i(15 downto 11);
+          cp0_reg_we_o <= '1';
+          cp0_reg_data_o <= reg1_i;
+        ELSE
+          cp0_reg_write_addr_o <= "00000";
+          cp0_reg_we_o <= '0';
+          cp0_reg_data_o <= X"00000000";
+        END IF;
+      END PROCESS;
 end behave;
