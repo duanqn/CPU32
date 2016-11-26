@@ -11,11 +11,12 @@ entity ram is
       clk: in std_logic;
       rst: in std_logic;
          
-      ope_addr_raw: in std_logic_vector(20 downto 0);
+      ope_addr: in std_logic_vector(19 downto 0);
       write_data: in std_logic_vector(31 downto 0);
       read_data: out std_logic_vector(31 downto 0);
       ope_we: in std_logic;
-      ope_ce: in std_logic;
+      ope_ce1: in std_logic;
+      ope_ce2: in std_logic;
            
       -- down
       baseram_addr: out std_logic_vector(19 downto 0);
@@ -38,28 +39,8 @@ architecture Behavioral of ram is
     --     write ram 1: 00000 -> 10000 -> 00000
     --     read ram 2: 00000 -> 00010 -> 00000
     --     write ram 2: 00000 -> 01000 -> 00000
-    signal ope_ce1: std_logic;
-    signal ope_ce2: std_logic;
-    signal ope_addr: std_logic_vector(19 downto 0);
 
 begin
-    identifier : process(ope_addr_raw, ope_ce)
-    begin
-      if(ope_ce = '1') then 
-        ope_addr <= ope_addr_raw(19 downto 0);
-        if(ope_addr_raw(20) = '1') then
-          ope_ce2 <= '1';
-          ope_ce1 <= '0';
-        else 
-          ope_ce1 <= '1';
-          ope_ce2 <= '0';
-        end if;
-      else
-        ope_ce2 <= '0';
-        ope_ce1 <= '0';
-      end if;
-    end process ; -- identifier
-
     process(clk, rst)
     begin
         if (rst = '0') then

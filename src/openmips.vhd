@@ -8,11 +8,15 @@ ENTITY openmips is
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
 
-    phy_addr: out std_logic_vector(31 downto 0);
-    phy_data: out std_logic_vector(31 downto 0);
-    storage_data: in std_logic_vector(31 downto 0);
-    phy_we: out std_logic;
-    phy_ce: out std_logic
+    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_data : out std_logic_vector(31 downto 0);
+    
+    to_physical_read_enable : out std_logic;
+    to_physical_write_enable : out std_logic;
+    
+    from_physical_data : in std_logic_vector(31 downto 0);
+    from_physical_ready : in std_logic;
+    from_physical_serial : in std_logic
 
     );
 end openmips;
@@ -236,7 +240,7 @@ architecture arch of openmips is
 
     mem_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_we_o: out STD_LOGIC;
-    mem_sel_o: out STD_LOGIC_VECTOR(3 downto 0);
+    mem_align: out STD_LOGIC_VECTOR(1 downto 0);
     mem_data_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_ce_o: out STD_LOGIC;
 
@@ -278,6 +282,7 @@ architecture arch of openmips is
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
+    stallreq_from_wait_for_data: IN STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
@@ -287,7 +292,6 @@ architecture arch of openmips is
     --up
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
-
     inst_data_i: out STD_LOGIC_VECTOR(31 downto 0);
     inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
     inst_ce_o: out STD_LOGIC;
@@ -296,36 +300,58 @@ architecture arch of openmips is
     ram_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
     ram_data_o: in STD_LOGIC_VECTOR(31 downto 0);
     ram_we_o: in STD_LOGIC;
-    ram_sel_o: in STD_LOGIC_VECTOR(3 downto 0);
+    ram_align: in STD_LOGIC_VECTOR(1 downto 0);
     ram_ce_o: in STD_LOGIC;
 
     --mix
     stallreq: out STD_LOGIC;
 
+    stallreq_wait_data: out STD_LOGIC;
+
     --down
     ope_addr: out std_logic_vector(31 downto 0);
     write_data: out std_logic_vector(31 downto 0);
     read_data: in std_logic_vector(31 downto 0);
+    data_ready: in std_logic;
     ope_we: out std_logic;
-    ope_ce: out std_logic
+    ope_ce: out std_logic;
+    align_type: out std_logic_vector(1 downto 0)
     );
   end component;
 
   component mmu 
   port (
-    --up
+    clk : in std_logic;
+    rst : in std_logic;
+    
     ope_addr: in std_logic_vector(31 downto 0);
-    ope_data: in std_logic_vector(31 downto 0);
-    result_data: out std_logic_vector(31 downto 0);
     ope_we: in std_logic;
     ope_ce: in std_logic;
+    write_data: in std_logic_vector(31 downto 0);
+        
+    read_data: out std_logic_vector(31 downto 0);
+    ready : out std_logic;       
+    
+    -- about exception
+    exc_code : out std_logic_vector(2 downto 0);   
+    
+    tlb_write_struct : in std_logic_vector(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
+    tlb_write_enable : in std_logic;
 
-    --down
-    phy_addr: out std_logic_vector(31 downto 0);
-    phy_data: out std_logic_vector(31 downto 0);
-    storage_data: in std_logic_vector(31 downto 0);
-    phy_we: out std_logic;
-    phy_ce: out std_logic
+    --
+    
+    align_type : in std_logic_vector(1 downto 0);
+    
+    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_data : out std_logic_vector(31 downto 0);
+    
+    to_physical_read_enable : out std_logic;
+    to_physical_write_enable : out std_logic;
+    
+    -- from physical level
+    from_physical_data : in std_logic_vector(31 downto 0);
+    from_physical_ready : in std_logic;
+    from_physical_serial : in std_logic
     );
   end component;
 
@@ -338,7 +364,7 @@ architecture arch of openmips is
   signal ram_addr_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ram_data_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ram_we_o: STD_LOGIC;
-  signal ram_sel_o: STD_LOGIC_VECTOR(3 downto 0);
+  signal ram_align: STD_LOGIC_VECTOR(3 downto 0);
   signal ram_ce_o: STD_LOGIC;
 
 -- about memcontrol -- mmu
@@ -347,6 +373,15 @@ architecture arch of openmips is
   signal ope_ce: STD_LOGIC;
   signal ope_we: STD_LOGIC;
   signal mmu_result_data: STD_LOGIC_VECTOR(31 downto 0);
+  signal data_ready: STD_LOGIC;
+  signal align_type: STD_LOGIC_VECTOR(1 downto 0);
+
+-- mmu -- Exception
+  signal serial_int_mmu: STD_LOGIC;
+  signal exc_code_mmu: STD_LOGIC_VECTOR(2 downto 0);
+  signal tlb_write_struct: STD_LOGIC_VECTOR(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
+  signal tlb_write_enable: STD_LOGIC;
+
 
 -- clock 
   signal clk_new: STD_LOGIC := '0';
@@ -356,6 +391,7 @@ architecture arch of openmips is
   signal stallreq_from_ex: STD_LOGIC;
   signal stallreq_from_id: STD_LOGIC;
   signal stallreq_from_mem: STD_LOGIC;
+  signal stallreq_from_wait_for_data: STD_LOGIC;
 
 -- branch
 -- ID to PC
@@ -532,7 +568,7 @@ begin
     wdata_i => mem_wdata_i, whilo_i => mem_whilo_i,
     hi_i => mem_hi_i, lo_i => mem_lo_i,
     mem_data_i => ram_data_i, mem_addr_o => ram_addr_o,
-    mem_we_o => ram_we_o, mem_sel_o => ram_sel_o,
+    mem_we_o => ram_we_o, mem_align => ram_align,
     mem_data_o => ram_data_o, mem_ce_o => ram_ce_o,
     wd_o => mem_wd_o, wreg_o => mem_wreg_o,
     wdata_o => mem_wdata_o, whilo_o => mem_whilo_o,
@@ -555,17 +591,19 @@ begin
     lo_o => ex_lo_i);
 
   ctrl0: ctrl port map(
-    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem);
+    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem, stallreq_from_wait_for_data => stallreq_from_wait_for_data);
 
   memcontrol0: memcontrol port map(
     rst => rst, clk => clk_new, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
-    ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_sel_o => ram_sel_o, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
-    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
+    ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_align => ram_align, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
+    stallreq_from_wait_for_data => stallreq_from_wait_for_data, ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
     );
 
   mmu0: mmu port map(
-    ope_addr => ope_addr, ope_data => ope_data, result_data => mmu_result_data, ope_ce => ope_ce, ope_we => ope_we, 
-    phy_addr => phy_addr, phy_data => phy_data, storage_data => storage_data, phy_we => phy_we, phy_ce => phy_ce
+    clk => clk, rst => rst, ope_addr => ope_addr, write_data => ope_data, ope_we => ope_we, ope_ce => ope_ce, read_data => mmu_result_data, ready => data_ready,
+    align_type => align_type, serial_int => serial_int_mmu, exc_code => exc_code_mmu, tlb_write_struct => tlb_write_struct, tlb_write_enable => tlb_write_enable, 
+    to_physical_addr => to_physical_addr, to_physical_data => to_physical_data, to_physical_read_enable => to_physical_read_enable, to_physical_write_enable => to_physical_write_enable,
+    from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial
     );
 
 end architecture ; -- arch

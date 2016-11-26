@@ -21,7 +21,7 @@ ENTITY mem is
 
     mem_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_we_o: out STD_LOGIC;
-    mem_sel_o: out STD_LOGIC_VECTOR(3 downto 0);
+    mem_align: out STD_LOGIC_VECTOR(1 downto 0);
     mem_data_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_ce_o: out STD_LOGIC;
 
@@ -51,7 +51,7 @@ begin
       whilo_o <= '0';
       mem_addr_o <= X"00000000";
       mem_we <= '0';
-      mem_sel_o <= "0000";
+      mem_align <= ALIGN_TYPE_WORD;
       mem_data_o <= X"00000000";
       mem_ce_o <= '0';
       stallreq <= '0';
@@ -68,66 +68,56 @@ begin
           mem_we <= '0';
           mem_ce_o <= '1';
           stallreq <= '1';
+          mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 8 => mem_data_i(31)) & mem_data_i(31 downto 24);
-              mem_sel_o <= "1000";
             when "01" =>
               wdata_o <= (31 downto 8 => mem_data_i(23)) & mem_data_i(23 downto 16);
-              mem_sel_o <= "0100";
             when "10" =>
               wdata_o <= (31 downto 8 => mem_data_i(15)) & mem_data_i(15 downto 8);
-              mem_sel_o <= "0010";
             when "11" =>
               wdata_o <= (31 downto 8 => mem_data_i(7)) & mem_data_i(7 downto 0);
-              mem_sel_o <= "0001";
             when others => 
               wdata_o <= X"00000000";
-              mem_sel_o <= "1111";
           end case;
         when EXE_LBU_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
           stallreq <= '1';
+          mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(31 downto 24);
-              mem_sel_o <= "1000";
             when "01" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(23 downto 16);
-              mem_sel_o <= "0100";
             when "10" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(15 downto 8);
-              mem_sel_o <= "0010";
             when "11" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(7 downto 0);
-              mem_sel_o <= "0001";
             when others => 
               wdata_o <= X"00000000";
-              mem_sel_o <= "1111";
           end case;
         when EXE_LHU_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
           stallreq <= '1';
+          mem_align <= ALIGN_TYPE_HALF_WORD;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
               wdata_o <= (31 downto 16 => '0') & mem_data_i(31 downto 16);
-              mem_sel_o <= "1100";
             when "10" =>
               wdata_o <= (31 downto 16 => '0') & mem_data_i(15 downto 0);
-              mem_sel_o <= "0011";
             when others => 
               wdata_o <= X"00000000";
-              mem_sel_o <= "1111";
           end case;
         when EXE_LW_OP => 
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           wdata_o <= mem_data_i;
-          mem_sel_o <= "1111";
+          mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '1';
           stallreq <= '1';
         when EXE_SB_OP => 
@@ -136,29 +126,30 @@ begin
           mem_data_o <= reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0);
           mem_ce_o <= '1';
           stallreq <= '1';
+          mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
-              mem_sel_o <= "1000";
+              mem_align <= "1000";
             when "01" =>
-              mem_sel_o <= "0100";
+              mem_align <= "0100";
             when "10" =>
-              mem_sel_o <= "0010";
+              mem_align <= "0010";
             when "11" =>
-              mem_sel_o <= "0001";
+              mem_align <= "0001";
             when others => 
-              mem_sel_o <= "0000";
+              mem_align <= "0000";
           end case;
         when EXE_SW_OP => 
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
           mem_data_o <= reg2_i;
-          mem_sel_o <= "1111";
+          mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '1';
           stallreq <= '1';
         when others => 
           mem_we <= '0';
           mem_addr_o <= X"00000000";
-          mem_sel_o <= "1111";
+          mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '0';
           mem_data_o <= X"00000000";
           stallreq <= '0';
