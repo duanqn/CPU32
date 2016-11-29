@@ -199,7 +199,7 @@ architecture arch of openmips is
     mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
-    cp0_rge_we_o: OUT STD_LOGIC;
+    cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
     );
@@ -667,7 +667,7 @@ begin
     wb_wdata => wb_wdata_i, wb_whilo => wb_whilo_i,
     wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall,
     mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
-    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_data_i);
+    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i);
 
   hilo_reg0: hilo_reg port map(
     clk => clk_new, rst => rst,
@@ -690,6 +690,7 @@ begin
     to_physical_addr => to_physical_addr, to_physical_data => to_physical_data, to_physical_read_enable => to_physical_read_enable, to_physical_write_enable => to_physical_write_enable,
     from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial
     );
+    
   cp0_reg0: cp0_reg port map(
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
     raddr_i => ex_cp0, data_o => cp0_reg_data_i

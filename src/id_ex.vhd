@@ -20,15 +20,21 @@ ENTITY id_ex IS
     id_is_in_delayslot: IN STD_LOGIC;
     next_inst_in_delayslot_i: IN STD_LOGIC;
 
-    id_inst:in STD_LOGIC_VECTOR(31 downto 0);
-    ex_inst:out STD_LOGIC_VECTOR(31 downto 0);
+    flush: IN STD_LOGIC;
+    id_excepttype: IN STD_LOGIC_VECTOR(31 downto 0);
+    id_current_inst_addr: IN STD_LOGIC_VECTOR(31 downto 0);
 
+    id_inst:in STD_LOGIC_VECTOR(31 downto 0);
+
+    ex_inst:out STD_LOGIC_VECTOR(31 downto 0);
     ex_aluop: OUT STD_LOGIC_VECTOR (7 downto 0);
     ex_alusel: OUT STD_LOGIC_VECTOR (2 downto 0);
     ex_reg1: OUT STD_LOGIC_VECTOR (31 downto 0);
     ex_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);
     ex_wd: OUT STD_LOGIC_VECTOR (4 downto 0);
     ex_wreg: OUT STD_LOGIC;
+    ex_excepttype: OUT STD_LOGIC_VECTOR(31 downto 0);
+    ex_current_inst_addr: OUT STD_LOGIC_VECTOR(31 downto 0);
 
     ex_link_address: OUT STD_LOGIC_VECTOR(31 downto 0);
     ex_is_in_delayslot: OUT STD_LOGIC;
@@ -48,6 +54,21 @@ PROCESS(clk, rst)
         ex_reg2 <= X"00000000";
         ex_wd <= "00000";
         ex_wreg <= '0';
+        ex_excepttype <= X"00000000";
+        ex_current_inst_addr <= X"00000000";
+      elsif (flush = '1') then
+        ex_aluop <= EXE_NOP_OP;
+        ex_alusel <= EXE_RES_NOP;
+        ex_reg1 <= X"00000000";
+        ex_reg2 <= X"00000000";
+        ex_wd <= "00000";
+        ex_wreg <= '0';
+        ex_excepttype <= X"00000000";
+        ex_link_address <= X"00000000";
+        ex_inst <= X"00000000";
+        ex_is_in_delayslot <= '0';
+        is_in_delayslot_o <= '0';
+        ex_current_inst_addr <= X"00000000";
       elsif (stall(2) = '1' and stall(3) = '0') then
         ex_aluop <= "00000000";
         ex_alusel <= "000";
@@ -55,6 +76,8 @@ PROCESS(clk, rst)
         ex_reg2 <= X"00000000";
         ex_wd <= "00000";
         ex_wreg <= '0';
+        ex_excepttype <= X"00000000";
+        ex_current_inst_addr <= X"00000000";
       elsif (stall(2) = '0') then
         ex_aluop <= id_aluop;
         ex_alusel <= id_alusel;
@@ -65,8 +88,9 @@ PROCESS(clk, rst)
         ex_link_address <= id_link_address;
         ex_is_in_delayslot <= id_is_in_delayslot;
         is_in_delayslot_o <= next_inst_in_delayslot_i;
-
         ex_inst <= id_inst;
+        ex_excepttype <= id_excepttype;
+        ex_current_inst_addr <= id_current_inst_addr;
       end if;
     end if;
   END PROCESS;
