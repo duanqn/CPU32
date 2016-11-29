@@ -12,6 +12,8 @@ entity pc_reg is
     stall: in STD_LOGIC_VECTOR(5 downto 0);
     branch_flag_i: in STD_LOGIC;
     branch_target_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+    flush: in STD_LOGIC;
+    new_pc: in STD_LOGIC_VECTOR(31 downto 0);
 
     pc: buffer STD_LOGIC_VECTOR(31 downto 0);
     ce: buffer STD_LOGIC
@@ -38,6 +40,8 @@ begin
     if (clk'event and clk = '1') then
       if (ce = '0') then
         pc <= x"00000000";
+      elsif (flush = '1') then
+        pc <= new_pc;
       elsif (stall(0) = '0') then
         if (branch_flag_i = '1') then
           pc <= branch_target_address_i;

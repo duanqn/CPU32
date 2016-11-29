@@ -21,6 +21,16 @@ ENTITY mem is
 		cp0_reg_we_i: in STD_LOGIC;
 		cp0_reg_write_addr_i: in STD_LOGIC_VECTOR(4 downto 0);
 		cp0_reg_data_i: in STD_LOGIC_VECTOR(31 downto 0);
+    cp0_status_i: in STD_LOGIC_VECTOR(31 downto 0);
+		cp0_cause_i: in STD_LOGIC_VECTOR(31 downto 0);
+		cp0_epc_i: in STD_LOGIC_VECTOR(31 downto 0);
+		wb_cp0_reg_we: in STD_LOGIC;
+		wb_cp0_reg_write_addr: in STD_LOGIC_VECTOR(4 downto 0);
+		wb_cp0_reg_data: in STD_LOGIC_VECTOR(31 downto 0);
+
+		excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
+		current_inst_addr_i: in STD_LOGIC_VECTOR(31 downto 0);
+		is_in_delayslot_i: in STD_LOGIC;
 
 
     mem_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
@@ -29,9 +39,14 @@ ENTITY mem is
     mem_data_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_ce_o: out STD_LOGIC;
 
-    cp0_reg_we_o: out  STD_LOGIC;
+    cp0_reg_we_o: out STD_LOGIC;
 		cp0_reg_write_addr_o: out STD_LOGIC_VECTOR(4 downto 0);
 		cp0_reg_data_o: out STD_LOGIC_VECTOR(31 downto 0);
+
+    excepttype_o: out STD_LOGIC_VECTOR(31 downto 0);
+		current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_o: out STD_LOGIC;
+		cp0_epc_o: out STD_LOGIC_VECTOR(31 downto 0);
 
     wd_o: out STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: out STD_LOGIC;
@@ -44,9 +59,18 @@ end mem;
 
 architecture arch of mem is
   signal mem_we: STD_LOGIC;
+	signal zero32: STD_LOGIC_VECTOR(31 downto 0);
+	signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
+	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
+	signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
+	signal mem_we: STD_LOGIC;
 begin
 
   mem_we_o <= mem_we;
+  zero32 <= X"00000000";
+  is_in_delayslot_o <= is_in_delayslot_i;
+	current_inst_addr_o <= current_inst_addr_i;
+
 
   identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i)
   begin
@@ -172,4 +196,67 @@ begin
     end if;
   end process ; -- identifier
 
+  --read latest cp0_status
+	process (rst, wb_cp0_reg_we, wb_cp0_reg_write_addr, wb_cp0_reg_data, cp0_status, cp0_status_i)
+	begin
+		if (rst = '0') then
+			cp0_status <= X"00000000";
+		elsif (wb_cp0_reg_we = '1' AND wb_cp0_reg_write_addr = "01100") then
+			cp0_status <= wb_cp0_reg_data;
+		else
+			cp0_status <= cp0_status_i;
+		end if;
+	end process;
+
+	--read latest cp0_epc
+	process (rst, wb_cp0_reg_we, wb_cp0_reg_data, wb_cp0_reg_write_addr, cp0_epc, cp0_epc_i)
+	begin
+		if(rst = '0') then
+			cp0_epc <= X"00000000";
+		elsif (wb_cp0_reg_we = '1' and wb_cp0_reg_write_addr = "01110") then
+			cp0_epc <= wb_cp0_reg_data;
+		else
+			cp0_epc <= cp0_epc_i;
+		end if;
+	end process;
+
+  cp0_epc_o <= cp0_epc;
+
+  --read latest cp0_cause
+	process (rst, wb_cp0_reg_we, wb_cp0_reg_write_addr, wb_cp0_reg_data, cp0_cause, cp0_cause_i)
+	begin
+		if(rst = '0') then
+			cp0_cause <= X"00000000";
+		elsif (wb_cp0_reg_we = '1' and wb_cp0_reg_write_addr = "01101") then
+			cp0_cause(9 downto 8) <= wb_cp0_reg_data(9 downto 8);
+			cp0_cause(22) <= wb_cp0_reg_data(22);
+			cp0_cause(23) <= wb_cp0_reg_data(23);
+		else
+			cp0_cause <= cp0_cause_i;
+	  end if;
+  end process;
+
+	process(rst, excepttype_o, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
+	  if(rst = '0') then
+			excepttype_o <= X"00000000";
+		else
+			excepttype_o <= X"00000000";
+			if (current_inst_addr_i /= X"00000000") then
+				if ((cp0_cause(15 downto 8) and (cp0_status(15 downto 8))) /= "00000000" and (cp0_status(1) = '0') and (cp0_status(0) = '1')) then
+					excepttype_o <= X"00000001";
+				elsif (excepttype_i(8) = '1') then
+					excepttype_o <= X"00000008";
+				elsif (excepttype_i(9) = '1') then
+					excepttype_o <= X"0000000a";
+				elsif (excepttype_i(11) = '1') then
+					excepttype_o <= X"0000000c";
+				elsif (excepttype_i(12) = '1') then
+					excepttype_o <= X"0000000e";
+				end if;
+		  end if;
+		end if;
+	end process;
+
+	--logic confusing
+	mem_we_o <= mem_we and (not (or excepttype_o));
 end architecture ; -- arch

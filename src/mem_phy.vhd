@@ -20,11 +20,11 @@ entity phy_mem is
       baseram_ce: out std_logic;
       baseram_oe: out std_logic;
       baseram_we: out std_logic;
-      extrram_addr: out std_logic_vector(19 downto 0);
-      extrram_data: inout std_logic_vector(31 downto 0);
-      extrram_ce: out std_logic;
-      extrram_oe: out std_logic;
-      extrram_we: out std_logic;
+      extraram_addr: out std_logic_vector(19 downto 0);
+      extraram_data: inout std_logic_vector(31 downto 0);
+      extraram_ce: out std_logic;
+      extraram_oe: out std_logic;
+      extraram_we: out std_logic;
 
       -- ports connected with flash
       flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
@@ -47,24 +47,29 @@ end phy_mem;
 architecture Behavioral of phy_mem is
 component ram
     Port(
-      clk: in std_logic; 
-      rst: in std_logic; 
-      ope_addr: in std_logic_vector(19 downto 0); 
-      write_data: in std_logic_vector(31 downto 0); 
+      -- up
+      clk: in std_logic;
+      rst: in std_logic;
+         
+      ope_addr: in std_logic_vector(19 downto 0);
+      write_data: in std_logic_vector(31 downto 0);
       read_data: out std_logic_vector(31 downto 0);
-      ope_we: in std_logic; 
-      ope_ce1: in std_logic; 
-      ope_ce2: in std_logic; 
-      baseram_addr: out std_logic_vector(19 downto 0); 
+      ope_we: in std_logic;
+      ope_ce1: in std_logic;
+      ope_ce2: in std_logic;
+           
+      -- down
+      baseram_addr: out std_logic_vector(19 downto 0);
       baseram_data: inout std_logic_vector(31 downto 0);
-      baseram_ce: out std_logic; 
-      baseram_oe: out std_logic; 
-      baseram_we: out std_logic; 
-      extrram_addr: out std_logic_vector(19 downto 0); 
-      extrram_data: inout std_logic_vector(31 downto 0); 
-      extrram_ce: out std_logic; 
-      extrram_oe: out std_logic; 
-      extrram_we: out std_logic);
+      baseram_ce: out std_logic;
+      baseram_oe: out std_logic;
+      baseram_we: out std_logic;
+
+      extraram_addr: out std_logic_vector(19 downto 0);
+      extraram_data: inout std_logic_vector(31 downto 0);
+      extraram_ce: out std_logic;
+      extraram_oe: out std_logic;
+      extraram_we: out std_logic);
 end component;
 
 signal ram_ope_addr: std_logic_vector(19 downto 0);
@@ -141,7 +146,7 @@ begin
       Txd_busy => serialport_transmit_busy);
     
     u2: flash port map(
-      clock => high_freq_clk, addr => flash_ope_addr, data_in => flash_write_data, 
+      clk => high_freq_clk, addr => flash_ope_addr, data_in => flash_write_data, 
       data_out => flash_read_data,flash_addr => flash_addr, flash_data => flash_data,
       read_enable => flash_read_signal, write_enable => '0', erase_enable => '0',
       flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1,
@@ -150,13 +155,13 @@ begin
       flash_control_oe => flash_control_oe, flash_control_we => flash_control_we);
 
     u1: ram port map(
-      clock => high_freq_clk, reset => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
+      clk => high_freq_clk, rst => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
       ope_addr => ram_ope_addr, write_data => ram_write_data, 
       read_data => ram_read_data, ope_we => ram_ope_we,
       baseram_addr => baseram_addr, baseram_data => baseram_data, 
       baseram_ce => baseram_ce, baseram_oe => baseram_oe, baseram_we => baseram_we,
-      extrram_addr => extrram_addr, extrram_data => extrram_data, 
-      extrram_ce => extrram_ce, extrram_oe => extrram_oe, extrram_we => extrram_we);
+      extraram_addr => extraram_addr, extraram_data => extraram_data, 
+      extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we);
     
 
     process (high_freq_clk) 
