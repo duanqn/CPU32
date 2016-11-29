@@ -18,7 +18,21 @@ ENTITY DWPC is
     extraram_data: inout std_logic_vector(31 downto 0);
     extraram_ce: out std_logic;
     extraram_oe: out std_logic;
-    extraram_we: out std_logic
+    extraram_we: out std_logic;
+
+    flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
+    flash_data : inout  STD_LOGIC_VECTOR (15 downto 0);
+    flash_control_ce0 : out  STD_LOGIC;
+    flash_control_ce1 : out  STD_LOGIC;
+    flash_control_ce2 : out  STD_LOGIC;
+    flash_control_byte : out  STD_LOGIC;
+    flash_control_vpen : out  STD_LOGIC;
+    flash_control_rp : out  STD_LOGIC;
+    flash_control_oe : out  STD_LOGIC;
+    flash_control_we : out  STD_LOGIC;
+
+    serialport_txd : out STD_LOGIC;
+    serialport_rxd : in STD_LOGIC
 
     );
 end DWPC;
@@ -60,11 +74,11 @@ port(
   baseram_ce: out std_logic;
   baseram_oe: out std_logic;
   baseram_we: out std_logic;
-  extrram_addr: out std_logic_vector(19 downto 0);
-  extrram_data: inout std_logic_vector(31 downto 0);
-  extrram_ce: out std_logic;
-  extrram_oe: out std_logic;
-  extrram_we: out std_logic;
+  extraram_addr: out std_logic_vector(19 downto 0);
+  extraram_data: inout std_logic_vector(31 downto 0);
+  extraram_ce: out std_logic;
+  extraram_oe: out std_logic;
+  extraram_we: out std_logic;
 
   -- ports connected with flash
   flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
@@ -84,37 +98,36 @@ port(
   );
 end component;
 
-component ram
-Port(
-  -- up
-  clk: in std_logic;
-  rst: in std_logic;
-     
-  ope_addr: in std_logic_vector(19 downto 0);
-  write_data: in std_logic_vector(31 downto 0);
-  read_data: out std_logic_vector(31 downto 0);
-  ope_we: in std_logic;
-  ope_ce1: in std_logic;
-  ope_ce2: in std_logic;
-       
-  -- down
-  baseram_addr: out std_logic_vector(19 downto 0);
-  baseram_data: inout std_logic_vector(31 downto 0);
-  baseram_ce: out std_logic;
-  baseram_oe: out std_logic;
-  baseram_we: out std_logic;
-
-  extraram_addr: out std_logic_vector(19 downto 0);
-  extraram_data: inout std_logic_vector(31 downto 0);
-  extraram_ce: out std_logic;
-  extraram_oe: out std_logic;
-  extraram_we: out std_logic
-);
-end component;
-
-
+-- CPU -- mem_phy
+signal physical_addr: STD_LOGIC_VECTOR(23 downto 0);
+signal physical_data_in: STD_LOGIC_VECTOR(31 downto 0);
+signal physical_data_out: STD_LOGIC_VECTOR(31 downto 0);
+signal write_enable: STD_LOGIC;
+signal read_enable: STD_LOGIC;
+signal busy: STD_LOGIC;
+signal ready_data: STD_LOGIC;
+signal serialport_data_ready: STD_LOGIC;
 
 begin
 
+cpu0: openmips port map( 
+  rst => rst, clk => clk, to_physical_addr => physical_addr, to_physical_data => physical_data_in,
+  to_physical_read_enable => read_enable, to_physical_write_enable => write_enable,
+  from_physical_data => physical_data_out, from_physical_ready => ready_data, from_physical_serial => serialport_data_ready
+  );
+
+ready_data => not busy;
+
+mem_phy0: mem_phy port map(
+  clk => clk, addr => physical_addr, data_in => physical_data_in, data_out => physical_data_out, write_enable => write_enable,
+  read_enable => read_enable, busy => busy, serialport_data_ready => serialport_data_ready, 
+  baseram_we => baseram_we, baseram_oe => baseram_oe, baseram_ce => baseram_ce, baseram_data => baseram_data, baseram_addr => baseram_addr,
+  extraram_we => extraram_we, extraram_oe => extraram_oe, extraram_ce => extraram_ce, extraram_data => extraram_data, extraram_addr => extraram_addr,
+  flash_data => flash_data, flash_addr => flash_addr, flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1, flash_control_ce2 => flash_control_ce2,
+  flash_control_byte => flash_control_byte, flash_control_vpen => flash_control_vpen, flash_control_rp => flash_control_rp, flash_control_oe => flash_control_oe,
+  flash_control_we => flash_control_we, serialport_txd => serialport_txd, serialport_rxd => serialport_rxd
+  );
+
 
 end architecture ; -- arch
+
