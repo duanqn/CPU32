@@ -313,7 +313,6 @@ architecture arch of openmips is
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
-    stallreq_from_wait_for_data: IN STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
@@ -336,8 +335,6 @@ architecture arch of openmips is
 
     --mix
     stallreq: out STD_LOGIC;
-
-    stallreq_wait_data: out STD_LOGIC;
 
     --down
     ope_addr: out std_logic_vector(31 downto 0);
@@ -450,7 +447,6 @@ architecture arch of openmips is
   signal stallreq_from_ex: STD_LOGIC;
   signal stallreq_from_id: STD_LOGIC;
   signal stallreq_from_mem: STD_LOGIC;
-  signal stallreq_from_wait_for_data: STD_LOGIC;
 
 -- branch
 -- ID to PC
@@ -676,12 +672,12 @@ begin
     lo_o => ex_lo_i);
 
   ctrl0: ctrl port map(
-    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem, stallreq_from_wait_for_data => stallreq_from_wait_for_data);
+    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem);
 
   memcontrol0: memcontrol port map(
-    rst => rst, clk => clk_new, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
+    rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
     ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_align => ram_align, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
-    stallreq_from_wait_for_data => stallreq_from_wait_for_data, ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
+    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
     );
 
   mmu0: mmu port map(

@@ -108,7 +108,7 @@ begin
   begin
         if rst = '0' then
             addr <= x"90000000";
-    elsif clk'event and clk = '1' and from_physical_ready = '1'  then
+    elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
       addr <= ope_addr;
     end if;
   end process;
