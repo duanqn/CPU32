@@ -80,7 +80,7 @@ begin
 
     elsif rising_edge(clk) then
 
-      register_values(12) <= register_values(12) + 1;
+      register_values(9) <= register_values(9) + 1;
       register_values(13)(15 downto 10) <= int_i;
 
       if(register_values(11) /= X"00000000" and register_values(9) = register_values(11)) then
