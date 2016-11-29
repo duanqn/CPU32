@@ -17,7 +17,7 @@ ENTITY mem_wb is
     mem_cp0_reg_write_addr: in STD_LOGIC_VECTOR(4 downto 0);
     mem_cp0_reg_data: in STD_LOGIC_VECTOR(31 downto 0);
     stall: in STD_LOGIC_VECTOR(5 downto 0);
-
+    flush: in std_logic;
     -- output
 	  wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
     wb_wreg: out STD_LOGIC;
@@ -48,6 +48,16 @@ begin
         wb_cp0_reg_we <= '0';
         wb_cp0_reg_write_addr <= "00000";
         wb_cp0_reg_data <= X"00000000";
+      elsif (flush = '1') then
+        wb_wd <= "00000";
+        wb_wreg <= '0';
+        wb_wdata <= X"00000000";
+        wb_hi <= X"00000000";
+        wb_lo <= X"00000000";
+        wb_whilo <= '0';
+        wb_cp0_reg_we <= '0';
+        wb_cp0_reg_write_addr <= "00000";
+        wb_cp0_reg_data <= x"00000000";
       elsif (stall(4) = '1' and stall(5) = '0') then
         wb_wd <= "00000";
         wb_wreg <= '0';
