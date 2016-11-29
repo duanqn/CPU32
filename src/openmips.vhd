@@ -393,7 +393,7 @@ architecture arch of openmips is
     rst : in std_logic;
     raddr_i : in std_logic_vector(4 downto 0);
     int_i : in std_logic_vector(5 downto 0);
-    we_i in : std_logic;
+    we_i : in std_logic;
     waddr_i : in std_logic_vector(4 downto 0);
     data_i : in std_logic_vector(31 downto 0);
 
@@ -690,7 +690,7 @@ begin
     to_physical_addr => to_physical_addr, to_physical_data => to_physical_data, to_physical_read_enable => to_physical_read_enable, to_physical_write_enable => to_physical_write_enable,
     from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial
     );
-    
+
   cp0_reg0: cp0_reg port map(
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
     raddr_i => ex_cp0, data_o => cp0_reg_data_i

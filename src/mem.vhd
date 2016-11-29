@@ -48,6 +48,9 @@ ENTITY mem is
     is_in_delayslot_o: out STD_LOGIC;
 		cp0_epc_o: out STD_LOGIC_VECTOR(31 downto 0);
 
+    -- "000": no exception  "001":TLB modified  "010":TLBL  "011":TLBS  "100":ADEL  "101":ADES
+    mmu_exc_code: in STD_LOGIC_VECTOR(2 downto 0);
+
     wd_o: out STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: out STD_LOGIC;
     wdata_o: out STD_LOGIC_VECTOR(31 downto 0);
@@ -237,6 +240,7 @@ begin
   end process;
 
 	process(rst, excepttype_o, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
+  begin
 	  if(rst = '0') then
 			excepttype_o <= X"00000000";
 		else
@@ -252,6 +256,8 @@ begin
 					excepttype_o <= X"0000000c";
 				elsif (excepttype_i(12) = '1') then
 					excepttype_o <= X"0000000e";
+        elsif (mmu_exc_code = "001") then
+          excepttype_o <= x"";
 				end if;
 		  end if;
 		end if;
