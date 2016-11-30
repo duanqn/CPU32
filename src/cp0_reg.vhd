@@ -11,7 +11,7 @@ entity cp0_reg is
     rst : in std_logic;
     raddr_i : in std_logic_vector(4 downto 0);
     int_i : in std_logic_vector(5 downto 0);
-    we_i in : std_logic;
+    we_i : in std_logic;
     waddr_i : in std_logic_vector(4 downto 0);
     data_i : in std_logic_vector(31 downto 0);
 
@@ -32,13 +32,14 @@ entity cp0_reg is
 
     excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
     current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+    badAddr_i: in STD_LOGIC_VECTOR(31 downto 0);
     is_in_delayslot_i: in STD_LOGIC
   );
 end cp0_reg;
 
 architecture behave of cp0_reg is
   type register_bank is array(31 downto 0) of std_logic_vector(31 downto 0);
-  signal register_values: register_bank := (others => (others => '0'));
+  signal register_values: register_bank := (11=>x"00FFFFFF", 12=>x"10000000", 15=>x"80000180",others => (others => '0'));
 
 begin
 
@@ -54,7 +55,7 @@ begin
   EPC_o <= register_values(14);
   EBase_o <= register_values(15);
 
-  write_operation : process(clk)
+  write_operation : process(rst, clk, register_values, int_i, we_i, waddr_i, data_i)
   begin
     if(rst = '0') then
       for i in 0 to 31 loop
@@ -72,7 +73,7 @@ begin
       --EntryHi_o init
       register_values(10) <= X"00000000";
       --Compare init to be set by myself(not X"00000000")
-      register_values(11) <= X"11111111";
+      register_values(11) <= X"00FFFFFF";
       --Status_o init
       register_values(12) <= X"10000000";
       --Cause_o init
@@ -126,7 +127,7 @@ begin
                             register_values(13)(22) <= data_i(22);
                             register_values(13)(27) <= data_i(27);
             --EBase
-            when "01111" => register_values(15)(29 downto 12) <= data_i(29 downto 12);
+            when "01111" => register_values(15) <= "10"&data_i(29 downto 12)&"00"&"0110000000";
             when others => null;
           end case;
         end if;
@@ -150,13 +151,13 @@ begin
             --Compare
             when "01011" => register_values(11) <= data_i;
             --EBase
-            when "01111" => register_values(15)(29 downto 12) <= data_i(29 downto 12);
+            when "01111" => register_values(15) <= "10"&data_i(29 downto 12)&"00"&"0110000000";
             when others => null;
           end case;
         end if;
 
         case excepttype_i is
-          when x"00000001" => --Interrupt
+          when x"00000007" => --Interrupt
             register_values(12)(1) <= '1';
             register_values(13)(6 downto 2) <= "00000";
             if(is_in_delayslot_i = '1') then
@@ -224,7 +225,82 @@ begin
               register_values(13)(6 downto 2) <= "01100";
             else
               register_values(13)(6 downto 2) <= "01100";
-          end if;
+            end if;
+
+          when x"00000001" => --TLB modify
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00001";
+            else
+              register_values(13)(6 downto 2) <= "00001";
+            end if;
+
+          when x"00000002" => --TLBL
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00010";
+            else
+              register_values(13)(6 downto 2) <= "00010";
+            end if;
+
+          when x"00000003" => --TLBS
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00011";
+            else
+              register_values(13)(6 downto 2) <= "00011";
+            end if;
+
+          when x"00000004" => --ADEL
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00100";
+            else
+              register_values(13)(6 downto 2) <= "00100";
+            end if;
+
+          when x"00000005" => --ADES
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00101";
+            else
+              register_values(13)(6 downto 2) <= "00101";
+            end if;
 
           when x"0000000E" => --Eret
             register_values(12)(1) <= '0';
@@ -236,7 +312,7 @@ begin
     end if; -- rising_edge
   end process;
 
-  read_operation : process(clk, rst)
+  read_operation : process(clk, rst, raddr_i, register_values)
     begin
       if (rst = '1') then
         data_o <= X"00000000";
