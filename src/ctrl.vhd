@@ -10,7 +10,6 @@ ENTITY ctrl IS
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
-    stallreq_from_wait_for_data: IN STD_LOGIC;
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
     cp0_epc_i: IN STD_LOGIC_VECTOR(31 downto 0);
     new_pc: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -46,9 +45,6 @@ BEGIN
         stall <= "000111";
         flush <= '0';
       ELSIF (stallreq_from_mem = '1') THEN
-        stall <= "001111";
-        flush <= '0';
-      ELSIF (stallreq_from_wait_for_data = '1') THEN
         stall <= "111111";
         flush <= '0';
       ELSE
