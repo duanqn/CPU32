@@ -27,7 +27,7 @@ port(
   serial_int : out std_logic;   -- interrupt, send to the exception module
   -- "000": no exception  "001":TLB modified  "010":TLBL  "011":TLBS  "100":ADEL  "101":ADES
   exc_code : out std_logic_vector(2 downto 0);    -- exception code
-  
+  bad_addr: out std_logic_vector(31 downto 0);
   -- about tlbwi
   -- index(69 downto 63) EntryHi(62 downto 44) EntryLo0(43 downto 24) DV(23 downto 22) EntryLo1(21 downto 2) DV(1 downto 0)
   tlb_write_struct : in std_logic_vector(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
@@ -131,24 +131,29 @@ begin
     if( (align_type = ALIGN_TYPE_HALF_WORD and addr(0) = '1') or (align_type = ALIGN_TYPE_WORD and addr(1 downto 0) /= "00") ) then
       if( ope_ce = '1' and ope_we = '0' )then
         exc_code <= ADE_L;
+        bad_addr <= addr;
         exc_counter <= '1';
       elsif( ope_ce = '1' and ope_we = '1') then
         exc_code <= ADE_S;
+        bad_addr <= addr;
         exc_counter <= '1';
       end if;
     -- tlb missing
     elsif tlb_missing = '1' then
       if( ope_ce = '1' and ope_we = '0' )then
         exc_code <= TLB_L;
+        bad_addr <= addr;
         exc_counter <= '1';
       elsif( ope_ce = '1' and ope_we = '1' ) then
         exc_code <= TLB_S;
+        bad_addr <= addr;
         exc_counter <= '1';
       end if;
     -- tlb modified
     elsif ( tlb_writable = '0') then
       if( ope_ce = '1' and ope_we = '1' ) then
         exc_code <= TLB_MODIFIED;
+        bad_addr <= addr;
         exc_counter <= '1';
       end if;
     end if;
