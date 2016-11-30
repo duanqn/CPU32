@@ -32,6 +32,7 @@ entity cp0_reg is
 
     excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
     current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+    badAddr_i: in STD_LOGIC_VECTOR(31 downto 0);
     is_in_delayslot_i: in STD_LOGIC
   );
 end cp0_reg;
@@ -156,7 +157,7 @@ begin
         end if;
 
         case excepttype_i is
-          when x"00000001" => --Interrupt
+          when x"00000007" => --Interrupt
             register_values(12)(1) <= '1';
             register_values(13)(6 downto 2) <= "00000";
             if(is_in_delayslot_i = '1') then
@@ -224,8 +225,83 @@ begin
               register_values(13)(6 downto 2) <= "01100";
             else
               register_values(13)(6 downto 2) <= "01100";
-          end if;
+            end if;
 
+          when x"00000001" => --TLB modify
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00001";
+            else
+              register_values(13)(6 downto 2) <= "00001";
+            end if;
+
+          when x"00000002" => --TLBL
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00010";
+            else
+              register_values(13)(6 downto 2) <= "00010";
+            end if;
+
+          when x"00000003" => --TLBS
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00011";
+            else
+              register_values(13)(6 downto 2) <= "00011";
+            end if;
+
+          when x"00000004" => --ADEL
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00100";
+            else
+              register_values(13)(6 downto 2) <= "00100";
+            end if;
+
+          when x"00000005" => --ADES
+            if(register_values(12)(1) = '0') then
+              if(is_in_delayslot_i = '1') then
+                register_values(14) <= current_inst_address_i - 4;
+                register_values(13)(31) <= '1';
+              else
+                register_values(14) <= current_inst_address_i;
+                register_values(13)(31) <= '0';
+              end if;
+              register_values(12)(1) <= '1';
+              register_values(13)(6 downto 2) <= "00101";
+            else
+              register_values(13)(6 downto 2) <= "00101";
+            end if;
+            
           when x"0000000E" => --Eret
             register_values(12)(1) <= '0';
 
