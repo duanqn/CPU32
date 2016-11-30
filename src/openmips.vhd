@@ -336,7 +336,17 @@ architecture arch of openmips is
     wdata_o: out STD_LOGIC_VECTOR(31 downto 0);
     hi_o: out STD_LOGIC_VECTOR(31 downto 0);
     lo_o: out STD_LOGIC_VECTOR(31 downto 0);
-    whilo_o:out STD_LOGIC
+    whilo_o:out STD_LOGIC;
+
+    -- cp0
+    Index_i : in std_logic_vector(31 downto 0);
+    EntryLo0_i : in std_logic_vector(31 downto 0);
+    EntryLo1_i : in std_logic_vector(31 downto 0);
+    PageMask_i : in std_logic_vector(31 downto 0);
+    EntryHi_i : in std_logic_vector(31 downto 0);
+
+    tlb_write_struct: out std_logic_vector(TLB_WRITE_STRUCT_WIDTH - 1 downto 0);
+    tlb_write_enable: out STD_LOGIC
     );
   end component;
 
@@ -464,19 +474,23 @@ architecture arch of openmips is
     data_i : in std_logic_vector(31 downto 0);
 
     -- output ports
+
+    data_o : out std_logic_vector(31 downto 0);
+
     Index_o : out std_logic_vector(31 downto 0);
     EntryLo0_o : out std_logic_vector(31 downto 0);
     EntryLo1_o : out std_logic_vector(31 downto 0);
     PageMask_o : out std_logic_vector(31 downto 0);
     EntryHi_o : out std_logic_vector(31 downto 0);
+
+    Cause_o : out std_logic_vector(31 downto 0);
+    EPC_o : out std_logic_vector(31 downto 0);
+    Status_o : out std_logic_vector(31 downto 0);
     
     BadVAddr_o : out std_logic_vector(31 downto 0);
     Count_o : out std_logic_vector(31 downto 0);
-    data_o : out std_logic_vector(31 downto 0);
     Compare_o : out std_logic_vector(31 downto 0);
-    Status_o : out std_logic_vector(31 downto 0);
-    Cause_o : out std_logic_vector(31 downto 0);
-    EPC_o : out std_logic_vector(31 downto 0);
+    
     EBase_o : out std_logic_vector(31 downto 0);
     timer_int_o : out std_logic;
 
@@ -514,6 +528,21 @@ architecture arch of openmips is
   signal bad_addr_mmu: STD_LOGIC_VECTOR(31 downto 0);
   signal tlb_write_struct: STD_LOGIC_VECTOR(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
   signal tlb_write_enable: STD_LOGIC;
+
+-- cp0
+
+  signal Index : std_logic_vector(31 downto 0);
+  signal EntryLo0 : std_logic_vector(31 downto 0);
+  signal EntryLo1 : std_logic_vector(31 downto 0);
+  signal PageMask : std_logic_vector(31 downto 0);
+  signal EntryHi : std_logic_vector(31 downto 0);
+    
+  signal BadVAddr : std_logic_vector(31 downto 0);
+  signal Count : std_logic_vector(31 downto 0);
+  signal Compare : std_logic_vector(31 downto 0);
+    
+  signal EBase : std_logic_vector(31 downto 0);
+  signal timer_int : std_logic;
 
 
 -- clock
@@ -766,7 +795,8 @@ begin
     cp0_epc_i => cp0_epc, cp0_status_i => cp0_status, cp0_cause_i => cp0_cause, wb_cp0_reg_data => wb_cp0_reg_data_i,
     wb_cp0_reg_we => wb_cp0_reg_we_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, mmu_exc_code => exc_code_mmu, mmu_badAddr => bad_addr_mmu,
     badAddr_o => bad_addr_mem, excepttype_o => excepttype_mem, current_inst_addr_o => current_inst_addr_mem, is_in_delayslot_o => is_in_delayslot_mem,
-    cp0_epc_o => cp0_epc_mem);
+    cp0_epc_o => cp0_epc_mem, Index_i => Index, EntryLo0_i => EntryLo0, EntryLo1_i => EntryLo1, PageMask_i => PageMask, EntryHi_i => EntryHi,
+    tlb_write_struct => tlb_write_struct, tlb_write_enable => tlb_write_enable);
 
   mem_wb0: mem_wb port map(
     clk => clk_new, rst => rst,
@@ -791,9 +821,9 @@ begin
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
     raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu, 
     excepttype_i => excepttype_mem, current_inst_addr_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
-    Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, 
-
-
+    Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, Index_o => Index, EntryHi_o => EntryHi, EntryLo0_o => EntryLo0,
+    EntryLo1_o => EntryLo1, PageMask_o => PageMask, BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
+    EBase_o => EBase, timer_int_o => timer_int
   );
 
   ctrl0: ctrl port map(

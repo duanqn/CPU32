@@ -58,7 +58,18 @@ ENTITY mem is
     wdata_o: out STD_LOGIC_VECTOR(31 downto 0);
     hi_o: out STD_LOGIC_VECTOR(31 downto 0);
     lo_o: out STD_LOGIC_VECTOR(31 downto 0);
-    whilo_o:out STD_LOGIC
+    whilo_o:out STD_LOGIC;
+
+    -- cp0
+    Index_i : in std_logic_vector(31 downto 0);
+    EntryLo0_i : in std_logic_vector(31 downto 0);
+    EntryLo1_i : in std_logic_vector(31 downto 0);
+    PageMask_i : in std_logic_vector(31 downto 0);
+    EntryHi_i : in std_logic_vector(31 downto 0);
+
+    tlb_write_struct: out std_logic_vector(TLB_WRITE_STRUCT_WIDTH - 1 downto 0);
+    tlb_write_enable: out STD_LOGIC
+
     );
 end mem;
 
@@ -94,7 +105,8 @@ begin
 			cp0_reg_we_o <= '0';
 			cp0_reg_write_addr_o <= "00000";
 			cp0_reg_data_o <= X"00000000";
-      stallreq <= '0';
+      tlb_write_enable <= '0';
+      
 
     else
       wd_o <= wd_i;
@@ -107,11 +119,20 @@ begin
 			cp0_reg_write_addr_o <= cp0_reg_write_addr_i;
 			cp0_reg_data_o <= cp0_reg_data_i;
       case( aluop_i ) is
+        when EXE_TLBWI_OP =>
+          mem_we <= '0';
+          mem_addr_o <= X"00000000";
+          mem_align <= ALIGN_TYPE_WORD;
+          mem_ce_o <= '0';
+          mem_data_o <= X"00000000";
+          tlb_write_enable <= '1';
+          tlb_write_struct <= Index_i(TLB_INDEX_WIDTH-1 downto 0) & EntryHi_i(31 downto 13) & EntryLo0_i(25 downto 6) &
+          EntryLo0_i(2 downto 1) & EntryLo1_i(25 downto 6) & EntryLo1_i(2 downto 1);
         when EXE_LB_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -129,7 +150,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -147,7 +168,7 @@ begin
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_HALF_WORD;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -163,13 +184,13 @@ begin
           wdata_o <= mem_data_i;
           mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
         when EXE_SB_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
           mem_data_o <= reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0);
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -189,14 +210,14 @@ begin
           mem_data_o <= reg2_i;
           mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '1';
-          stallreq <= '1';
+          tlb_write_enable <= '0';
         when others =>
           mem_we <= '0';
           mem_addr_o <= X"00000000";
           mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '0';
           mem_data_o <= X"00000000";
-          stallreq <= '0';
+          tlb_write_enable <= '0';
       end case ;
     end if;
   end process ; -- identifier
