@@ -40,7 +40,11 @@ architecture arch of openmips is
     branch_flag_i: in STD_LOGIC;
     branch_target_address_i: in STD_LOGIC_VECTOR(31 downto 0);
     pc: buffer STD_LOGIC_VECTOR(31 downto 0);
-    ce: buffer STD_LOGIC
+    ce: buffer STD_LOGIC;
+
+    -- exception
+    flush: in STD_LOGIC;
+    new_pc: in STD_LOGIC_VECTOR(31 downto 0)
     );
   end component;
 
@@ -52,7 +56,10 @@ architecture arch of openmips is
     if_inst:in STD_LOGIC_VECTOR(31 downto 0);
     stall: in STD_LOGIC_VECTOR(5 downto 0);
     id_pc:out STD_LOGIC_VECTOR(31 downto 0);
-    id_inst:out STD_LOGIC_VECTOR(31 downto 0)
+    id_inst:out STD_LOGIC_VECTOR(31 downto 0);
+
+    --exception
+    flush: in STD_LOGIC
     );
   end component;
 
@@ -87,7 +94,11 @@ architecture arch of openmips is
     is_in_delayslot_o:out STD_LOGIC;
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
     stallreq:out STD_LOGIC; -- =1 -> stall pipeline
-    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0)
+    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0);
+
+    -- exception
+    excepttype_o:out STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0)
     );
   end component;
 
@@ -149,7 +160,16 @@ architecture arch of openmips is
 
     ex_link_address: OUT STD_LOGIC_VECTOR(31 downto 0);
     ex_is_in_delayslot: OUT STD_LOGIC;
-    is_in_delayslot_o: OUT STD_LOGIC
+    is_in_delayslot_o: OUT STD_LOGIC;
+
+    -- exception
+    flush: IN STD_LOGIC;
+    id_excepttype: IN STD_LOGIC_VECTOR(31 downto 0);
+    id_current_inst_addr: IN STD_LOGIC_VECTOR(31 downto 0);
+
+    ex_excepttype: OUT STD_LOGIC_VECTOR(31 downto 0);
+    ex_current_inst_addr: OUT STD_LOGIC_VECTOR(31 downto 0)
+
     );
   end component;
 
@@ -166,12 +186,14 @@ architecture arch of openmips is
 
     hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
+
     wb_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     wb_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
     wb_whilo_i: IN STD_LOGIC;
     wb_cp0_reg_we: IN STD_LOGIC;
-    wb_CP0_reg_write_addr: IN STD_LOGIC_VECTOR(4 downto 0);
+    wb_cp0_reg_write_addr: IN STD_LOGIC_VECTOR(4 downto 0);
     wb_cp0_reg_data: IN STD_LOGIC_VECTOR(31 downto 0);
+
     mem_hi_i: IN STD_LOGIC_VECTOR(31 downto 0);
     mem_lo_i: IN STD_LOGIC_VECTOR(31 downto 0);
     mem_whilo_i: IN STD_LOGIC;
@@ -184,7 +206,10 @@ architecture arch of openmips is
 
     inst_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
-    cp0_reeg_data_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    cp0_reg_data_i: IN STD_LOGIC_VECTOR(31 downto 0);
+
+    excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_i: IN STD_LOGIC_VECTOR(31 downto 9);
 
     stallreq: OUT STD_LOGIC;
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -198,10 +223,15 @@ architecture arch of openmips is
     aluop_o: OUT STD_LOGIC_VECTOR(7 downto 0);
     mem_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     reg2_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
+
+    excepttype_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_o: OUT STD_LOGIC
     );
   end component;
 
@@ -235,7 +265,18 @@ architecture arch of openmips is
     mem_reg2: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_cp0_reg_we: OUT STD_LOGIC;
     mem_cp0_reg_write_addr: OUT STD_LOGIC_VECTOR (4 downto 0);
-    mem_cp0_reg_data: OUT STD_LOGIC_VECTOR (31 downto 0)
+    mem_cp0_reg_data: OUT STD_LOGIC_VECTOR (31 downto 0);
+
+    -- exception
+    flush: IN STD_LOGIC;
+    ex_excepttype: IN STD_LOGIC_VECTOR(31 downto 0);
+    ex_current_inst_addr: IN STD_LOGIC_VECTOR(31 downto 0);
+    ex_is_in_delayslot: IN STD_LOGIC;
+
+    mem_excepttype: OUT STD_LOGIC_VECTOR(31 downto 0);
+    mem_current_inst_addr: OUT STD_LOGIC_VECTOR(31 downto 0);
+    mem_is_in_delayslot: OUT STD_LOGIC
+
     );
   end component;
 
@@ -258,6 +299,17 @@ architecture arch of openmips is
     cp0_reg_we_i: in STD_LOGIC;
     cp0_reg_write_addr_i: in STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_data_i: in STD_LOGIC_VECTOR(31 downto 0);
+    cp0_status_i: in STD_LOGIC_VECTOR(31 downto 0);
+    cp0_cause_i: in STD_LOGIC_VECTOR(31 downto 0);
+    cp0_epc_i: in STD_LOGIC_VECTOR(31 downto 0);
+    wb_cp0_reg_we: in STD_LOGIC;
+    wb_cp0_reg_write_addr: in STD_LOGIC_VECTOR(4 downto 0);
+    wb_cp0_reg_data: in STD_LOGIC_VECTOR(31 downto 0);
+
+    excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_i: in STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_i: in STD_LOGIC;
+
 
     mem_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_we_o: out STD_LOGIC;
@@ -265,9 +317,19 @@ architecture arch of openmips is
     mem_data_o: out STD_LOGIC_VECTOR(31 downto 0);
     mem_ce_o: out STD_LOGIC;
 
-    cp0_reg_we_o: out  STD_LOGIC;
+    cp0_reg_we_o: out STD_LOGIC;
     cp0_reg_write_addr_o: out STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_data_o: out STD_LOGIC_VECTOR(31 downto 0);
+
+    excepttype_o: out STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_o: out STD_LOGIC;
+    cp0_epc_o: out STD_LOGIC_VECTOR(31 downto 0);
+
+    -- "000": no exception  "001":TLB modified  "010":TLBL  "011":TLBS  "100":ADEL  "101":ADES
+    mmu_exc_code: in STD_LOGIC_VECTOR(2 downto 0);
+    mmu_badAddr: in STD_LOGIC_VECTOR(31 downto 0);
+    badAddr_o: out STD_LOGIC_VECTOR(31 downto 0);
 
     wd_o: out STD_LOGIC_VECTOR(4 downto 0);
     wreg_o: out STD_LOGIC;
@@ -293,6 +355,7 @@ architecture arch of openmips is
     mem_cp0_reg_write_addr: in STD_LOGIC_VECTOR(4 downto 0);
     mem_cp0_reg_data: in STD_LOGIC_VECTOR(31 downto 0);
     stall: in STD_LOGIC_VECTOR(5 downto 0);
+    flush: in std_logic;
 
     -- output
     wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
@@ -313,6 +376,10 @@ architecture arch of openmips is
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
+    excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    cp0_epc_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    new_pc: OUT STD_LOGIC_VECTOR(31 downto 0);
+    flush: OUT STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
     );
   end component;
@@ -361,7 +428,9 @@ architecture arch of openmips is
     ready : out std_logic;
 
     -- about exception
+    serial_int : out std_logic_vector(3 downto 0); 
     exc_code : out std_logic_vector(2 downto 0);
+    bad_addr: out std_logic_vector(31 downto 0);
 
     tlb_write_struct : in std_logic_vector(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
     tlb_write_enable : in std_logic;
@@ -385,29 +454,36 @@ architecture arch of openmips is
 
   component cp0_reg
   port (
-    -- input ports
+   -- input ports
     clk : in std_logic;
     rst : in std_logic;
     raddr_i : in std_logic_vector(4 downto 0);
-    int_i : in std_logic_vector(5 downto 0);
+    mmu_int_i : in std_logic_vector(3 downto 0);  -- Cause(14 downto 11)
     we_i : in std_logic;
     waddr_i : in std_logic_vector(4 downto 0);
     data_i : in std_logic_vector(31 downto 0);
 
     -- output ports
-    data_o : out std_logic_vector(31 downto 0);
     Index_o : out std_logic_vector(31 downto 0);
     EntryLo0_o : out std_logic_vector(31 downto 0);
     EntryLo1_o : out std_logic_vector(31 downto 0);
+    PageMask_o : out std_logic_vector(31 downto 0);
+    EntryHi_o : out std_logic_vector(31 downto 0);
+    
     BadVAddr_o : out std_logic_vector(31 downto 0);
     Count_o : out std_logic_vector(31 downto 0);
-    EntryHi_o : out std_logic_vector(31 downto 0);
+    data_o : out std_logic_vector(31 downto 0);
     Compare_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
     Cause_o : out std_logic_vector(31 downto 0);
     EPC_o : out std_logic_vector(31 downto 0);
     EBase_o : out std_logic_vector(31 downto 0);
-    timer_int_o : out std_logic
+    timer_int_o : out std_logic;
+
+    excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);
+    badAddr_i: in STD_LOGIC_VECTOR(31 downto 0);
+    is_in_delayslot_i: in STD_LOGIC
     );
   end component;
 
@@ -433,8 +509,9 @@ architecture arch of openmips is
   signal align_type: STD_LOGIC_VECTOR(1 downto 0);
 
 -- mmu -- Exception
-  signal serial_int_mmu: STD_LOGIC;
+  signal serial_int_mmu: STD_LOGIC_VECTOR(3 downto 0);
   signal exc_code_mmu: STD_LOGIC_VECTOR(2 downto 0);
+  signal bad_addr_mmu: STD_LOGIC_VECTOR(31 downto 0);
   signal tlb_write_struct: STD_LOGIC_VECTOR(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
   signal tlb_write_enable: STD_LOGIC;
 
@@ -442,11 +519,14 @@ architecture arch of openmips is
 -- clock
   signal clk_new: STD_LOGIC := '0';
 
--- stall
+-- ctrl
   signal stall: STD_LOGIC_VECTOR(5 downto 0);
   signal stallreq_from_ex: STD_LOGIC;
   signal stallreq_from_id: STD_LOGIC;
   signal stallreq_from_mem: STD_LOGIC;
+  signal new_pc: STD_LOGIC_VECTOR(31 downto 0);
+  signal flush: STD_LOGIC;
+
 
 -- branch
 -- ID to PC
@@ -475,6 +555,8 @@ architecture arch of openmips is
   signal id_wreg_o: STD_LOGIC;
   signal id_wd_o: STD_LOGIC_VECTOR(4 downto 0);
   signal id_inst: STD_LOGIC_VECTOR(31 downto 0);
+  signal excepttype_id: STD_LOGIC_VECTOR(31 downto 0);
+  signal current_inst_addr_id: STD_LOGIC_VECTOR(31 downto 0);
 
 -- ID/EX to EX
   signal ex_aluop_i: STD_LOGIC_VECTOR(7 downto 0);
@@ -484,6 +566,8 @@ architecture arch of openmips is
   signal ex_wreg_i: STD_LOGIC;
   signal ex_wd_i: STD_LOGIC_VECTOR(4 downto 0);
   signal ex_inst: STD_LOGIC_VECTOR(31 downto 0);
+  signal excepttype_id_ex: STD_LOGIC_VECTOR(31 downto 0);
+  signal current_inst_addr_id_ex: STD_LOGIC_VECTOR(31 downto 0);
 
 -- EX to EX/MEM
   signal ex_wreg_o: STD_LOGIC;
@@ -498,6 +582,9 @@ architecture arch of openmips is
   signal ex_cp0_reg_data_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ex_cp0_reg_write_addr_o: STD_LOGIC_VECTOR(4 downto 0);
   signal ex_cp0_reg_we_o: STD_LOGIC;
+  signal excepttype_ex: STD_LOGIC_VECTOR(31 downto 0);
+  signal current_inst_addr_ex: STD_LOGIC_VECTOR(31 downto 0);
+  signal is_in_delayslot_ex: STD_LOGIC;
 
 -- EX/MEM to MEM
   signal mem_wreg_i: STD_LOGIC;
@@ -512,6 +599,23 @@ architecture arch of openmips is
   signal mem_cp0_reg_data_i: STD_LOGIC_VECTOR(31 downto 0);
   signal mem_cp0_reg_write_addr_i: STD_LOGIC_VECTOR(4 downto 0);
   signal mem_cp0_reg_we_i: STD_LOGIC;
+  signal excepttype_ex_mem: STD_LOGIC_VECTOR(31 downto 0);
+  signal current_inst_addr_ex_mem: STD_LOGIC_VECTOR(31 downto 0);
+  signal is_in_delayslot_ex_mem: STD_LOGIC;
+
+-- MEM to CP0
+  signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
+  signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
+  signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
+  signal bad_addr_mem: STD_LOGIC_VECTOR(31 downto 0);
+  signal excepttype_mem: STD_LOGIC_VECTOR(31 downto 0);
+  signal current_inst_addr_mem: STD_LOGIC_VECTOR(31 downto 0);
+  signal is_in_delayslot_mem: STD_LOGIC;
+
+-- MEM to CTRL
+  signal cp0_epc_mem: STD_LOGIC_VECTOR(31 downto 0);
+  
+
 
 -- MEM to MEM/WB
   signal mem_wreg_o: STD_LOGIC;
@@ -560,14 +664,15 @@ begin
     clk => clk, rst => rst, clk_new => clk_new
     );
 
+  -- flush new_pc
   pc_reg0: pc_reg port map(
     clk => clk_new, rst => rst, pc => pc, ce => inst_ce,
     stall => stall, branch_target_address_i => branch_target_address,
-    branch_flag_i => branch_flag);
+    branch_flag_i => branch_flag， flush => flush, new_pc => new_pc);
 
 
 
-  if_id0: if_id port map(clk => clk_new, rst => rst, if_pc => pc, if_inst => inst_data, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall);
+  if_id0: if_id port map(clk => clk_new, rst => rst, if_pc => pc, if_inst => inst_data, id_pc => id_pc_i, id_inst => id_inst_i, stall => stall, flush => flush);
 
   id0: id port map(
     rst => rst, pc_i => id_pc_i, inst_i => id_inst_i,
@@ -583,7 +688,7 @@ begin
     is_in_delayslot_i => is_in_delayslot, is_in_delayslot_o => id_is_in_delayslot,
     link_addr_o => id_link_address, next_inst_in_delayslot_o => next_inst_in_delayslot,
     branch_target_address_o => branch_target_address, branch_flag_o => branch_flag,
-    inst_o => id_inst, ex_aluop_i => ex_aluop);
+    inst_o => id_inst, ex_aluop_i => ex_aluop, excepttype_o => excepttype_id, current_inst_addr_o => current_inst_addr_id);
 
   regfile0: regfile port map(
     clk => clk_new, rst => rst,
@@ -605,7 +710,8 @@ begin
     id_is_in_delayslot => id_is_in_delayslot, id_link_address => id_link_address,
     next_inst_in_delayslot_i => next_inst_in_delayslot, ex_is_in_delayslot => ex_is_in_delayslot,
     ex_link_address => ex_link_address, is_in_delayslot_o => is_in_delayslot,
-    id_inst => id_inst, ex_inst => ex_inst);
+    id_inst => id_inst, ex_inst => ex_inst, flush => flush, id_excepttype => excepttype_id, id_current_inst_addr => current_inst_addr_id,
+    ex_excepttype => excepttype_id_ex, ex_current_inst_addr => current_inst_addr_id_ex);
 
   ex0: ex port map(
     rst => rst,
@@ -624,7 +730,8 @@ begin
     wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i,
     mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
     cp0_reg_read_addr_o => ex_cp0, cp0_reg_data_o => ex_cp0_reg_data_o, cp0_reg_write_addr_o => ex_cp0_reg_write_addr_o, cp0_reg_we_o => ex_cp0_reg_we_o,
-    cp0_reg_data_i => cp0_reg_data_i);
+    cp0_reg_data_i => cp0_reg_data_i, excepttype_i => excepttype_id_ex, current_inst_addr_i => current_inst_addr_id_ex, excepttype_o => excepttype_ex, current_inst_addr_o => current_inst_addr_ex,
+    is_in_delayslot_o => is_in_delayslot_ex);
 
   ex_mem0: ex_mem port map(
     clk => clk_new, rst => rst,
@@ -637,7 +744,9 @@ begin
     ex_aluop => ex_aluop, ex_mem_addr => ex_mem_addr, ex_reg2 => ex_reg2,
     mem_aluop => mem_aluop, mem_mem_addr => mem_addr, mem_reg2 => mem_reg2,
     ex_cp0_reg_data => ex_cp0_reg_data_o, ex_cp0_reg_write_addr => ex_cp0_reg_write_addr_o, ex_cp0_reg_we => ex_cp0_reg_we_o,
-    mem_cp0_reg_data => mem_cp0_reg_data_i, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_i, mem_cp0_reg_we => mem_cp0_reg_we_i);
+    mem_cp0_reg_data => mem_cp0_reg_data_i, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_i, mem_cp0_reg_we => mem_cp0_reg_we_i, flush => flush,
+    ex_excepttype => excepttype_ex, ex_current_inst_addr => current_inst_addr_ex, ex_is_in_delayslot => is_in_delayslot_ex,
+    mem_excepttype => excepttype_ex_mem, mem_current_inst_addr => current_inst_addr_ex_mem, mem_is_in_delayslot => is_in_delayslot_ex_mem);
 
   mem0: mem port map(
     rst => rst,
@@ -652,7 +761,12 @@ begin
     hi_o => mem_hi_o, lo_o => mem_lo_o,
     aluop_i => mem_aluop, mem_addr_i => mem_addr, reg2_i => mem_reg2,
     cp0_reg_data_i => mem_cp0_reg_data_i, cp0_reg_write_addr_i => mem_cp0_reg_write_addr_i, cp0_reg_we_i => mem_cp0_reg_we_i,
-    cp0_reg_data_o => mem_cp0_reg_data_o, cp0_reg_write_addr_o => mem_cp0_reg_write_addr_o, cp0_reg_we_o => mem_cp0_reg_we_o);
+    cp0_reg_data_o => mem_cp0_reg_data_o, cp0_reg_write_addr_o => mem_cp0_reg_write_addr_o, cp0_reg_we_o => mem_cp0_reg_we_o,
+    excepttype_i => excepttype_ex_mem, current_inst_addr_i => current_inst_addr_ex_mem, is_in_delayslot_i => is_in_delayslot_ex_mem,
+    cp0_epc_i => cp0_epc, cp0_status_i => cp0_status, cp0_cause_i => cp0_cause, wb_cp0_reg_data => wb_cp0_reg_data_i,
+    wb_cp0_reg_we => wb_cp0_reg_we_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, mmu_exc_code => exc_code_mmu, mmu_badAddr => bad_addr_mmu,
+    badAddr_o => bad_addr_mem, excepttype_o => excepttype_mem, current_inst_addr_o => current_inst_addr_mem, is_in_delayslot_o => is_in_delayslot_mem,
+    cp0_epc_o => cp0_epc_mem);
 
   mem_wb0: mem_wb port map(
     clk => clk_new, rst => rst,
@@ -663,7 +777,8 @@ begin
     wb_wdata => wb_wdata_i, wb_whilo => wb_whilo_i,
     wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall,
     mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
-    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i);
+    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i, flush => flush,
+    );
 
   hilo_reg0: hilo_reg port map(
     clk => clk_new, rst => rst,
@@ -671,8 +786,19 @@ begin
     lo_i => wb_lo_i, hi_o => ex_hi_i,
     lo_o => ex_lo_i);
 
+  cp0_reg0: cp0_reg port map(
+    clk => clk_new, rst => rst,
+    data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
+    raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu, 
+    excepttype_i => excepttype_mem, current_inst_addr_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
+    Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, 
+
+
+  );
+
   ctrl0: ctrl port map(
-    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem);
+    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem, cp0_epc_i => cp0_epc_mem, excepttype_i => excepttype_mem,
+    new_pc => new_pc, flush => flush);
 
   memcontrol0: memcontrol port map(
     rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
@@ -687,8 +813,5 @@ begin
     from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial
     );
 
-  cp0_reg0: cp0_reg port map(
-    data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
-    raddr_i => ex_cp0, data_o => cp0_reg_data_i
-  );
+
 end architecture ; -- arch

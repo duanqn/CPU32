@@ -24,7 +24,9 @@ port(
   ready : out std_logic;      -- memory access is ready ready
   
   -- about exception
-  serial_int : out std_logic;   -- interrupt, send to the exception module
+  -- 0001: ps2     0010: com1    0100: com2     1000: mmu extra 
+  serial_int : out std_logic_vector(3 downto 0);   -- interrupt, send to the exception module
+  
   -- "000": no exception  "001":TLB modified  "010":TLBL  "011":TLBS  "100":ADEL  "101":ADES
   exc_code : out std_logic_vector(2 downto 0);    -- exception code
   bad_addr: out std_logic_vector(31 downto 0);
@@ -214,7 +216,8 @@ begin
           else from_physical_data;
   
   ready <= from_physical_ready;
-  serial_int <= from_physical_serial;
+  --serial_int <= from_physical_serial;
+  serial_int <= "0000"
   
   -- register of serial status, return this directly if you load serial status
   serial_status_reg <= '1' 

@@ -10,23 +10,29 @@ entity cp0_reg is
     clk : in std_logic;
     rst : in std_logic;
     raddr_i : in std_logic_vector(4 downto 0);
-    int_i : in std_logic_vector(5 downto 0);
+    mmu_int_i : in std_logic_vector(3 downto 0);  -- Cause(14 downto 11)
     we_i : in std_logic;
     waddr_i : in std_logic_vector(4 downto 0);
     data_i : in std_logic_vector(31 downto 0);
 
     -- output ports
+
     data_o : out std_logic_vector(31 downto 0);
+
     Index_o : out std_logic_vector(31 downto 0);
     EntryLo0_o : out std_logic_vector(31 downto 0);
     EntryLo1_o : out std_logic_vector(31 downto 0);
-    BadVAddr_o : out std_logic_vector(31 downto 0);
-    Count_o : out std_logic_vector(31 downto 0);
+    PageMask_o : out std_logic_vector(31 downto 0);
     EntryHi_o : out std_logic_vector(31 downto 0);
-    Compare_o : out std_logic_vector(31 downto 0);
-    Status_o : out std_logic_vector(31 downto 0);
+
     Cause_o : out std_logic_vector(31 downto 0);
     EPC_o : out std_logic_vector(31 downto 0);
+    Status_o : out std_logic_vector(31 downto 0);
+    
+    BadVAddr_o : out std_logic_vector(31 downto 0);
+    Count_o : out std_logic_vector(31 downto 0);
+    Compare_o : out std_logic_vector(31 downto 0);
+    
     EBase_o : out std_logic_vector(31 downto 0);
     timer_int_o : out std_logic;
 
@@ -46,6 +52,7 @@ begin
   Index_o <= register_values(0);
   EntryLo0_o <= register_values(2);
   EntryLo1_o <= register_values(3);
+  PageMask_o <= register_values(5);
   BadVAddr_o <= register_values(8);
   Count_o <= register_values(9);
   EntryHi_o <= register_values(10);
@@ -55,12 +62,13 @@ begin
   EPC_o <= register_values(14);
   EBase_o <= register_values(15);
 
-  write_operation : process(rst, clk, register_values, int_i, we_i, waddr_i, data_i)
+  register_values(13)(14 downto 11) <= mmu_int_i;
+  timer_int_o <= register_values(13)(10);
+
+  write_operation : process(rst, clk, we_i, waddr_i, data_i)
   begin
     if(rst = '0') then
-      for i in 0 to 31 loop
-        register_values(i) <= (others => '0');
-      end loop;
+
       --Index init
       register_values(0) <= X"00000000";
       --EntryLo0_o + EntryLo1_o init
@@ -77,25 +85,38 @@ begin
       --Status_o init
       register_values(12) <= X"10000000";
       --Cause_o init
-      register_values(13) <= X"00000000";
+      register_values(13)(31 downto 16) <= x"0000";
+      register_values(13)(15) <= '0';
+      register_values(13)(9 downto 0) <= "0000000000";
       --EPC_o init
       register_values(14) <= X"00000000";
       --EBase_o init(not sure on the 9 to 0 bits)
       register_values(15) <= X"80000180";
 
-    elsif rising_edge(clk) then
+      register_values(1) <= X"00000000";
+      register_values(4) <= X"00000000";
+      register_values(5) <= X"00000000";
+      register_values(6) <= X"00000000";
+      register_values(7) <= X"00000000";
+      for i in 16 to 31 loop
+        register_values(i) <= (others => '0');
+      end loop;
 
-      register_values(9) <= register_values(9) + 1;
-      register_values(13)(15 downto 10) <= int_i;
+    elsif rising_edge(clk) then
 
       if(register_values(11) /= X"00000000" and register_values(9) = register_values(11)) then
         if(we_i = '1' and waddr_i /= "01011") then
-          timer_int_o <= '1';
+          register_values(13)(10) <= '1';
+          register_values(9) <= x"00000000";
         elsif (we_i = '0') then
-          timer_int_o <= '1';
+          register_values(13)(10) <= '1';
+          register_values(9) <= x"00000000";
         else
-          timer_int_o <= '0';
+          register_values(13)(10) <= '0';
         end if;
+      else
+        register_values(13)(10) <= '0';
+        register_values(9) <= register_values(9) + 1;
       end if;
 
       if(excepttype_i = x"00000000") then
