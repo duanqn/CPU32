@@ -209,7 +209,7 @@ architecture arch of openmips is
     cp0_reg_data_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
-    current_inst_addr_i: IN STD_LOGIC_VECTOR(31 downto 9);
+    current_inst_addr_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
     stallreq: OUT STD_LOGIC;
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -510,7 +510,7 @@ architecture arch of openmips is
   signal ram_addr_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ram_data_o: STD_LOGIC_VECTOR(31 downto 0);
   signal ram_we_o: STD_LOGIC;
-  signal ram_align: STD_LOGIC_VECTOR(3 downto 0);
+  signal ram_align: STD_LOGIC_VECTOR(1 downto 0);
   signal ram_ce_o: STD_LOGIC;
 
 -- about memcontrol -- mmu

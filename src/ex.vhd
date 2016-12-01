@@ -40,7 +40,7 @@ ENTITY ex IS
     cp0_reg_data_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
-    current_inst_addr_i: IN STD_LOGIC_VECTOR(31 downto 9);
+    current_inst_addr_i: IN STD_LOGIC_VECTOR(31 downto 0);
 
     stallreq: OUT STD_LOGIC;
     hi_o: OUT STD_LOGIC_VECTOR(31 downto 0);
