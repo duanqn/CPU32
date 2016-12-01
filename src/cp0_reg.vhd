@@ -28,11 +28,11 @@ entity cp0_reg is
     Cause_o : out std_logic_vector(31 downto 0);
     EPC_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
-    
+
     BadVAddr_o : out std_logic_vector(31 downto 0);
     Count_o : out std_logic_vector(31 downto 0);
     Compare_o : out std_logic_vector(31 downto 0);
-    
+
     EBase_o : out std_logic_vector(31 downto 0);
     timer_int_o : out std_logic;
 
@@ -80,8 +80,8 @@ begin
       register_values(9) <= X"00000000";
       --EntryHi_o init
       register_values(10) <= X"00000000";
-      --Compare init to be set by myself(not X"00000000")
-      register_values(11) <= X"00FFFFFF";
+      --Compare init to zero, handled by OS
+      register_values(11) <= X"00000000";
       --Status_o init
       register_values(12) <= X"10000000";
       --Cause_o init
@@ -107,10 +107,9 @@ begin
       if(register_values(11) /= X"00000000" and register_values(9) = register_values(11)) then
         if(we_i = '1' and waddr_i /= "01011") then
           register_values(13)(10) <= '1';
-          register_values(9) <= x"00000000";
+          -- reset operation done by OS
         elsif (we_i = '0') then
           register_values(13)(10) <= '1';
-          register_values(9) <= x"00000000";
         else
           register_values(13)(10) <= '0';
         end if;
@@ -120,6 +119,11 @@ begin
       end if;
 
       if(excepttype_i = x"00000000") then
+        if(we_i = '1' and waddr_i = "01000") then
+          register_values(8) <= data_i;
+        else
+          register_values(8) <= badAddr_i;
+        end if;
         if(we_i = '1') then
           case waddr_i is
             --Index
@@ -130,7 +134,7 @@ begin
             --EntryLo1
             when "00011" => register_values(3)(25 downto 0) <= data_i(25 downto 0);
             --BadVAddr
-            when "01000" => register_values(8) <= data_i;
+            --when "01000" => register_values(8) <= data_i;
             --Count
             when "01001" => register_values(9) <= data_i;
             --EntryHi
@@ -153,6 +157,11 @@ begin
           end case;
         end if;
       else
+        if(we_i = '1' and waddr_i = "01000") then
+          register_values(8) <= data_i;
+        else
+          register_values(8) <= badAddr_i;
+        end if;
         if(we_i = '1') then
           case waddr_i is
             --Index
@@ -163,7 +172,7 @@ begin
             --EntryLo1
             when "00011" => register_values(3)(25 downto 0) <= data_i(25 downto 0);
             --BadVAddr
-            when "01000" => register_values(8) <= data_i;
+            --when "01000" => register_values(8) <= data_i;
             --Count
             when "01001" => register_values(9) <= data_i;
             --EntryHi

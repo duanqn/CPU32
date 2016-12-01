@@ -38,7 +38,7 @@ architecture arch of memcontrol is
 begin
 
   memcontrol : process(clk, rst)
-  variable state : integer := 0
+  variable state : integer := 0;
   begin
     if(rst = '0') then
       ope_ce <= '0';
@@ -50,7 +50,7 @@ begin
       state := 0;
     elsif (clk'event and clk = '1') then
       case state is
-        when 0 => 
+        when 0 =>
           if(inst_ce_o = '1') then
             ope_ce <= '1';
             ope_we <= '0';
@@ -68,11 +68,11 @@ begin
             align_type <= ram_align;
             write_data <= ram_data_o;
           end if;
-        when 1 => 
+        when 1 =>
           ope_ce <= '0';
           stallreq <= '1';
           state := 2;
-        when 2 => 
+        when 2 =>
           if(data_ready = '1') then
             inst_data_i <= read_data;
             if(ram_ce_o = '0') then
@@ -111,5 +111,5 @@ begin
       end case;
     end if;
   end process;
-              
+
 end architecture ; -- arch
