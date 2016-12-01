@@ -80,8 +80,8 @@ begin
       register_values(9) <= X"00000000";
       --EntryHi_o init
       register_values(10) <= X"00000000";
-      --Compare init to be set by myself(not X"00000000")
-      register_values(11) <= X"00FFFFFF";
+      --Compare init to zero, handled by OS
+      register_values(11) <= X"00000000";
       --Status_o init
       register_values(12) <= X"10000000";
       --Cause_o init
@@ -107,10 +107,9 @@ begin
       if(register_values(11) /= X"00000000" and register_values(9) = register_values(11)) then
         if(we_i = '1' and waddr_i /= "01011") then
           register_values(13)(10) <= '1';
-          register_values(9) <= x"00000000";
+          -- reset operation done by OS
         elsif (we_i = '0') then
           register_values(13)(10) <= '1';
-          register_values(9) <= x"00000000";
         else
           register_values(13)(10) <= '0';
         end if;
