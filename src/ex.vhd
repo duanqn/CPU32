@@ -58,7 +58,7 @@ ENTITY ex IS
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
-    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
+    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0);
 
     excepttype_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     current_inst_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
