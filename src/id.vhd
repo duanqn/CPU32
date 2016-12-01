@@ -804,7 +804,7 @@ begin
           end if;
 
         when EXE_CP0 =>
-          if (inst_i(25 downto 21) = "00000" AND inst_i(10 downto 3)) then
+          if ((inst_i(25 downto 21) = "00000") AND (inst_i(10 downto 2) = "000000000")) then
             aluop_o <= EXE_MFC0_OP;
             alusel_o <= EXE_RES_MOVE;
             wd_o <= inst_i(20 downto 16);
@@ -816,7 +816,7 @@ begin
             reg2_read_o <= '0';
             branch_flag_o <= '0';
             next_inst_in_delayslot_o <= '0';
-          elsif (inst_i(25 downto 21) = "00100" AND inst_i(10 downto 3)) then
+          elsif ((inst_i(25 downto 21) = "00100") AND (inst_i(10 downto 2) = "000000000")) then
             aluop_o <= EXE_MTC0_OP;
             alusel_o <= EXE_RES_NOP;
             wreg_o <= '0';

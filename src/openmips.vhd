@@ -820,7 +820,7 @@ begin
     clk => clk_new, rst => rst,
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
     raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu,
-    excepttype_i => excepttype_mem, current_inst_addr_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
+    excepttype_i => excepttype_mem, current_inst_address_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
     Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, Index_o => Index, EntryHi_o => EntryHi, EntryLo0_o => EntryLo0,
     EntryLo1_o => EntryLo1, PageMask_o => PageMask, BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
     EBase_o => EBase, timer_int_o => timer_int
