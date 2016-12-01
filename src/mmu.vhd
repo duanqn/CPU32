@@ -106,15 +106,18 @@ begin
 
 -- serial logic
   -- choose addr on posedge
-  process(clk, rst)
-  begin
-        if rst = '0' then
-            addr <= x"90000000";
-    elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
-      addr <= ope_addr;
-    end if;
-  end process;
-  
+  --process(clk, rst)
+  --begin
+  --      if rst = '0' then
+  --          addr <= x"90000000";
+  --  elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
+  --    addr <= ope_addr;
+  --  end if;
+  --end process;
+
+  addr <= ope_addr;
+
+
   -- handle TLBWI
   process(clk)
     variable tlb_index : integer range 127 downto 0 := 0;

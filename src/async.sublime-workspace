@@ -4,6 +4,42 @@
 		"selected_items":
 		[
 			[
+				"std",
+				"std_logic_vector"
+			],
+			[
+				"ti",
+				"timer_int_o"
+			],
+			[
+				"Co",
+				"Compare_o"
+			],
+			[
+				"Cou",
+				"Count"
+			],
+			[
+				"Ba",
+				"BadVAddr"
+			],
+			[
+				"P",
+				"PageMask"
+			],
+			[
+				"Page",
+				"PageMask_o"
+			],
+			[
+				"Ent",
+				"EntryLo1"
+			],
+			[
+				"En",
+				"EntryHi"
+			],
+			[
 				"el",
 				"else\telse"
 			],
@@ -174,10 +210,6 @@
 			[
 				"ST",
 				"STD_LOGIC"
-			],
-			[
-				"std",
-				"STD_LOGIC_VECTOR"
 			],
 			[
 				"pro",
@@ -482,38 +514,6 @@
 			[
 				"wdata",
 				"wdata_i"
-			],
-			[
-				"STD_l",
-				"STD_LOGIC_VECTOR"
-			],
-			[
-				"ex_",
-				"ex_alusel"
-			],
-			[
-				"ex_al",
-				"ex_aluop"
-			],
-			[
-				"id_wr",
-				"id_wreg"
-			],
-			[
-				"id_reg",
-				"id_reg2"
-			],
-			[
-				"id_a",
-				"id_alusel"
-			],
-			[
-				"id_alu",
-				"id_aluop"
-			],
-			[
-				"STD_LOGIC",
-				"STD_LOGIC_VECTOR"
 			]
 		]
 	},
@@ -602,6 +602,8 @@
 	},
 	"file_history":
 	[
+		"/Users/pxxgogo/Desktop/exp2.cpp",
+		"/Users/pxxgogo/Desktop/计算机组成原理/armcpu-master-d89e603943a63364e993f9569f53af84a27c26bc/armcpu/src/stage_mem.v",
 		"/Users/pxxgogo/Desktop/CPU32/src/memcontrol.vhd",
 		"/Users/pxxgogo/Desktop/CPU32/src/mmu.vhd",
 		"/Users/pxxgogo/Downloads/cloudAPI/prj2_fpgy/cloudAPI/src/linkface_api/CreatFaceId.java",
@@ -727,9 +729,7 @@
 		"/Users/pxxgogo/Desktop/stanford_NLP/stanford-corenlp/edu/stanford/nlp/pipeline/StanfordCoreNLPServer.java",
 		"/Users/pxxgogo/Desktop/stanford_NLP/stanford-corenlp/SemgrexDemo.java",
 		"/Users/pxxgogo/Desktop/stanford_NLP/stanford-corenlp/tokensregex/color.properties",
-		"/Users/pxxgogo/Desktop/stanford_NLP/stanford-corenlp/input.txt.out",
-		"/Volumes/Untitled/asmHW_Final/result.txt",
-		"/Users/pxxgogo/AndroidStudioProjects/TingShuo/app/src/main/assets/ShareSDK.xml"
+		"/Users/pxxgogo/Desktop/stanford_NLP/stanford-corenlp/input.txt.out"
 	],
 	"find":
 	{
@@ -747,6 +747,11 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"tag",
+			"g_rip_route_table",
+			"state",
+			"stallreq",
+			"timer_int_o",
 			"inst_ce_o",
 			"vocab_size",
 			"extrr",
@@ -869,12 +874,7 @@
 			"StringUtils",
 			"strict",
 			"main",
-			"model",
-			"NLPIR_ParagraphProcessA",
-			"p2",
-			"indexof",
-			"6",
-			"0"
+			"model"
 		],
 		"highlight": true,
 		"in_selection": false,
