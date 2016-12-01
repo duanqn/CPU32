@@ -108,6 +108,14 @@ begin
             stallreq <= '0';
             state := 0;
           end if;
+        when others => 
+          ope_ce <= '0';
+          ope_we <= '0';
+          ope_addr <= (others => '0');
+          write_data <= (others => '0');
+          align_type <= ALIGN_TYPE_WORD;
+          stallreq <= '0';
+          state := 0;
       end case;
     end if;
   end process;

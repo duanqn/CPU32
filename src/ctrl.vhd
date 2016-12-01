@@ -26,13 +26,13 @@ BEGIN
         stall <= "000000";
         flush <= '0';
         new_pc <= X"00000000";
-      ELSIF (stallreq_from_ex = '1') THEN
-        stall <= "001111";
+      ELSIF (excepttype_i /= X"00000000") THEN
+        stall <= "000000";
         flush <= '1';
         case(excepttype_i) is
-          when X"00000001" =>
-            new_pc <= X"00000020";
-          when X"00000008" =>
+          when X"00000002" =>        -- tlbL
+            new_pc <= X"80000020";
+          when X"00000008" =>        -- syscall
             new_pc <= X"00000040";
           when X"0000000a" =>
             new_pc <= X"00000040";
@@ -40,7 +40,11 @@ BEGIN
             new_pc <= X"00000040";
           when X"0000000e" =>
             new_pc <= cp0_epc_i;
+
         end case;
+      ELSIF (stallreq_from_ex = '1') THEN
+        stall <= "001111";
+        flush <= '0';
       ELSIF (stallreq_from_id = '1') THEN
         stall <= "000111";
         flush <= '0';

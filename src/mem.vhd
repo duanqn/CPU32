@@ -191,18 +191,6 @@ begin
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_BYTE;
-          case( mem_addr_i(1 downto 0) ) is
-            when "00" =>
-              mem_align <= "1000";
-            when "01" =>
-              mem_align <= "0100";
-            when "10" =>
-              mem_align <= "0010";
-            when "11" =>
-              mem_align <= "0001";
-            when others =>
-              mem_align <= "0000";
-          end case;
         when EXE_SW_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
