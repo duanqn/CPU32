@@ -79,12 +79,14 @@ architecture arch of mem is
 	signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
+  signal excepttype: STD_LOGIC_VECTOR(31 downto 0);
 begin
 
   mem_we_o <= mem_we;
   zero32 <= X"00000000";
   is_in_delayslot_o <= is_in_delayslot_i;
 	current_inst_addr_o <= current_inst_addr_i;
+  excepttype_o <= excepttype;
 
 
   identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i)
@@ -252,34 +254,34 @@ begin
 	process(rst, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
   begin
 	  if(rst = '0') then
-			excepttype_o <= X"00000000";
+			excepttype <= X"00000000";
 		else
-			excepttype_o <= X"00000000";
+			excepttype <= X"00000000";
 			if (current_inst_addr_i /= X"00000000") then
 				if ((cp0_cause(15 downto 8) and (cp0_status(15 downto 8))) /= "00000000" and (cp0_status(1) = '0') and (cp0_status(0) = '1')) then
-					excepttype_o <= X"00000007"; -- Interrupt
+					excepttype <= X"00000007"; -- Interrupt
 				elsif (excepttype_i(8) = '1') then
-					excepttype_o <= X"00000008"; -- Syscall
+					excepttype <= X"00000008"; -- Syscall
 				elsif (excepttype_i(9) = '1') then
-					excepttype_o <= X"0000000a"; -- Invalid instruction
+					excepttype <= X"0000000a"; -- Invalid instruction
 				elsif (excepttype_i(11) = '1') then
-					excepttype_o <= X"0000000c"; -- Overflow
+					excepttype <= X"0000000c"; -- Overflow
 				elsif (excepttype_i(12) = '1') then
-					excepttype_o <= X"0000000e"; -- ERET
+					excepttype <= X"0000000e"; -- ERET
         elsif (mmu_exc_code = "100") then
-          excepttype_o <= x"00000004";  -- ADEL
+          excepttype <= x"00000004";  -- ADEL
           badAddr_o <= mmu_badAddr;
         elsif (mmu_exc_code = "101") then
-          excepttype_o <= x"00000005";  -- ADES
+          excepttype <= x"00000005";  -- ADES
           badAddr_o <= mmu_badAddr;
         elsif (mmu_exc_code = "010") then
-          excepttype_o <= x"00000002";  -- TLBL
+          excepttype <= x"00000002";  -- TLBL
           badAddr_o <= mmu_badAddr;
         elsif (mmu_exc_code = "011") then
-          excepttype_o <= x"00000003";  -- TLBS
+          excepttype <= x"00000003";  -- TLBS
           badAddr_o <= mmu_badAddr;
         elsif (mmu_exc_code = "001") then
-          excepttype_o <= x"00000001";  -- TLB modify
+          excepttype <= x"00000001";  -- TLB modify
           badAddr_o <= mmu_badAddr;
 				end if;
 		  end if;

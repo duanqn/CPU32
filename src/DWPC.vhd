@@ -46,10 +46,10 @@ port(
 
   to_physical_addr : out std_logic_vector(23 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
-  
+
   to_physical_read_enable : out std_logic;
   to_physical_write_enable : out std_logic;
-  
+
   from_physical_data : in std_logic_vector(31 downto 0);
   from_physical_ready : in std_logic;
   from_physical_serial : in std_logic
@@ -59,7 +59,7 @@ end component;
 
 component mem_phy
 port(
-  clk : in  STD_LOGIC;  
+  clk : in  STD_LOGIC;
   addr : in  STD_LOGIC_VECTOR (23 downto 0);
   data_in : in  STD_LOGIC_VECTOR (31 downto 0);
   data_out : out  STD_LOGIC_VECTOR (31 downto 0) := X"FFFFFFFF";
@@ -110,17 +110,17 @@ signal serialport_data_ready: STD_LOGIC;
 
 begin
 
-cpu0: openmips port map( 
+cpu0: openmips port map(
   rst => rst, clk => clk, to_physical_addr => physical_addr, to_physical_data => physical_data_in,
   to_physical_read_enable => read_enable, to_physical_write_enable => write_enable,
   from_physical_data => physical_data_out, from_physical_ready => ready_data, from_physical_serial => serialport_data_ready
   );
 
-ready_data => not busy;
+ready_data <= not busy;
 
 mem_phy0: mem_phy port map(
   clk => clk, addr => physical_addr, data_in => physical_data_in, data_out => physical_data_out, write_enable => write_enable,
-  read_enable => read_enable, busy => busy, serialport_data_ready => serialport_data_ready, 
+  read_enable => read_enable, busy => busy, serialport_data_ready => serialport_data_ready,
   baseram_we => baseram_we, baseram_oe => baseram_oe, baseram_ce => baseram_ce, baseram_data => baseram_data, baseram_addr => baseram_addr,
   extraram_we => extraram_we, extraram_oe => extraram_oe, extraram_ce => extraram_ce, extraram_data => extraram_data, extraram_addr => extraram_addr,
   flash_data => flash_data, flash_addr => flash_addr, flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1, flash_control_ce2 => flash_control_ce2,
@@ -130,4 +130,3 @@ mem_phy0: mem_phy port map(
 
 
 end architecture ; -- arch
-

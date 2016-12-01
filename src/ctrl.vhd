@@ -12,6 +12,7 @@ ENTITY ctrl IS
     stallreq_from_mem: IN STD_LOGIC;
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
     cp0_epc_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    cp0_ebase_i: IN STD_LOGIC_VECTOR(31 downto 0);
     new_pc: OUT STD_LOGIC_VECTOR(31 downto 0);
     flush: OUT STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
@@ -30,17 +31,12 @@ BEGIN
         stall <= "000000";
         flush <= '1';
         case(excepttype_i) is
-          when X"00000002" =>        -- tlbL
-            new_pc <= X"80000020";
-          when X"00000008" =>        -- syscall
-            new_pc <= X"00000040";
-          when X"0000000a" =>
-            new_pc <= X"00000040";
-          when X"0000000c" =>
-            new_pc <= X"00000040";
-          when X"0000000e" =>
-            new_pc <= cp0_epc_i;
-
+          when X"00000002" =>  -- TLBL
+            new_pc <= "10"&cp0_ebase_i(29 downto 12) & "000000000000";
+          when X"00000003" =>  -- TLBS
+            new_pc <= "10"&cp0_ebase_i(29 downto 12) & "000000000000";
+          when others =>
+            new_pc <= "10"&cp0_ebase_i(29 downto 12) & "000110000000";
         end case;
       ELSIF (stallreq_from_ex = '1') THEN
         stall <= "001111";
