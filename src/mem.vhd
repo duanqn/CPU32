@@ -299,5 +299,9 @@ begin
 	end process;
 
 	--logic confusing
-	mem_we_o <= mem_we and (not (or excepttype_o));
+  if(excepttype = x"00000000") then
+    mem_we_o <= mem_we;
+  else
+    mem_we_o <= '0';
+  end if;
 end architecture ; -- arch
