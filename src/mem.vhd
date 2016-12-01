@@ -79,7 +79,6 @@ architecture arch of mem is
 	signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
-	signal mem_we: STD_LOGIC;
 begin
 
   mem_we_o <= mem_we;
@@ -106,7 +105,7 @@ begin
 			cp0_reg_write_addr_o <= "00000";
 			cp0_reg_data_o <= X"00000000";
       tlb_write_enable <= '0';
-      
+
 
     else
       wd_o <= wd_i;
@@ -262,7 +261,7 @@ begin
 	  end if;
   end process;
 
-	process(rst, excepttype_o, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
+	process(rst, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
   begin
 	  if(rst = '0') then
 			excepttype_o <= X"00000000";
