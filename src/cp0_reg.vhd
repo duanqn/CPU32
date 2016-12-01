@@ -91,7 +91,7 @@ begin
       --EPC_o init
       register_values(14) <= X"00000000";
       --EBase_o init(not sure on the 9 to 0 bits)
-      register_values(15) <= X"80000180";
+      register_values(15) <= X"00000000";
 
       register_values(1) <= X"00000000";
       register_values(4) <= X"00000000";
