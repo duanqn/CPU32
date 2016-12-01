@@ -117,6 +117,20 @@ begin
       branch_target_address_o <= x"00000000";
       link_addr_o <= x"00000000";
 
+    elsif (inst_i = "01000010000000000000000000000010") then
+      wreg_o <= '0';
+      aluop_o <= EXE_TLBWI_OP;
+      alusel_o <= EXE_RES_NOP;
+      reg1_read_o <= '0';
+      reg2_read_o <= '0';
+      instvalid <= '1';
+      excepttype_is_eret <= '0';
+      excepttype_is_syscall <= '0';
+      branch_flag_o <= '0';
+      next_inst_in_delayslot_o <= '0';
+      branch_target_address_o <= x"00000000";
+      link_addr_o <= x"00000000";
+
     else
       case op is
         when EXE_ORI =>  --ORI

@@ -24,7 +24,7 @@ ENTITY ex_mem IS
     stall: IN STD_LOGIC_VECTOR(5 downto 0);
     flush: IN STD_LOGIC;
     ex_excepttype: IN STD_LOGIC_VECTOR(31 downto 0);
-    ex_current_inst_address: IN STD_LOGIC_VECTOR(31 downto 0);
+    ex_current_inst_addr: IN STD_LOGIC_VECTOR(31 downto 0);
     ex_is_in_delayslot: IN STD_LOGIC;
 
     mem_wd: BUFFER STD_LOGIC_VECTOR (4 downto 0);         --5bit  �ô��׶ε�ָ��Ҫд��Ŀ�ļĴ�����ֵ
@@ -40,7 +40,7 @@ ENTITY ex_mem IS
     mem_cp0_reg_write_addr: OUT STD_LOGIC_VECTOR (4 downto 0);
     mem_cp0_reg_data: OUT STD_LOGIC_VECTOR (31 downto 0);
     mem_excepttype: OUT STD_LOGIC_VECTOR(31 downto 0);
-    mem_current_inst_address: OUT STD_LOGIC_VECTOR(31 downto 0);
+    mem_current_inst_addr: OUT STD_LOGIC_VECTOR(31 downto 0);
     mem_is_in_delayslot: OUT STD_LOGIC
   );
 end ex_mem;
@@ -66,7 +66,7 @@ end ex_mem;
             mem_cp0_reg_data <= X"00000000";
             mem_excepttype <= X"00000000";
             mem_is_in_delayslot <= '0';
-            mem_current_inst_address <= X"00000000";
+            mem_current_inst_addr <= X"00000000";
 
           elsif (flush = '1') then
             mem_wb <= "00000";
@@ -83,7 +83,7 @@ end ex_mem;
             mem_cp0_reg_data <= X"00000000";
             mem_excepttype <= X"00000000"；
             mem_is_in_delayslot <= '0';
-            mem_current_inst_address <= X"00000000";
+            mem_current_inst_addr <= X"00000000";
 
 
 			 ELSIF (stall(3) = '1' and stall(4) = '0') THEN
@@ -101,7 +101,7 @@ end ex_mem;
             mem_cp0_reg_data <= X"00000000";
             mem_excepttype <= X"00000000";
             mem_is_in_delayslot <= '0';
-            mem_current_inst_address <= X"00000000";
+            mem_current_inst_addr <= X"00000000";
 
           ELSIF (stall(3) = '0') THEN
             mem_wd <= ex_wd;
@@ -118,7 +118,7 @@ end ex_mem;
             mem_cp0_reg_data <= ex_cp0_reg_data;
             mem_excepttype <= ex_excepttype;
             mem_is_in_delayslot <= ex_is_in_delayslot;
-            mem_current_inst_address <= ex_current_inst_address;
+            mem_current_inst_addr <= ex_current_inst_addr;
           END IF;
         END IF;
       END PROCESS;

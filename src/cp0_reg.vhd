@@ -16,17 +16,23 @@ entity cp0_reg is
     data_i : in std_logic_vector(31 downto 0);
 
     -- output ports
+
     data_o : out std_logic_vector(31 downto 0);
+
     Index_o : out std_logic_vector(31 downto 0);
     EntryLo0_o : out std_logic_vector(31 downto 0);
     EntryLo1_o : out std_logic_vector(31 downto 0);
-    BadVAddr_o : out std_logic_vector(31 downto 0);
-    Count_o : out std_logic_vector(31 downto 0);
+    PageMask_o : out std_logic_vector(31 downto 0);
     EntryHi_o : out std_logic_vector(31 downto 0);
-    Compare_o : out std_logic_vector(31 downto 0);
-    Status_o : out std_logic_vector(31 downto 0);
+
     Cause_o : out std_logic_vector(31 downto 0);
     EPC_o : out std_logic_vector(31 downto 0);
+    Status_o : out std_logic_vector(31 downto 0);
+    
+    BadVAddr_o : out std_logic_vector(31 downto 0);
+    Count_o : out std_logic_vector(31 downto 0);
+    Compare_o : out std_logic_vector(31 downto 0);
+    
     EBase_o : out std_logic_vector(31 downto 0);
     timer_int_o : out std_logic;
 
@@ -46,6 +52,7 @@ begin
   Index_o <= register_values(0);
   EntryLo0_o <= register_values(2);
   EntryLo1_o <= register_values(3);
+  PageMask_o <= register_values(5);
   BadVAddr_o <= register_values(8);
   Count_o <= register_values(9);
   EntryHi_o <= register_values(10);
