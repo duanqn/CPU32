@@ -11,22 +11,22 @@ entity mmu is
 port(
   clk : in std_logic;
   rst : in std_logic;
-  
+
   -- during instruction fetch time slice
   ope_addr: in std_logic_vector(31 downto 0);
   ope_we: in std_logic;
   ope_ce: in std_logic;
   write_data: in std_logic_vector(31 downto 0);
-  
+
   -- during memory time slice
-  
+
   read_data: out std_logic_vector(31 downto 0);
   ready : out std_logic;      -- memory access is ready ready
-  
+
   -- about exception
-  -- 0001: ps2     0010: com1    0100: com2     1000: mmu extra 
+  -- 0001: ps2     0010: com1    0100: com2     1000: mmu extra
   serial_int : out std_logic_vector(3 downto 0);   -- interrupt, send to the exception module
-  
+
   -- "000": no exception  "001":TLB modified  "010":TLBL  "011":TLBS  "100":ADEL  "101":ADES
   exc_code : out std_logic_vector(2 downto 0);    -- exception code
   bad_addr: out std_logic_vector(31 downto 0);
@@ -34,22 +34,22 @@ port(
   -- index(69 downto 63) EntryHi(62 downto 44) EntryLo0(43 downto 24) DV(23 downto 22) EntryLo1(21 downto 2) DV(1 downto 0)
   tlb_write_struct : in std_logic_vector(TLB_WRITE_STRUCT_WIDTH-1 downto 0);
   tlb_write_enable : in std_logic;
-  
+
   -- which kind of alignment? from IDecode
   -- "00" 4byte   "01" 2byte    "10" 1byte
   align_type : in std_logic_vector(1 downto 0);
-  
+
   -- send to physical level
   -- the address passed down to physical level of memory
-  -- RAM:"00" + "0" + address(20 downto 0)    
+  -- RAM:"00" + "0" + address(20 downto 0)
   -- Flash:"01" + address(21 downto 0)
   -- Serial:"10" + "0000000000000000000000";
   to_physical_addr : out std_logic_vector(23 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
-  
+
   to_physical_read_enable : out std_logic;
   to_physical_write_enable : out std_logic;
-  
+
   -- from physical level
   from_physical_data : in std_logic_vector(31 downto 0);
   from_physical_ready : in std_logic;
@@ -58,10 +58,10 @@ port(
 end mmu;
 
 architecture Behavioral of mmu_module is
-  
+
   -- choose between instruction_addr and virtual_addr
   signal addr : std_logic_vector(31 downto 0);
-  
+
   -- related to TLB
   -- EntryHi(62 downto 44) EntryLo0(43 downto 24) DV0(23 downto 22) EntryLo1(21 downto 2) DV1(1 downto 0)
   type tlb_mem_block is array(TLB_NUM_ENTRY-1 downto 0) of std_logic_vector(TLB_ENTRY_WIDTH-1 downto 0);
@@ -78,43 +78,46 @@ architecture Behavioral of mmu_module is
   signal tlb_missing : std_logic;
   signal tlb_writable : std_logic;
   -- end of tlb signals
-  
-  
+
+
   signal not_use_mmu : std_logic;
   signal special_com1_status : std_logic := '0';
-  
+
   -- physical address after TLB transform
   -- not the one that give to the physical level
   signal physical_addr : std_logic_vector(31 downto 0);
-    
+
   -- related to serial port
     -- the value of (COM1 + 4)
   signal serial_status_reg : std_logic := '1';
-  
+
   -- exception code
   signal no_exception_accur : std_logic := '1';
   signal exc_counter : std_logic := '0';
-  
+
   -- to physical level registers
   signal to_physical_addr_reg : std_logic_vector(23 downto 0);
   signal to_physical_data_reg : std_logic_vector(31 downto 0);
   signal to_physical_read_enable_reg : std_logic := '0';
   signal to_physical_write_enable_reg : std_logic := '0';
   signal to_physical_counter : std_logic := '0';
-  
+
 begin
 
 -- serial logic
   -- choose addr on posedge
-  process(clk, rst)
-  begin
-        if rst = '0' then
-            addr <= x"90000000";
-    elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
-      addr <= ope_addr;
-    end if;
-  end process;
-  
+  --process(clk, rst)
+  --begin
+  --      if rst = '0' then
+  --          addr <= x"90000000";
+  --  elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
+  --    addr <= ope_addr;
+  --  end if;
+  --end process;
+
+  addr <= ope_addr;
+
+
   -- handle TLBWI
   process(clk)
     variable tlb_index : integer range 127 downto 0 := 0;
@@ -126,7 +129,7 @@ begin
       end if;
     end if;
   end process;
-  
+
   -- handle exception
   process(clk, rst)
   begin
@@ -160,35 +163,35 @@ begin
       end if;
     end if;
   end process;
-  
-  
-  
+
+
+
   -- clear enable and data and addr on posedge
   -- send information to physical level on negedge
   to_physical_addr <= to_physical_addr_reg;
   to_physical_data <= to_physical_data_reg;
   to_physical_read_enable <= to_physical_read_enable_reg;
   to_physical_write_enable <= to_physical_write_enable_reg;
-  
--- combination logic  
+
+-- combination logic
   -- control signal
   not_use_mmu <= '1' when addr(31 downto 29) = "100" or addr(31 downto 29) = "101"
              else '0' ;
-             
+
   special_com1_status <= '1'  when addr(31 downto 0) = VIRTUAL_SERIAL_STATUS
                   else '0';
-                  
+
   physical_addr <= "000" & addr(28 downto 0)
               when not_use_mmu = '1'
               else tlb_lookup_result(20 downto 1) & addr(11 downto 0)
                when not_use_mmu = '0' and tlb_missing = '0'
               else x"FFFFFFFF";
-              
+
   no_exception_accur <= '1'
                   when (not((align_type = ALIGN_TYPE_HALF_WORD and addr(0) = '1') or (align_type = ALIGN_TYPE_WORD and addr(1 downto 0) /= "00")) )
                       and tlb_missing = '0' and tlb_writable = '1'
                  else '0';
-                 
+
   -- to physical_level
   to_physical_addr_reg <= "00" & physical_addr(23 downto 2) -- Flash
                     when physical_addr(31 downto 24) = x"1E"
@@ -199,44 +202,44 @@ begin
                   else "11" & x"000" & physical_addr(11 downto 2)
                     when physical_addr(31 downto 12) = x"10000"
                   else x"FFFFFF";
-          
+
   to_physical_data_reg <= data_in;
-  
+
   to_physical_read_enable_reg <= '1'
                       when( special_com1_status = '0' and to_physical_counter = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '0' and ope_ce = '1')
                     else '0';
-                  
+
   to_physical_write_enable_reg <= '1'
-                      when( special_com1_status = '0' and to_physical_counter = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '1' and ope_ce = '1') 
+                      when( special_com1_status = '0' and to_physical_counter = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '1' and ope_ce = '1')
                     else '0';
 
   -- to top mem level
   read_data <= x"0000000" & "00" & serial_status_reg & "1"
           when (special_com1_status = '1')
           else from_physical_data;
-  
+
   ready <= from_physical_ready;
   --serial_int <= from_physical_serial;
-  serial_int <= "0000"
-  
+  serial_int <= "0000";
+
   -- register of serial status, return this directly if you load serial status
-  serial_status_reg <= '1' 
+  serial_status_reg <= '1'
                 when (from_physical_serial = '1')
                 else '0';
-    
+
   -- which EntryLo is selected and generate tlb_temp
   tlb_check : for i in tlb_num_entry-1 downto 0 generate
     tlb_which_equal(i) <= '1' when (tlb_mem(i)(62 downto 44) = addr(31 downto 13))
                   else '0';
-    tlb_which_low(i*2) <= tlb_which_equal(i) and tlb_mem(i)(0) and ( addr(12));   
+    tlb_which_low(i*2) <= tlb_which_equal(i) and tlb_mem(i)(0) and ( addr(12));
     tlb_which_low(i*2+1) <= tlb_which_equal(i) and tlb_mem(i)(22) and ( not addr(12));
-  
+
     tlb_temp : for j in 20 downto 0 generate
       tlb_low_temp_value(j)(i*2) <= tlb_which_low(i*2) and tlb_mem(i)(j+1);
       tlb_low_temp_value(j)(i*2+1) <= tlb_which_low(i*2+1) and tlb_mem(i)(j+23);
     end generate tlb_temp;
   end generate tlb_check;
-  
+
   -- generate lookup result
   -- tlb_lookup_result can be generated with "or reduce" operator in Verilog, but in VHDL it is difficult
   tlb_result : for i in 20 downto 0 generate
@@ -497,7 +500,7 @@ begin
                             tlb_low_temp_value(i)(254) or
                             tlb_low_temp_value(i)(255);
   end generate tlb_result;
-  
+
   tlb_missing <= not(
                       not_use_mmu or
                       tlb_which_low(0) or
@@ -758,5 +761,5 @@ begin
                       tlb_which_low(255)
               );
   tlb_writable <= not_use_mmu or tlb_lookup_result(0);
-  
+
 end architecture;

@@ -58,7 +58,7 @@ ENTITY ex IS
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
-    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
+    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0);
 
     excepttype_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     current_inst_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -97,18 +97,15 @@ end ex;
     excepttype_o <= excepttype_i(31 downto 12) & ovassert & '0' & excepttype_i(9 downto 8) & "00000000";
     is_in_delayslot_o <= is_in_delayslot_i;
     current_inst_addr_o <= current_inst_addr_i;
-    if (aluop_i = EXE_SUBU_OP OR aluop_i = EXE_SLT_OP) then
-      reg2_i_mux <= NOT(reg2_i) + 1;
-    else
-      reg2_i_mux <= reg2_i;
-    end if;
+    reg2_i_mux <= NOT(reg2_i) + X"00000001" 
+      when (aluop_i = EXE_SUBU_OP OR aluop_i = EXE_SLT_OP)
+      else reg2_i_mux <= reg2_i;
     result_sum <= reg1_i + reg2_i_mux;
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
-    if(aluop_i = EXE_SLT_OP) then
-      reg1_lt_reg2 <= (reg1_i(31) AND (NOT(reg2_i(31)))) OR (NOT(reg1_i(31)) AND NOT(reg2_i(31)) AND NOT(result_sum(31))) OR (reg1_i(31) AND reg2_i(31) AND result_sum(31));
-    else
-      reg1_lt_reg2 <= (reg1_i < reg2_i);
-    end if;
+    
+    reg1_lt_reg2 <= (reg1_i(31) AND (NOT(reg2_i(31)))) OR (NOT(reg1_i(31)) AND NOT(reg2_i(31)) AND NOT(result_sum(31))) OR (reg1_i(31) AND reg2_i(31) AND result_sum(31))
+      when (aluop_i = EXE_SLT_OP)
+      else (reg1_i < reg2_i);
 
     -- get reg2_i's complement
     process(aluop_i, reg2_i)
