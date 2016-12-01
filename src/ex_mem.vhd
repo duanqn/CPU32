@@ -69,7 +69,7 @@ end ex_mem;
             mem_current_inst_addr <= X"00000000";
 
           elsif (flush = '1') then
-            mem_wb <= "00000";
+            mem_wd <= "00000";
             mem_wreg <= '0';
             mem_wdata <= X"00000000";
             mem_hi <= X"00000000";
