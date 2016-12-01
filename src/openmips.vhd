@@ -382,7 +382,7 @@ architecture arch of openmips is
 
   component ctrl
   port (
-    rrst: IN STD_LOGIC;
+    rst: IN STD_LOGIC;
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
