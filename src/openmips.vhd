@@ -227,7 +227,7 @@ architecture arch of openmips is
     cp0_reg_read_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
     cp0_reg_we_o: OUT STD_LOGIC;
     cp0_reg_write_addr_o: OUT STD_LOGIC_VECTOR(4 downto 0);
-    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0)
+    cp0_reg_data_o: OUT STD_LOGIC_VECTOR(31 downto 0);
 
     excepttype_o: OUT STD_LOGIC_VECTOR(31 downto 0);
     current_inst_addr_o: OUT STD_LOGIC_VECTOR(31 downto 0);
@@ -438,7 +438,7 @@ architecture arch of openmips is
     ready : out std_logic;
 
     -- about exception
-    serial_int : out std_logic_vector(3 downto 0); 
+    serial_int : out std_logic_vector(3 downto 0);
     exc_code : out std_logic_vector(2 downto 0);
     bad_addr: out std_logic_vector(31 downto 0);
 
@@ -486,11 +486,11 @@ architecture arch of openmips is
     Cause_o : out std_logic_vector(31 downto 0);
     EPC_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
-    
+
     BadVAddr_o : out std_logic_vector(31 downto 0);
     Count_o : out std_logic_vector(31 downto 0);
     Compare_o : out std_logic_vector(31 downto 0);
-    
+
     EBase_o : out std_logic_vector(31 downto 0);
     timer_int_o : out std_logic;
 
@@ -536,11 +536,11 @@ architecture arch of openmips is
   signal EntryLo1 : std_logic_vector(31 downto 0);
   signal PageMask : std_logic_vector(31 downto 0);
   signal EntryHi : std_logic_vector(31 downto 0);
-    
+
   signal BadVAddr : std_logic_vector(31 downto 0);
   signal Count : std_logic_vector(31 downto 0);
   signal Compare : std_logic_vector(31 downto 0);
-    
+
   signal EBase : std_logic_vector(31 downto 0);
   signal timer_int : std_logic;
 
@@ -643,7 +643,7 @@ architecture arch of openmips is
 
 -- MEM to CTRL
   signal cp0_epc_mem: STD_LOGIC_VECTOR(31 downto 0);
-  
+
 
 
 -- MEM to MEM/WB
@@ -697,7 +697,7 @@ begin
   pc_reg0: pc_reg port map(
     clk => clk_new, rst => rst, pc => pc, ce => inst_ce,
     stall => stall, branch_target_address_i => branch_target_address,
-    branch_flag_i => branch_flag， flush => flush, new_pc => new_pc);
+    branch_flag_i => branch_flag, flush => flush, new_pc => new_pc);
 
 
 
@@ -807,7 +807,7 @@ begin
     wb_wdata => wb_wdata_i, wb_whilo => wb_whilo_i,
     wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall,
     mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
-    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i, flush => flush,
+    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i, flush => flush
     );
 
   hilo_reg0: hilo_reg port map(
@@ -819,7 +819,7 @@ begin
   cp0_reg0: cp0_reg port map(
     clk => clk_new, rst => rst,
     data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
-    raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu, 
+    raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu,
     excepttype_i => excepttype_mem, current_inst_addr_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
     Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, Index_o => Index, EntryHi_o => EntryHi, EntryLo0_o => EntryLo0,
     EntryLo1_o => EntryLo1, PageMask_o => PageMask, BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
