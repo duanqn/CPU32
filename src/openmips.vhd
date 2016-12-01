@@ -833,7 +833,7 @@ begin
   memcontrol0: memcontrol port map(
     rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
     ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_align => ram_align, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
-    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce
+    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce, data_ready => data_ready
     );
 
   mmu0: mmu port map(
