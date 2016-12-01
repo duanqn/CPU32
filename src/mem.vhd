@@ -298,6 +298,36 @@ begin
 		end if;
 	end process;
 
-	--logic confusing
-	mem_we_o <= mem_we and (not (or excepttype_o));
+	mem_we_o <= mem_we and (not (excepttype(0)
+or excepttype(1)
+or excepttype(2)
+or excepttype(3)
+or excepttype(4)
+or excepttype(5)
+or excepttype(6)
+or excepttype(7)
+or excepttype(8)
+or excepttype(9)
+or excepttype(10)
+or excepttype(11)
+or excepttype(12)
+or excepttype(13)
+or excepttype(14)
+or excepttype(15)
+or excepttype(16)
+or excepttype(17)
+or excepttype(18)
+or excepttype(19)
+or excepttype(20)
+or excepttype(21)
+or excepttype(22)
+or excepttype(23)
+or excepttype(24)
+or excepttype(25)
+or excepttype(26)
+or excepttype(27)
+or excepttype(28)
+or excepttype(29)
+or excepttype(30)
+or excepttype(31)));
 end architecture ; -- arch

@@ -745,7 +745,7 @@ begin
                   alusel_o <= EXE_RES_NOP;
                   reg1_read_o <= '0';
                   reg2_read_o <= '0';
-                  instvalid <= '1'
+                  instvalid <= '1';
                   excepttype_is_eret <= '0';
                   excepttype_is_syscall <= '1';
                   link_addr_o <= x"00000000";
@@ -844,7 +844,7 @@ begin
             link_addr_o <= x"00000000";
             branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
-            next_inst_in_delayslot_o <= '0'
+            next_inst_in_delayslot_o <= '0';
           end if;
 
         when others =>  -- op
