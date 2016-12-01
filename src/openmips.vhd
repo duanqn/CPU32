@@ -382,12 +382,13 @@ architecture arch of openmips is
 
   component ctrl
   port (
-    rst: IN STD_LOGIC;
+    rrst: IN STD_LOGIC;
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
     cp0_epc_i: IN STD_LOGIC_VECTOR(31 downto 0);
+    cp0_ebase_i: IN STD_LOGIC_VECTOR(31 downto 0);
     new_pc: OUT STD_LOGIC_VECTOR(31 downto 0);
     flush: OUT STD_LOGIC;
     stall: OUT STD_LOGIC_VECTOR(5 downto 0)
@@ -828,7 +829,7 @@ begin
 
   ctrl0: ctrl port map(
     rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem, cp0_epc_i => cp0_epc_mem, excepttype_i => excepttype_mem,
-    new_pc => new_pc, flush => flush);
+    new_pc => new_pc, flush => flush, cp0_ebase_i => EBase);
 
   memcontrol0: memcontrol port map(
     rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
