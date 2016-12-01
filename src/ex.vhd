@@ -87,19 +87,17 @@ end ex;
     SIGNAL hilo_temp: STD_LOGIC_VECTOR(63 downto 0);
     SIGNAL mulres: STD_LOGIC_VECTOR(63 downto 0);
 
-    SIGNAL ovassert: STD_LOGIC;
-
   BEGIN
 
     aluop_o <= aluop_i;
     mem_addr_o <= reg1_i + ((31 downto 16 => inst_i(15)) & inst_i(15 downto 0));
     reg2_o <= reg2_i;
-    excepttype_o <= excepttype_i(31 downto 12) & ovassert & '0' & excepttype_i(9 downto 8) & "00000000";
+    excepttype_o <= excepttype_i(31 downto 12) & '0' & '0' & excepttype_i(9 downto 8) & "00000000";
     is_in_delayslot_o <= is_in_delayslot_i;
     current_inst_addr_o <= current_inst_addr_i;
     result_sum <= reg1_i + reg2_i_mux;
     ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
-    
+
 
     -- get reg2_i's complement
     process(aluop_i, reg2_i)
@@ -498,7 +496,7 @@ end ex;
         END CASE;
       END PROCESS;
 -- mtc0
-    PROCESS(rst, cp0_reg_data_o, cp0_reg_write_addr_o, cp0_reg_we_o, inst_i, reg1_i)
+    PROCESS(rst, inst_i, reg1_i)
       BEGIN
         IF(rst = '0') THEN
           cp0_reg_write_addr_o <= "00000";
@@ -515,15 +513,4 @@ end ex;
         END IF;
       END PROCESS;
 
-  --ov_sum overflow
-    PROCESS(aluop_i, ovassert, wreg_o)
-      BEGIN
-        IF(aluop_i = EXE_ADD_OP) THEN
-          ovassert <= '1';
-          wreg_o <= '0';
-        ELSE
-          wreg_o <= wreg_i;
-          ovassert <= '0';
-        END IF;
-    END PROCESS;
 end behave;
