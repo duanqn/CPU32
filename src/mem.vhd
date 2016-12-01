@@ -82,7 +82,38 @@ architecture arch of mem is
   signal excepttype: STD_LOGIC_VECTOR(31 downto 0);
 begin
 
-  mem_we_o <= mem_we;
+  mem_we_o <= mem_we and (not (excepttype(0)
+or excepttype(1)
+or excepttype(2)
+or excepttype(3)
+or excepttype(4)
+or excepttype(5)
+or excepttype(6)
+or excepttype(7)
+or excepttype(8)
+or excepttype(9)
+or excepttype(10)
+or excepttype(11)
+or excepttype(12)
+or excepttype(13)
+or excepttype(14)
+or excepttype(15)
+or excepttype(16)
+or excepttype(17)
+or excepttype(18)
+or excepttype(19)
+or excepttype(20)
+or excepttype(21)
+or excepttype(22)
+or excepttype(23)
+or excepttype(24)
+or excepttype(25)
+or excepttype(26)
+or excepttype(27)
+or excepttype(28)
+or excepttype(29)
+or excepttype(30)
+or excepttype(31)));
   zero32 <= X"00000000";
   is_in_delayslot_o <= is_in_delayslot_i;
 	current_inst_addr_o <= current_inst_addr_i;
@@ -193,18 +224,6 @@ begin
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
           mem_align <= ALIGN_TYPE_BYTE;
-          case( mem_addr_i(1 downto 0) ) is
-            when "00" =>
-              mem_align <= "1000";
-            when "01" =>
-              mem_align <= "0100";
-            when "10" =>
-              mem_align <= "0010";
-            when "11" =>
-              mem_align <= "0001";
-            when others =>
-              mem_align <= "0000";
-          end case;
         when EXE_SW_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
@@ -300,36 +319,5 @@ begin
 		end if;
 	end process;
 
-	mem_we_o <= mem_we and (not (excepttype(0)
-or excepttype(1)
-or excepttype(2)
-or excepttype(3)
-or excepttype(4)
-or excepttype(5)
-or excepttype(6)
-or excepttype(7)
-or excepttype(8)
-or excepttype(9)
-or excepttype(10)
-or excepttype(11)
-or excepttype(12)
-or excepttype(13)
-or excepttype(14)
-or excepttype(15)
-or excepttype(16)
-or excepttype(17)
-or excepttype(18)
-or excepttype(19)
-or excepttype(20)
-or excepttype(21)
-or excepttype(22)
-or excepttype(23)
-or excepttype(24)
-or excepttype(25)
-or excepttype(26)
-or excepttype(27)
-or excepttype(28)
-or excepttype(29)
-or excepttype(30)
-or excepttype(31)));
+
 end architecture ; -- arch
