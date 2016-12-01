@@ -81,7 +81,7 @@ end ex_mem;
             mem_cp0_reg_we <= '0';
             mem_cp0_reg_write_addr <= "00000";
             mem_cp0_reg_data <= X"00000000";
-            mem_excepttype <= X"00000000"；
+            mem_excepttype <= X"00000000";
             mem_is_in_delayslot <= '0';
             mem_current_inst_addr <= X"00000000";
 
