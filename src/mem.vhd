@@ -175,6 +175,8 @@ or excepttype(31)));
               wdata_o <= (31 downto 8 => mem_data_i(15)) & mem_data_i(15 downto 8);
             when "11" =>
               wdata_o <= (31 downto 8 => mem_data_i(7)) & mem_data_i(7 downto 0);
+            when others =>
+              wdata_o <= (others => '0');
           end case;
         when EXE_LBU_OP =>
           mem_addr_o <= mem_addr_i;
@@ -193,6 +195,8 @@ or excepttype(31)));
               wdata_o <= (31 downto 8 => '0') & mem_data_i(15 downto 8);
             when "11" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(7 downto 0);
+            when others =>
+              wdata_o <= (others => '0');
           end case;
         when EXE_LHU_OP =>
           mem_addr_o <= mem_addr_i;
