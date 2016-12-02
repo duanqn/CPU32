@@ -75,7 +75,7 @@ end mem;
 
 architecture arch of mem is
   signal mem_we: STD_LOGIC;
-	signal zero32: STD_LOGIC_VECTOR(31 downto 0);
+	--signal zero32: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
@@ -114,13 +114,13 @@ or excepttype(28)
 or excepttype(29)
 or excepttype(30)
 or excepttype(31)));
-  zero32 <= X"00000000";
+  --zero32 <= X"00000000";
   is_in_delayslot_o <= is_in_delayslot_i;
 	current_inst_addr_o <= current_inst_addr_i;
   excepttype_o <= excepttype;
 
 
-  identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i)
+  identifier : process(rst, wd_i, wreg_i, wdata_i, hi_i, lo_i, whilo_i, aluop_i, mem_addr_i, mem_data_i, reg2_i, cp0_reg_we_i, cp0_reg_write_addr_i, cp0_reg_data_i, Index_i, EntryLo0_i, EntryLo1_i, EntryHi_i)
   begin
     if(rst='0') then
       wd_o <= "00000";
@@ -282,7 +282,7 @@ or excepttype(31)));
 	  end if;
   end process;
 
-	process(rst, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i)
+	process(rst, excepttype_i, cp0_cause, cp0_status, current_inst_addr_i, mmu_exc_code, mmu_badAddr)
   begin
 	  if(rst = '0') then
 			excepttype <= X"00000000";

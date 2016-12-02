@@ -109,12 +109,6 @@ end ex;
         END IF;
       end process;
 
-    result_sum <= reg1_i + reg2_i_mux;
-
-    -- about overflow
-    ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
-
-
     process(aluop_i, reg1_i, reg2_i, result_sum)
     BEGIN
       IF (aluop_i = EXE_SLT_OP) THEN
@@ -207,7 +201,7 @@ end ex;
       END PROCESS;
 
 -- about MFHI, MFLO
-    PROCESS(rst, aluop_i, HI, LO)
+    PROCESS(rst, aluop_i, HI, LO, inst_i, cp0_reg_data_i, mem_cp0_reg_we, mem_cp0_reg_write_addr, wb_cp0_reg_we, wb_cp0_reg_write_addr)
       BEGIN
         IF(rst = '0') THEN
           moveres <= X"00000000";
@@ -496,7 +490,7 @@ end ex;
         END CASE;
       END PROCESS;
 -- mtc0
-    PROCESS(rst, inst_i, reg1_i)
+    PROCESS(rst, inst_i, reg1_i, aluop_i)
       BEGIN
         IF(rst = '0') THEN
           cp0_reg_write_addr_o <= "00000";
