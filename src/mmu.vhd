@@ -65,7 +65,7 @@ architecture Behavioral of mmu is
   -- related to TLB
   -- EntryHi(62 downto 44) EntryLo0(43 downto 24) DV0(23 downto 22) EntryLo1(21 downto 2) DV1(1 downto 0)
   type tlb_mem_block is array(TLB_NUM_ENTRY-1 downto 0) of std_logic_vector(TLB_ENTRY_WIDTH-1 downto 0);
-  signal tlb_mem : tlb_mem_block := (others => '0');
+  signal tlb_mem : tlb_mem_block := (others => (others => '0'));
   -- a matrix (21*32) to store the temp value
   type tlb_low_temp_value_block is array(20 downto 0) of std_logic_vector(tlb_num_entry*2-1 downto 0);
   signal tlb_low_temp_value : tlb_low_temp_value_block;
