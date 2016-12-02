@@ -45,6 +45,8 @@ entity mem_phy is
 end mem_phy;
 
 architecture behave of mem_phy is
+
+signal data_ready: STD_LOGIC := 0;
 component ram
     Port(
       -- up
@@ -144,17 +146,17 @@ signal sel_data: STD_LOGIC_VECTOR(6 downto 0) := "0000000";
 
 begin
     u3: async_receiver port map(
-      clk => high_freq_clk, RxD => serialport_rxd,
+      clk => clk, RxD => serialport_rxd,
       RxD_data_ready => serialport_receive_signal,
       RxD_data => serialport_receive_data);
 
     u4: async_transmitter port map(
-      clk => high_freq_clk, Txd => serialport_txd,
+      clk => clk, Txd => serialport_txd,
       TxD_start => serialport_transmit_signal,TxD_data => serialport_transmit_data,
       Txd_busy => serialport_transmit_busy);
 
     u2: flash port map(
-      clk => high_freq_clk, addr => flash_ope_addr, data_in => flash_write_data,
+      clk => clk, addr => flash_ope_addr, data_in => flash_write_data,
       data_out => flash_read_data,flash_addr => flash_addr, flash_data => flash_data,
       read_enable => flash_read_signal, write_enable => '0', erase_enable => '0',
       flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1,
@@ -163,7 +165,7 @@ begin
       flash_control_oe => flash_control_oe, flash_control_we => flash_control_we, data_ready => flash_data_ready);
 
     u1: ram port map(
-      clk => high_freq_clk, rst => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
+      clk => clk, rst => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
       ope_addr => ram_ope_addr, write_data => ram_write_data,
       read_data => ram_read_data, ope_we => ram_ope_we,
       baseram_addr => baseram_addr, baseram_data => baseram_data,
@@ -246,5 +248,7 @@ begin
         data_ready <= '0';
       end if;
     end process;
+
+    busy <= not data_ready;
 
 end behave;
