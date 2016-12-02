@@ -3,7 +3,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 use work.CPU32.ALL;
 
-entity phy_mem is
+entity mem_phy is
     Port (
       clk : in  STD_LOGIC;  
       addr : in  STD_LOGIC_VECTOR (23 downto 0);
@@ -42,7 +42,7 @@ entity phy_mem is
       serialport_txd : out STD_LOGIC;
       serialport_rxd : in STD_LOGIC
       );
-end phy_mem;
+end mem_phy;
 
 architecture Behavioral of phy_mem is
 component ram

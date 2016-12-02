@@ -45,12 +45,13 @@ begin
     begin
         if (rst = '0') then
             read_data <= (others => '0');
-            ram_addr <= (others => '0');
+            baseram_addr <= (others => '0');
             state <= (others => '0');
             baseram_data <= (others => 'Z');
             baseram_ce <= '1';
             baseram_oe <= '1';
             baseram_we <= '1';
+            extraram_addr <= (others => '0');
             extraram_data <= (others => 'Z');
             extraram_ce <= '1';
             extraram_oe <= '1';

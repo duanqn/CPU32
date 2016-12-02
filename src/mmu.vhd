@@ -57,7 +57,7 @@ port(
 );
 end mmu;
 
-architecture Behavioral of mmu_module is
+architecture Behavioral of mmu is
 
   -- choose between instruction_addr and virtual_addr
   signal addr : std_logic_vector(31 downto 0);

@@ -402,7 +402,7 @@ architecture arch of openmips is
     clk: in STD_LOGIC;
     inst_data_i: out STD_LOGIC_VECTOR(31 downto 0);
     inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
-    inst_ce_o: out STD_LOGIC;
+    inst_ce_o: in STD_LOGIC;
 
     ram_data_i: out STD_LOGIC_VECTOR(31 downto 0);
     ram_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
