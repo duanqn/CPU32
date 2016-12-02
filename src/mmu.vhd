@@ -65,7 +65,7 @@ architecture Behavioral of mmu is
   -- related to TLB
   -- EntryHi(62 downto 44) EntryLo0(43 downto 24) DV0(23 downto 22) EntryLo1(21 downto 2) DV1(1 downto 0)
   type tlb_mem_block is array(TLB_NUM_ENTRY-1 downto 0) of std_logic_vector(TLB_ENTRY_WIDTH-1 downto 0);
-  signal tlb_mem : tlb_mem_block;
+  signal tlb_mem : tlb_mem_block := (others => '0');
   -- a matrix (21*32) to store the temp value
   type tlb_low_temp_value_block is array(20 downto 0) of std_logic_vector(tlb_num_entry*2-1 downto 0);
   signal tlb_low_temp_value : tlb_low_temp_value_block;
@@ -93,14 +93,12 @@ architecture Behavioral of mmu is
 
   -- exception code
   signal no_exception_accur : std_logic := '1';
-  signal exc_counter : std_logic := '0';
 
   -- to physical level registers
   signal to_physical_addr_reg : std_logic_vector(23 downto 0);
   signal to_physical_data_reg : std_logic_vector(31 downto 0);
   signal to_physical_read_enable_reg : std_logic := '0';
   signal to_physical_write_enable_reg : std_logic := '0';
-  signal to_physical_counter : std_logic := '0';
 
 begin
 
@@ -131,35 +129,39 @@ begin
   end process;
 
   -- handle exception
-  process(clk, rst)
+  process(align_type, ope_ce, addr, tlb_missing)
   begin
     if( (align_type = ALIGN_TYPE_HALF_WORD and addr(0) = '1') or (align_type = ALIGN_TYPE_WORD and addr(1 downto 0) /= "00") ) then
       if( ope_ce = '1' and ope_we = '0' )then
         exc_code <= ADE_L;
         bad_addr <= addr;
-        exc_counter <= '1';
       elsif( ope_ce = '1' and ope_we = '1') then
         exc_code <= ADE_S;
         bad_addr <= addr;
-        exc_counter <= '1';
+      else
+        exc_code <= (others => '0');
+        bad_addr <= (others => '0');
       end if;
     -- tlb missing
     elsif tlb_missing = '1' then
       if( ope_ce = '1' and ope_we = '0' )then
         exc_code <= TLB_L;
         bad_addr <= addr;
-        exc_counter <= '1';
       elsif( ope_ce = '1' and ope_we = '1' ) then
         exc_code <= TLB_S;
         bad_addr <= addr;
-        exc_counter <= '1';
+      else
+        exc_code <= (others => '0');
+        bad_addr <= (others => '0');
       end if;
     -- tlb modified
     elsif ( tlb_writable = '0') then
       if( ope_ce = '1' and ope_we = '1' ) then
         exc_code <= TLB_MODIFIED;
         bad_addr <= addr;
-        exc_counter <= '1';
+      else
+        exc_code <= (others => '0');
+        bad_addr <= (others => '0');
       end if;
     end if;
   end process;
@@ -206,11 +208,11 @@ begin
   to_physical_data_reg <= write_data;
 
   to_physical_read_enable_reg <= '1'
-                      when( special_com1_status = '0' and to_physical_counter = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '0' and ope_ce = '1')
+                      when( special_com1_status = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '0' and ope_ce = '1')
                     else '0';
 
   to_physical_write_enable_reg <= '1'
-                      when( special_com1_status = '0' and to_physical_counter = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '1' and ope_ce = '1')
+                      when( special_com1_status = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '1' and ope_ce = '1')
                     else '0';
 
   -- to top mem level

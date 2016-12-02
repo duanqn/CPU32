@@ -75,12 +75,10 @@ end ex;
     SIGNAL HI: STD_LOGIC_VECTOR(31 downto 0);
     SIGNAL LO: STD_LOGIC_VECTOR(31 downto 0);
 
-    SIGNAL ov_sum: STD_LOGIC;
     SIGNAL reg1_eq_reg2: STD_LOGIC;
     SIGNAL reg1_lt_reg2: STD_LOGIC;
     SIGNAL arithmeticres: STD_LOGIC_VECTOR(31 downto 0);
     SIGNAL reg2_i_mux: STD_LOGIC_VECTOR(31 downto 0);
-    SIGNAL reg1_i_not: STD_LOGIC_VECTOR(31 downto 0);
     SIGNAL result_sum: STD_LOGIC_VECTOR(31 downto 0);
     SIGNAL opdata1_mult: STD_LOGIC_VECTOR(31 downto 0);
     SIGNAL opdata2_mult: STD_LOGIC_VECTOR(31 downto 0);
@@ -96,7 +94,6 @@ end ex;
     is_in_delayslot_o <= is_in_delayslot_i;
     current_inst_addr_o <= current_inst_addr_i;
     result_sum <= reg1_i + reg2_i_mux;
-    ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
 
 
     -- get reg2_i's complement
@@ -124,7 +121,6 @@ end ex;
       END IF;
     end process;
 
-    reg1_i_not <= not reg1_i;
 
     -- get arithmeticres
     PROCESS(rst, aluop_i, result_sum, reg1_lt_reg2)
@@ -201,14 +197,18 @@ end ex;
       END PROCESS;
 
 -- about MFHI, MFLO
-    PROCESS(rst, aluop_i, HI, LO, inst_i, cp0_reg_data_i, mem_cp0_reg_we, mem_cp0_reg_write_addr, wb_cp0_reg_we, wb_cp0_reg_write_addr)
+    PROCESS(rst, aluop_i, HI, LO, inst_i, cp0_reg_data_i, mem_cp0_reg_we, mem_cp0_reg_write_addr, wb_cp0_reg_we, wb_cp0_reg_write_addr, mem_cp0_reg_data, wb_cp0_reg_data)
       BEGIN
         IF(rst = '0') THEN
           moveres <= X"00000000";
         ELSE
           CASE aluop_i IS
-            WHEN EXE_MFHI_OP => moveres <= HI;
-            WHEN EXE_MFLO_OP => moveres <= LO;
+            WHEN EXE_MFHI_OP => 
+              moveres <= HI;
+              cp0_reg_read_addr_o <= "00000";
+            WHEN EXE_MFLO_OP => 
+              moveres <= LO;
+              cp0_reg_read_addr_o <= "00000";
             WHEN EXE_MFC0_OP => cp0_reg_read_addr_o <= inst_i(15 downto 11);
                                 moveres <= cp0_reg_data_i;
                                 if (mem_cp0_reg_we = '1' AND mem_cp0_reg_write_addr = inst_i(15 downto 11)) then
@@ -216,7 +216,9 @@ end ex;
                                 elsif (wb_cp0_reg_we = '1' AND wb_cp0_reg_write_addr = inst_i(15 downto 11)) then
                                   moveres <= wb_cp0_reg_data;
                                 end if;
-            WHEN others => moveres <= X"00000000";
+            WHEN others => 
+              moveres <= X"00000000";
+              cp0_reg_read_addr_o <= "00000";
           END CASE;
         END IF;
       END PROCESS;

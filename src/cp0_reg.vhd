@@ -29,12 +29,12 @@ entity cp0_reg is
     EPC_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
 
-    BadVAddr_o : out std_logic_vector(31 downto 0);
-    Count_o : out std_logic_vector(31 downto 0);
-    Compare_o : out std_logic_vector(31 downto 0);
+    --BadVAddr_o : out std_logic_vector(31 downto 0);
+    --Count_o : out std_logic_vector(31 downto 0);
+    --Compare_o : out std_logic_vector(31 downto 0);
 
     EBase_o : out std_logic_vector(31 downto 0);
-    timer_int_o : out std_logic;
+    --timer_int_o : out std_logic;
 
     excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
     current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);

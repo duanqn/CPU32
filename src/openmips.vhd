@@ -488,12 +488,12 @@ architecture arch of openmips is
     EPC_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
 
-    BadVAddr_o : out std_logic_vector(31 downto 0);
-    Count_o : out std_logic_vector(31 downto 0);
-    Compare_o : out std_logic_vector(31 downto 0);
+    --BadVAddr_o : out std_logic_vector(31 downto 0);
+    --Count_o : out std_logic_vector(31 downto 0);
+    --Compare_o : out std_logic_vector(31 downto 0);
 
     EBase_o : out std_logic_vector(31 downto 0);
-    timer_int_o : out std_logic;
+    --timer_int_o : out std_logic;
 
     excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
     current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);
@@ -538,12 +538,12 @@ architecture arch of openmips is
   signal PageMask : std_logic_vector(31 downto 0);
   signal EntryHi : std_logic_vector(31 downto 0);
 
-  signal BadVAddr : std_logic_vector(31 downto 0);
-  signal Count : std_logic_vector(31 downto 0);
-  signal Compare : std_logic_vector(31 downto 0);
+  --signal BadVAddr : std_logic_vector(31 downto 0);
+  --signal Count : std_logic_vector(31 downto 0);
+  --signal Compare : std_logic_vector(31 downto 0);
 
   signal EBase : std_logic_vector(31 downto 0);
-  signal timer_int : std_logic;
+  --signal timer_int : std_logic;
 
 
 -- clock
@@ -823,8 +823,8 @@ begin
     raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu,
     excepttype_i => excepttype_mem, current_inst_address_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
     Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, Index_o => Index, EntryHi_o => EntryHi, EntryLo0_o => EntryLo0,
-    EntryLo1_o => EntryLo1, PageMask_o => PageMask, BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
-    EBase_o => EBase, timer_int_o => timer_int
+    EntryLo1_o => EntryLo1, PageMask_o => PageMask, --BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
+    EBase_o => EBase--, timer_int_o => timer_int
   );
 
   ctrl0: ctrl port map(
@@ -834,14 +834,14 @@ begin
   memcontrol0: memcontrol port map(
     rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
     ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_align => ram_align, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
-    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce, data_ready => data_ready
+    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce, data_ready => data_ready, align_type => align_type
     );
 
   mmu0: mmu port map(
     clk => clk, rst => rst, ope_addr => ope_addr, write_data => ope_data, ope_we => ope_we, ope_ce => ope_ce, read_data => mmu_result_data, ready => data_ready,
     align_type => align_type, serial_int => serial_int_mmu, exc_code => exc_code_mmu, tlb_write_struct => tlb_write_struct, tlb_write_enable => tlb_write_enable,
     to_physical_addr => to_physical_addr, to_physical_data => to_physical_data, to_physical_read_enable => to_physical_read_enable, to_physical_write_enable => to_physical_write_enable,
-    from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial
+    from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial, bad_addr => bad_addr_mmu
     );
 
 
