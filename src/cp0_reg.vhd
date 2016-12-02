@@ -45,7 +45,7 @@ end cp0_reg;
 
 architecture behave of cp0_reg is
   type register_bank is array(31 downto 0) of std_logic_vector(31 downto 0);
-  signal register_values: register_bank := (11=>x"00FFFFFF", 12=>x"10000000", 15=>x"80000180",others => (others => '0'));
+  signal register_values: register_bank := (11=>x"00000000", 12=>x"10000000", 15=>x"80000180",others => (others => '0'));
 
 begin
 
@@ -91,7 +91,7 @@ begin
       --EPC_o init
       register_values(14) <= X"00000000";
       --EBase_o init(not sure on the 9 to 0 bits)
-      register_values(15) <= X"00000000";
+      register_values(15) <= X"80000180";
 
       register_values(1) <= X"00000000";
       register_values(4) <= X"00000000";
