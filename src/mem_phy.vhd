@@ -2,6 +2,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 use work.CPU32.ALL;
+use work.rom.ALL;
 
 entity mem_phy is
     Port (
@@ -46,7 +47,7 @@ end mem_phy;
 
 architecture behave of mem_phy is
 
-signal data_ready: STD_LOGIC := 0;
+signal data_ready: STD_LOGIC := '0';
 component ram
     Port(
       -- up
