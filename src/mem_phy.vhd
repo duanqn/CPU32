@@ -57,6 +57,7 @@ component ram
       ope_we: in std_logic;
       ope_ce1: in std_logic;
       ope_ce2: in std_logic;
+      data_ready: out std_logic;
            
       -- down
       baseram_addr: out std_logic_vector(19 downto 0);
@@ -78,18 +79,23 @@ signal ram_read_data: std_logic_vector(31 downto 0);
 signal ram_ope_we: std_logic;
 signal ram_ope_ce1: std_logic := '0';
 signal ram_ope_ce2: std_logic := '0';
+signal ram_data_ready: std_logic;
 
 
 
 component flash is
     Port ( 
-      clk : in  STD_LOGIC; 
-      addr : in  STD_LOGIC_VECTOR (21 downto 0); 
+      clk : in  STD_LOGIC;
+      addr : in  STD_LOGIC_VECTOR (21 downto 0);
       data_in : in STD_LOGIC_VECTOR (15 downto 0);
       data_out : out  STD_LOGIC_VECTOR (15 downto 0);
+
       read_enable: in std_logic;
       write_enable: in std_logic;
       erase_enable: in std_logic;
+
+      data_ready: out std_logic;
+
       flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
       flash_data : inout  STD_LOGIC_VECTOR (15 downto 0);
       flash_control_ce0: out std_logic;
@@ -106,6 +112,8 @@ signal flash_read_signal: std_logic := '0';
 signal flash_read_data: std_logic_vector(15 downto 0);
 constant flash_write_data: std_logic_vector(15 downto 0) := (others => '0'); -- not supported
 signal flash_ope_addr: std_logic_vector(21 downto 0);
+signal flash_data_ready: std_logic;
+
 
 component async_receiver
     port(
@@ -152,7 +160,7 @@ begin
       flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1,
       flash_control_ce2 => flash_control_ce2, flash_control_byte => flash_control_byte,
       flash_control_vpen => flash_control_vpen, flash_control_rp => flash_control_rp,
-      flash_control_oe => flash_control_oe, flash_control_we => flash_control_we);
+      flash_control_oe => flash_control_oe, flash_control_we => flash_control_we, data_ready => flash_data_ready);
 
     u1: ram port map(
       clk => high_freq_clk, rst => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
@@ -161,103 +169,82 @@ begin
       baseram_addr => baseram_addr, baseram_data => baseram_data, 
       baseram_ce => baseram_ce, baseram_oe => baseram_oe, baseram_we => baseram_we,
       extraram_addr => extraram_addr, extraram_data => extraram_data, 
-      extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we);
+      extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we, data_ready => ram_data_ready);
     
 
-    process (high_freq_clk) 
-        variable state : integer := 0;
+    signal sel_data: STD_LOGIC_VECTOR(6 downto 0) := "0000000";
+    process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in)
     begin
-        if (high_freq_clk'event and high_freq_clk = '1') then
-            -- check signal from serial port
-            if (serialport_receive_signal = '1') then
-                -- if have data incoming, latch it
-                serialport_data_latch <= serialport_receive_data;
-                serialport_data_ready <= '1';
-            end if;
-            -- read flash from 0 to 13
-            -- write ram from 0 to 101 to  ...
-            -- read ram from 0 to 201 to ...
-            -- read serial port form 0 to 0, need only one cycle
-            -- read serial port from 0 to 301 to 0, need waiting at 301 for a long time
-            -- read from rom
-            case (state) is
-                when 0 =>
-                    -- read flash
-                    if (read_enable = '1' and addr(23 downto 22) = "00") then
-                        flash_ope_addr <= addr(21 downto 0);
-                        flash_read_signal <= '1';
-                        state := 1;
-                    -- write ram
-                    elsif (write_enable = '1' and addr(23 downto 22) = "01") then
-                        ram_ope_addr <= addr(19 downto 0);
-                        ram_write_data <= data_in;
-                        ram_ope_we <= '0';
-                        ram_ope_ce1 <= not addr(20);
-                        ram_ope_ce2 <= addr(20);
-                        state := 101;
-                    -- read ram
-                    elsif (read_enable = '1' and addr(23 downto 22) = "01") then
-                        ram_ope_addr <= addr(19 downto 0);
-                        ram_ope_we <= '1';
-                        ram_ope_ce1 <= not addr(20);
-                        ram_ope_ce2 <= addr(20);
-                        state := 201;
-                    -- read serial port
-                    elsif (read_enable = '1' and addr(23 downto 22) = "10") then
-                        data_out <= X"000000" & serialport_data_latch;
-                        serialport_data_ready <= '0';
-                        state := 0;
-                    -- write serial port
-                    elsif (write_enable = '1' and addr(23 downto 22) = "10") then
-                        serialport_transmit_signal <= '1';
-                        serialport_transmit_data <= data_in(7 downto 0);
-                        state := 301;
-                    -- read rom
-                    elsif (read_enable = '1' and addr(23 downto 22) = "11") then
-                        data_out <= boot_rom(to_integer(unsigned(addr(21 downto 0))));
-                    else 
-                        state := 0;
-                        flash_read_signal <= '0';
-                    end if;
-                when 1|2|3|4|5|7|8|9|10|11|12 =>
-                    state := state + 1;
-                when 6 =>
-                    flash_read_signal <= '0';
-                    state := state + 1;
-                when 13 =>
-                    data_out <= X"0000" & flash_read_data;
-                    state := 0;
-                when 101 =>
-                    ram_ope_ce1 <= '0';
-                    ram_ope_ce2 <= '0';
-                    state := 102;
-                when 102 to 103 =>
-                    state := state + 1;
-                when 104 =>
-                    state := 0;
-                when 201 =>
-                    ram_ope_ce1 <= '0';
-                    ram_ope_ce2 <= '0';
-                    state := 202;
-                when 202 to 203 =>
-                    state := state + 1;
-                when 204 =>
-                    data_out <= ram_read_data;
-                    state := 0;
-                when 301 =>
-                    serialport_transmit_signal <= '0';
-                    if (serialport_transmit_busy = '0') then
-                        state := 0;
-                    end if;
-                when others =>
-                    state := 0;
-            end case;
-            
-            case (state) is
-                when 0 => busy <= '0';
-                when others => busy <= '1';
-            end case;
-            
-        end if;
+      if (serialport_receive_signal = '1') then
+        -- if have data incoming, latch it
+        serialport_data_latch <= serialport_receive_data;
+        serialport_data_ready <= '1';
+      end if;
+      -- read flash
+      if (read_enable = '1' and addr(23 downto 22) = "00") then
+          flash_ope_addr <= addr(21 downto 0);
+          flash_read_signal <= '1';
+          sel_data <= "0100000";
+
+      -- write ram
+      elsif (write_enable = '1' and addr(23 downto 22) = "01") then
+          ram_ope_addr <= addr(19 downto 0);
+          ram_write_data <= data_in;
+          ram_ope_we <= '0';
+          ram_ope_ce1 <= not addr(20);
+          ram_ope_ce2 <= addr(20);
+          sel_data <= "0010000";
+      -- read ram
+      elsif (read_enable = '1' and addr(23 downto 22) = "01") then
+          ram_ope_addr <= addr(19 downto 0);
+          ram_ope_we <= '1';
+          ram_ope_ce1 <= not addr(20);
+          ram_ope_ce2 <= addr(20);
+          sel_data <= "0001000";
+      -- read serial port
+      elsif (read_enable = '1' and addr(23 downto 22) = "10") then
+          serialport_data_ready <= '0';
+          sel_data <= "0000100";
+      -- write serial port
+      elsif (write_enable = '1' and addr(23 downto 22) = "10") then
+          serialport_transmit_data <= data_in(7 downto 0);
+          sel_data <= "0000010";
+      -- read rom
+      elsif (read_enable = '1' and addr(23 downto 22) = "11") then
+          sel_data <= "0000001";
+      else 
+          flash_read_signal <= '0';
+          sel_data <= "0000000";
+      end if;
     end process;
+
+    process(sel_data, flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, addr)
+    begin
+      if flash_data_ready = '1' and sel_data = "0100000" then -- flash read
+        data_out <= X"0000" & flash_read_data;
+        data_ready <= '1';
+      elsif ram_data_ready = '1' and sel_data = "0010000" then -- ram write
+        data_ready <= '1';
+      elsif ram_data_ready = '1' and sel_data = "0001000" then -- ram read
+        data_ready <= '1';
+        data_out <= ram_read_data;
+      elsif sel_data = "0000100" then -- serialport_read
+        data_ready <= '1';
+        data_out <= X"000000" & serialport_data_latch;
+      elsif sel_data = "0000010" then -- serialport_transmit
+        serialport_transmit_signal <= '1';
+        if serialport_transmit_busy = '0' then
+          serialport_transmit_signal <= '0';
+          data_ready <= '1';
+        else
+          data_ready <= '0';
+        end if;
+      elsif sel_data = "0000001" then -- rom_read
+        data_out <= boot_rom(to_integer(unsigned(addr(21 downto 0))));
+        data_ready <= '1';
+      else
+        data_ready <= '0';
+      end if;
+    end process;
+
 end Behavioral;
