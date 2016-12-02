@@ -129,7 +129,7 @@ begin
   end process;
 
   -- handle exception
-  process(align_type, ope_ce, addr, tlb_missing)
+  process(align_type, ope_ce, addr, tlb_missing, ope_we, tlb_writable)
   begin
     if( (align_type = ALIGN_TYPE_HALF_WORD and addr(0) = '1') or (align_type = ALIGN_TYPE_WORD and addr(1 downto 0) /= "00") ) then
       if( ope_ce = '1' and ope_we = '0' )then
