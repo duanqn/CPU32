@@ -109,12 +109,6 @@ end ex;
         END IF;
       end process;
 
-    result_sum <= reg1_i + reg2_i_mux;
-
-    -- about overflow
-    ov_sum <= (((not reg1_i(31)) and (not reg2_i_mux(31))) and result_sum(31)) or ((reg1_i(31) and reg2_i_mux(31)) and (not result_sum(31)));
-
-
     process(aluop_i, reg1_i, reg2_i, result_sum)
     BEGIN
       IF (aluop_i = EXE_SLT_OP) THEN
