@@ -53,17 +53,17 @@ begin
   EntryLo0_o <= register_values(2);
   EntryLo1_o <= register_values(3);
   PageMask_o <= register_values(5);
-  BadVAddr_o <= register_values(8);
-  Count_o <= register_values(9);
+  --BadVAddr_o <= register_values(8);
+  --Count_o <= register_values(9);
   EntryHi_o <= register_values(10);
-  Compare_o <= register_values(11);
+  --Compare_o <= register_values(11);
   Status_o <= register_values(12);
   Cause_o <= register_values(13);
   EPC_o <= register_values(14);
   EBase_o <= register_values(15);
 
   register_values(13)(14 downto 11) <= mmu_int_i;
-  timer_int_o <= register_values(13)(10);
+  --timer_int_o <= register_values(13)(10);
 
   write_operation : process(rst, clk, we_i, waddr_i, data_i)
   begin
