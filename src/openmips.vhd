@@ -794,7 +794,10 @@ begin
     cp0_reg_data_o => mem_cp0_reg_data_o, cp0_reg_write_addr_o => mem_cp0_reg_write_addr_o, cp0_reg_we_o => mem_cp0_reg_we_o,
     excepttype_i => excepttype_ex_mem, current_inst_addr_i => current_inst_addr_ex_mem, is_in_delayslot_i => is_in_delayslot_ex_mem,
     cp0_epc_i => cp0_epc, cp0_status_i => cp0_status, cp0_cause_i => cp0_cause, wb_cp0_reg_data => wb_cp0_reg_data_i,
-    wb_cp0_reg_we => wb_cp0_reg_we_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, mmu_exc_code => exc_code_mmu, mmu_badAddr => bad_addr_mmu,
+    wb_cp0_reg_we => wb_cp0_reg_we_i, 
+    wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, 
+    mmu_exc_code => exc_code_mmu, 
+    mmu_badAddr => bad_addr_mmu,
     badAddr_o => bad_addr_mem, excepttype_o => excepttype_mem, current_inst_addr_o => current_inst_addr_mem, is_in_delayslot_o => is_in_delayslot_mem,
     cp0_epc_o => cp0_epc_mem, Index_i => Index, EntryLo0_i => EntryLo0, EntryLo1_i => EntryLo1, PageMask_i => PageMask, EntryHi_i => EntryHi,
     tlb_write_struct => tlb_write_struct, tlb_write_enable => tlb_write_enable);
