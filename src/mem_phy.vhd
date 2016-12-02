@@ -3,9 +3,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.numeric_std.all;
 use work.CPU32.ALL;
 
-entity phy_mem is
+entity mem_phy is
     Port (
-      clk : in  STD_LOGIC;  
+      clk : in  STD_LOGIC;
       addr : in  STD_LOGIC_VECTOR (23 downto 0);
       data_in : in  STD_LOGIC_VECTOR (31 downto 0);
       data_out : out  STD_LOGIC_VECTOR (31 downto 0) := X"FFFFFFFF";
@@ -42,15 +42,15 @@ entity phy_mem is
       serialport_txd : out STD_LOGIC;
       serialport_rxd : in STD_LOGIC
       );
-end phy_mem;
+end mem_phy;
 
-architecture Behavioral of phy_mem is
+architecture behave of mem_phy is
 component ram
     Port(
       -- up
       clk: in std_logic;
       rst: in std_logic;
-         
+
       ope_addr: in std_logic_vector(19 downto 0);
       write_data: in std_logic_vector(31 downto 0);
       read_data: out std_logic_vector(31 downto 0);
@@ -58,7 +58,7 @@ component ram
       ope_ce1: in std_logic;
       ope_ce2: in std_logic;
       data_ready: out std_logic;
-           
+
       -- down
       baseram_addr: out std_logic_vector(19 downto 0);
       baseram_data: inout std_logic_vector(31 downto 0);
@@ -84,7 +84,7 @@ signal ram_data_ready: std_logic;
 
 
 component flash is
-    Port ( 
+    Port (
       clk : in  STD_LOGIC;
       addr : in  STD_LOGIC_VECTOR (21 downto 0);
       data_in : in STD_LOGIC_VECTOR (15 downto 0);
@@ -105,7 +105,7 @@ component flash is
       flash_control_vpen: out std_logic;
       flash_control_rp: out std_logic;
       flash_control_oe: out std_logic;
-      flash_control_we: out std_logic);    
+      flash_control_we: out std_logic);
 end component;
 
 signal flash_read_signal: std_logic := '0';
@@ -117,9 +117,9 @@ signal flash_data_ready: std_logic;
 
 component async_receiver
     port(
-      clk: in std_logic; 
-      RxD: in std_logic; 
-      RxD_data_ready: out std_logic; 
+      clk: in std_logic;
+      RxD: in std_logic;
+      RxD_data_ready: out std_logic;
       RxD_data: out std_logic_vector(7 downto 0));
 end component;
 
@@ -129,10 +129,10 @@ signal serialport_data_latch: std_logic_vector(7 downto 0);
 
 component async_transmitter
     port(
-      clk: in std_logic; 
-      TxD_start: in std_logic; 
-      TxD_data: in std_logic_vector(7 downto 0); 
-      TxD: out std_logic; 
+      clk: in std_logic;
+      TxD_start: in std_logic;
+      TxD_data: in std_logic_vector(7 downto 0);
+      TxD: out std_logic;
       TxD_busy: out std_logic);
 end component;
 
@@ -140,21 +140,21 @@ signal serialport_transmit_signal : std_logic := '0';
 signal serialport_transmit_data : std_logic_vector(7 downto 0);
 signal serialport_transmit_busy : std_logic := '0';
 
-
+signal sel_data: STD_LOGIC_VECTOR(6 downto 0) := "0000000";
 
 begin
     u3: async_receiver port map(
-      clk => high_freq_clk, RxD => serialport_rxd, 
-      RxD_data_ready => serialport_receive_signal, 
-      RxD_data => serialport_receive_data);  
-    
+      clk => high_freq_clk, RxD => serialport_rxd,
+      RxD_data_ready => serialport_receive_signal,
+      RxD_data => serialport_receive_data);
+
     u4: async_transmitter port map(
-      clk => high_freq_clk, Txd => serialport_txd, 
-      TxD_start => serialport_transmit_signal,TxD_data => serialport_transmit_data, 
+      clk => high_freq_clk, Txd => serialport_txd,
+      TxD_start => serialport_transmit_signal,TxD_data => serialport_transmit_data,
       Txd_busy => serialport_transmit_busy);
-    
+
     u2: flash port map(
-      clk => high_freq_clk, addr => flash_ope_addr, data_in => flash_write_data, 
+      clk => high_freq_clk, addr => flash_ope_addr, data_in => flash_write_data,
       data_out => flash_read_data,flash_addr => flash_addr, flash_data => flash_data,
       read_enable => flash_read_signal, write_enable => '0', erase_enable => '0',
       flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1,
@@ -164,15 +164,15 @@ begin
 
     u1: ram port map(
       clk => high_freq_clk, rst => '1', ope_ce1 => ram_ope_ce1, ope_ce2 => ram_ope_ce2,
-      ope_addr => ram_ope_addr, write_data => ram_write_data, 
+      ope_addr => ram_ope_addr, write_data => ram_write_data,
       read_data => ram_read_data, ope_we => ram_ope_we,
-      baseram_addr => baseram_addr, baseram_data => baseram_data, 
+      baseram_addr => baseram_addr, baseram_data => baseram_data,
       baseram_ce => baseram_ce, baseram_oe => baseram_oe, baseram_we => baseram_we,
-      extraram_addr => extraram_addr, extraram_data => extraram_data, 
+      extraram_addr => extraram_addr, extraram_data => extraram_data,
       extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we, data_ready => ram_data_ready);
-    
 
-    signal sel_data: STD_LOGIC_VECTOR(6 downto 0) := "0000000";
+
+
     process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in)
     begin
       if (serialport_receive_signal = '1') then
@@ -212,7 +212,7 @@ begin
       -- read rom
       elsif (read_enable = '1' and addr(23 downto 22) = "11") then
           sel_data <= "0000001";
-      else 
+      else
           flash_read_signal <= '0';
           sel_data <= "0000000";
       end if;
@@ -247,4 +247,4 @@ begin
       end if;
     end process;
 
-end Behavioral;
+end behave;

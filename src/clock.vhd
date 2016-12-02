@@ -16,7 +16,7 @@ ARCHITECTURE arch OF clock IS
 signal clk_2: STD_LOGIC := '0';
 BEGIN
 
-  PROCESS(clk)
+  PROCESS(clk, rst)
     BEGIN
       if(rst = '0') then
         clk_2 <= '0';
@@ -25,7 +25,7 @@ BEGIN
       END IF;
     END PROCESS;
 
-  PROCESS(clk_2)
+  PROCESS(clk_2, rst)
     BEGIN
       if(rst = '0') then
         clk_new <= '0';

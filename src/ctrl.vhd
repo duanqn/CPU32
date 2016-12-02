@@ -21,7 +21,7 @@ ENTITY ctrl IS
 
 ARCHITECTURE arch OF ctrl IS
 BEGIN
-  PROCESS(rst, stallreq_from_ex, stallreq_from_id, stallreq_from_mem, excepttype_i, cp0_ebase_i)
+  PROCESS(rst, stallreq_from_ex, stallreq_from_id, stallreq_from_mem, excepttype_i, cp0_ebase_i, cp0_epc_i)
     BEGIN
       if (rst = '0') THEN
         stall <= "000000";
