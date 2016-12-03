@@ -7,12 +7,13 @@ use work.CPU32.all;
 ENTITY clock IS
   PORT(
     clk: IN STD_LOGIC;
-    clk_new: BUFFER STD_LOGIC
+    clk_new: out STD_LOGIC
     );
   END clock;
 
 ARCHITECTURE arch OF clock IS
 signal clk_2: STD_LOGIC := '0';
+signal clk_4: STD_LOGIC := '0';
 BEGIN
 
   PROCESS(clk)
@@ -25,7 +26,8 @@ BEGIN
   PROCESS(clk_2)
     BEGIN
       if (clk_2'event and clk_2 = '1') then
-        clk_new <= not clk_new;
+        clk_4 <= not clk_4;
       END IF;
     END PROCESS;
+  clk_new <= clk_4;
 END ARCHITECTURE; -- arch
