@@ -126,39 +126,39 @@ ARCHITECTURE behavior OF test1 IS
 
 
 BEGIN
-process
-    file in_file: text open read_mode is "inst.txt";
-    variable line_str: line;
-    variable address: std_logic_vector(31 downto 0);
-    variable data: std_logic_vector(31 downto 0);
-begin
-    -- Initialize memory by reading file
+--process
+--    file in_file: text open read_mode is "inst.txt";
+--    variable line_str: line;
+--    variable address: std_logic_vector(31 downto 0);
+--    variable data: std_logic_vector(31 downto 0);
+--begin
+--    -- Initialize memory by reading file
     
-    while not endfile(in_file) loop
-        rst <= '0';
-        readline(in_file, line_str);
-        --report line_str;
-        hread(line_str, address);
-        hread(line_str, data);
-        report "addr " & integer'image(to_integer(unsigned(address(30 downto 0))));
-        report "data " & integer'image(to_integer(unsigned(data(30 downto 0))));
-        if address(22) = '0' then
-          baseram_addr <= address(21 downto 2);
-          baseram_oe <= '1';
-          baseram_ce <= '0';
-          baseram_we <= '0';
-          baseram_data <= data;
-        else
-          extraram_addr <= address(21 downto 2);
-          extraram_oe <= '1';
-          extraram_ce <= '0';
-          extraram_we <= '0';
-          extraram_data <= data;
-        end if;
-        wait for 30 ns;
-    end loop;
-    rst <= '1';
-end process ; 
+--    while not endfile(in_file) loop
+--        rst <= '0';
+--        readline(in_file, line_str);
+--        --report line_str;
+--        hread(line_str, address);
+--        hread(line_str, data);
+--        report "addr " & integer'image(to_integer(unsigned(address(30 downto 0))));
+--        report "data " & integer'image(to_integer(unsigned(data(30 downto 0))));
+--        if address(22) = '0' then
+--          baseram_addr <= address(21 downto 2);
+--          baseram_oe <= '1';
+--          baseram_ce <= '0';
+--          baseram_we <= '0';
+--          baseram_data <= data;
+--        else
+--          extraram_addr <= address(21 downto 2);
+--          extraram_oe <= '1';
+--          extraram_ce <= '0';
+--          extraram_we <= '0';
+--          extraram_data <= data;
+--        end if;
+--        wait for 30 ns;
+--    end loop;
+--    rst <= '1';
+--end process ; 
 
 
   -- Instantiate the Unit Under Test (UUT)
