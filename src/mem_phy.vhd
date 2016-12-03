@@ -266,7 +266,7 @@ begin
       end if;
     end process;
 
-    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable， addr)
+    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
     begin
       if addr(23 downto 22) = "00" then -- flash read
         data_out <= X"0000" & flash_read_data;
