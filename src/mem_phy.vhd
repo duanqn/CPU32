@@ -286,7 +286,7 @@ begin
           data_ready <= '0';
         end if;
       elsif addr(23 downto 22) = "11" then -- rom_read
-        data_out <= boot_rom(to_integer(unsigned(addr(21 downto 0))));
+        data_out <= boot_rom(to_integer(unsigned(addr(5 downto 0))));
         data_ready <= '1';
         serialport_transmit_signal <= '0';
       else
