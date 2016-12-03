@@ -66,7 +66,7 @@ begin
     -- Write to baseMemory
     Write_loop : loop 
         wait until falling_edge(baseram_we);
-        memory(to_integer(unsigned(baseram_addr(9 downto 0))) <= transport baseram_data after DELAY;
+        memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= transport baseram_data after DELAY;
         report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
               integer'image(to_integer(unsigned(baseram_data)));
     end loop ;
