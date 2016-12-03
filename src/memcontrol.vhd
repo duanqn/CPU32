@@ -35,10 +35,11 @@ ENTITY memcontrol is
 end memcontrol;
 
 architecture arch of memcontrol is
+signal state : integer := 0;
 begin
 
   memcontrol : process(clk, rst)
-  variable state : integer := 0;
+  
   begin
     if(rst = '0') then
       ope_ce <= '0';
@@ -47,7 +48,7 @@ begin
       write_data <= (others => '0');
       align_type <= ALIGN_TYPE_WORD;
       stallreq <= '0';
-      state := 0;
+      state <= 0;
     elsif (clk'event and clk = '1') then
       case state is
         when 0 =>
@@ -58,10 +59,10 @@ begin
             align_type <= ALIGN_TYPE_WORD;
             write_data <= (others => '0');
             stallreq <= '1';
-            state := 1;
+            state <= 1;
           elsif (ram_ce_o = '1') then
             stallreq <= '1';
-            state := 3;
+            state <= 3;
             ope_ce <= '1';
             ope_addr <= ram_data_o;
             ope_we <= ram_we_o;
@@ -71,7 +72,7 @@ begin
         when 1 =>
           ope_ce <= '0';
           stallreq <= '1';
-          state := 2;
+          state <= 2;
         when 2 =>
           if(data_ready = '1') then
             inst_data_i <= read_data;
@@ -82,10 +83,10 @@ begin
               write_data <= (others => '0');
               align_type <= ALIGN_TYPE_WORD;
               stallreq <= '0';
-              state := 0;
+              state <= 0;
             else
               stallreq <= '1';
-              state := 3;
+              state <= 3;
               ope_ce <= '1';
               ope_addr <= ram_data_o;
               ope_we <= ram_we_o;
@@ -96,7 +97,7 @@ begin
         when 3 =>
           ope_ce <= '0';
           stallreq <= '1';
-          state := 4;
+          state <= 4;
         when 4 =>
           if(data_ready = '1') then
             ram_data_i <= read_data;
@@ -106,7 +107,7 @@ begin
             write_data <= (others => '0');
             align_type <= ALIGN_TYPE_WORD;
             stallreq <= '0';
-            state := 0;
+            state <= 0;
           end if;
         when others => 
           ope_ce <= '0';
@@ -115,7 +116,7 @@ begin
           write_data <= (others => '0');
           align_type <= ALIGN_TYPE_WORD;
           stallreq <= '0';
-          state := 0;
+          state <= 0;
       end case;
     end if;
   end process;
