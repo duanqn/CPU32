@@ -140,6 +140,8 @@ begin
         --report line_str;
         hread(line_str, address);
         hread(line_str, data);
+        report "addr " & integer'image(to_integer(unsigned(address(30 downto 0))));
+        report "data " & integer'image(to_integer(unsigned(data(30 downto 0))));
         if address(22) = '0' then
           baseram_addr <= address(21 downto 2);
           baseram_oe <= '1';
