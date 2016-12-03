@@ -23,11 +23,11 @@ BEGIN
       END IF;
     END PROCESS;
 
-  PROCESS(clk_2)
-    BEGIN
-      if (clk_2'event and clk_2 = '1') then
-        clk_4 <= not clk_4;
-      END IF;
-    END PROCESS;
-  clk_new <= clk_4;
+  --PROCESS(clk_2)
+  --  BEGIN
+  --    if (clk_2'event and clk_2 = '1') then
+  --      clk_4 <= not clk_4;
+  --    END IF;
+  --  END PROCESS;
+  clk_new <= clk_2;
 END ARCHITECTURE; -- arch

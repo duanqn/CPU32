@@ -44,6 +44,7 @@ begin
     process(clk, rst)
     begin
         if (rst = '0') then
+            read_data <= (others => '0');
             baseram_addr <= (others => '0');
             state <= (others => '0');
             baseram_data <= (others => 'Z');
@@ -97,7 +98,7 @@ begin
                                     data_ready <= '1';
                                 end if;
                 -- read ram 1
-                when "00001" => 
+                when "00001" => read_data <= baseram_data;
                                 baseram_ce <= '1';
                                 baseram_oe <= '1';
                                 data_ready <= '1';
@@ -110,7 +111,7 @@ begin
                                 state <= "00000";
 
                 -- read ram 2
-                when "00010" => 
+                when "00010" => read_data <= extraram_data;
                                 extraram_ce <= '1';
                                 extraram_oe <= '1';
                                 data_ready <= '1';
@@ -136,18 +137,6 @@ begin
             end case;
         end if;
     end process;
-
-    process(ope_ce1, ope_ce2, ope_we, baseram_data, extraram_data)
-    begin
-        if(ope_ce1 = '1' and ope_we = '1') then
-            read_data <= baseram_data;
-        elsif (ope_ce2 = '1' and ope_we = '1') then
-            read_data <= extraram_data;
-        else
-            read_data <= (others => '0');
-        end if;
-    end process;
-            
-
+    
 
 end Behavioral;
