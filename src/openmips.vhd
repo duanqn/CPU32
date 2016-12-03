@@ -1003,7 +1003,7 @@ begin
     rst => rst, 
     stallreq_from_ex => stallreq_from_ex, 
     stallreq_from_id => stallreq_from_id, 
-    stallreq_from_mem_all => stallreq_from_mem_all;
+    stallreq_from_mem_all => stallreq_from_mem_all,
     stall => stall, 
     stallreq_from_mem => stallreq_from_mem, 
     cp0_epc_i => cp0_epc_mem, 
