@@ -38,7 +38,7 @@ end memcontrol;
 architecture arch of memcontrol is
 --signal state : integer := 0;
 begin
-  process(inst_ce_o, ram_ce_o)
+  process(inst_ce_o, ram_ce_o, ram_data_o, ram_we_o, ram_align, read_data)
   begin
     if(inst_ce_o = '1') then
       if(ram_ce_o = '1') then
