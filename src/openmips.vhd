@@ -25,7 +25,6 @@ architecture arch of openmips is
 
   component clock
   port(
-    rst: in STD_LOGIC;
     clk: in STD_LOGIC;
     clk_new: BUFFER STD_LOGIC
     );
@@ -691,7 +690,7 @@ begin
   inst_addr <= pc;
 
   clock0: clock port map(
-    clk => clk, rst => rst, clk_new => clk_new
+    clk => clk, clk_new => clk_new
     );
 
   -- flush new_pc
