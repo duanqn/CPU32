@@ -47,7 +47,7 @@ end mem_phy;
 
 architecture behave of mem_phy is
 
-signal data_ready: STD_LOGIC := '0';
+signal data_ready: STD_LOGIC := '1';
 component ram
     Port(
       -- up
