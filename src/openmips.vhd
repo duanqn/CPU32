@@ -704,7 +704,8 @@ begin
     branch_target_address_i => branch_target_address,
     branch_flag_i => branch_flag, 
     flush => flush, 
-    new_pc => new_pc);
+    new_pc => new_pc
+    );
 
 
 
@@ -716,7 +717,8 @@ begin
     id_pc => id_pc_i, 
     id_inst => id_inst_i, 
     stall => stall, 
-    flush => flush);
+    flush => flush
+    );
 
   id0: id port map(
     rst => rst, 
@@ -750,7 +752,8 @@ begin
     inst_o => id_inst, 
     ex_aluop_i => ex_aluop, 
     excepttype_o => excepttype_id, 
-    current_inst_addr_o => current_inst_addr_id);
+    current_inst_addr_o => current_inst_addr_id
+    );
 
   regfile0: regfile port map(
     clk => clk_new, 
@@ -763,7 +766,8 @@ begin
     rdata1 => reg1_data,
     re2 => reg2_read, 
     raddr2 => reg2_addr,
-    rdata2 => reg2_data);
+    rdata2 => reg2_data
+    );
 
 
   id_ex0: id_ex port map(
@@ -794,7 +798,8 @@ begin
     id_excepttype => excepttype_id, 
     id_current_inst_addr => current_inst_addr_id,
     ex_excepttype => excepttype_id_ex, 
-    ex_current_inst_addr => current_inst_addr_id_ex);
+    ex_current_inst_addr => current_inst_addr_id_ex
+    );
 
   ex0: ex port map(
     rst => rst,
@@ -840,7 +845,8 @@ begin
     current_inst_addr_i => current_inst_addr_id_ex, 
     excepttype_o => excepttype_ex, 
     current_inst_addr_o => current_inst_addr_ex,
-    is_in_delayslot_o => is_in_delayslot_ex);
+    is_in_delayslot_o => is_in_delayslot_ex
+    );
 
   ex_mem0: ex_mem port map(
     clk => clk_new, 
@@ -876,7 +882,8 @@ begin
     ex_is_in_delayslot => is_in_delayslot_ex,
     mem_excepttype => excepttype_ex_mem, 
     mem_current_inst_addr => current_inst_addr_ex_mem, 
-    mem_is_in_delayslot => is_in_delayslot_ex_mem);
+    mem_is_in_delayslot => is_in_delayslot_ex_mem
+    );
 
   mem0: mem port map(
     rst => rst,
@@ -927,51 +934,125 @@ begin
     PageMask_i => PageMask, 
     EntryHi_i => EntryHi,
     tlb_write_struct => tlb_write_struct, 
-    tlb_write_enable => tlb_write_enable);
+    tlb_write_enable => tlb_write_enable
+    );
 
   mem_wb0: mem_wb port map(
-    clk => clk_new, rst => rst,
-    mem_wd => mem_wd_o, mem_wreg => mem_wreg_o,
-    mem_wdata => mem_wdata_o, mem_whilo => mem_whilo_o,
-    mem_hi => mem_hi_o, mem_lo => mem_lo_o,
-    wb_wd => wb_wd_i, wb_wreg => wb_wreg_i,
-    wb_wdata => wb_wdata_i, wb_whilo => wb_whilo_i,
-    wb_hi => wb_hi_i, wb_lo => wb_lo_i, stall => stall,
-    mem_cp0_reg_data => mem_cp0_reg_data_o, mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, mem_cp0_reg_we => mem_cp0_reg_we_o,
-    wb_cp0_reg_data => wb_cp0_reg_data_i, wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, wb_cp0_reg_we => wb_cp0_reg_we_i, flush => flush
+    clk => clk_new, 
+    rst => rst,
+    mem_wd => mem_wd_o, 
+    mem_wreg => mem_wreg_o,
+    mem_wdata => mem_wdata_o, 
+    mem_whilo => mem_whilo_o,
+    mem_hi => mem_hi_o, 
+    mem_lo => mem_lo_o,
+    wb_wd => wb_wd_i, 
+    wb_wreg => wb_wreg_i,
+    wb_wdata => wb_wdata_i, 
+    wb_whilo => wb_whilo_i,
+    wb_hi => wb_hi_i, 
+    wb_lo => wb_lo_i, 
+    stall => stall,
+    mem_cp0_reg_data => mem_cp0_reg_data_o, 
+    mem_cp0_reg_write_addr => mem_cp0_reg_write_addr_o, 
+    mem_cp0_reg_we => mem_cp0_reg_we_o,
+    wb_cp0_reg_data => wb_cp0_reg_data_i, 
+    wb_cp0_reg_write_addr => wb_cp0_reg_write_addr_i, 
+    wb_cp0_reg_we => wb_cp0_reg_we_i, 
+    flush => flush
     );
 
   hilo_reg0: hilo_reg port map(
-    clk => clk_new, rst => rst,
-    we => wb_whilo_i, hi_i => wb_hi_i,
-    lo_i => wb_lo_i, hi_o => ex_hi_i,
-    lo_o => ex_lo_i);
+    clk => clk_new, 
+    rst => rst,
+    we => wb_whilo_i, 
+    hi_i => wb_hi_i,
+    lo_i => wb_lo_i, 
+    hi_o => ex_hi_i,
+    lo_o => ex_lo_i
+    );
 
   cp0_reg0: cp0_reg port map(
-    clk => clk_new, rst => rst,
-    data_i => wb_cp0_reg_data_i, waddr_i => wb_cp0_reg_write_addr_i, we_i => wb_cp0_reg_we_i,
-    raddr_i => ex_cp0, data_o => cp0_reg_data_i, mmu_int_i => serial_int_mmu,
-    excepttype_i => excepttype_mem, current_inst_address_i => current_inst_addr_mem, is_in_delayslot_i => is_in_delayslot_mem, badAddr_i => bad_addr_mem,
-    Status_o => cp0_status, Cause_o => cp0_cause, EPC_o => cp0_epc, Index_o => Index, EntryHi_o => EntryHi, EntryLo0_o => EntryLo0,
-    EntryLo1_o => EntryLo1, PageMask_o => PageMask, --BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
+    clk => clk_new, 
+    rst => rst,
+    data_i => wb_cp0_reg_data_i, 
+    waddr_i => wb_cp0_reg_write_addr_i, 
+    we_i => wb_cp0_reg_we_i,
+    raddr_i => ex_cp0, 
+    data_o => cp0_reg_data_i, 
+    mmu_int_i => serial_int_mmu,
+    excepttype_i => excepttype_mem, 
+    current_inst_address_i => current_inst_addr_mem, 
+    is_in_delayslot_i => is_in_delayslot_mem, 
+    badAddr_i => bad_addr_mem,
+    Status_o => cp0_status, 
+    Cause_o => cp0_cause, 
+    EPC_o => cp0_epc, 
+    Index_o => Index, 
+    EntryHi_o => EntryHi, 
+    EntryLo0_o => EntryLo0,
+    EntryLo1_o => EntryLo1, 
+    PageMask_o => PageMask, --BadVAddr_o => BadVAddr, Count_o => Count, Compare_o => Compare,
     EBase_o => EBase--, timer_int_o => timer_int
   );
 
   ctrl0: ctrl port map(
-    rst => rst, stallreq_from_ex => stallreq_from_ex, stallreq_from_id => stallreq_from_id, stall => stall, stallreq_from_mem => stallreq_from_mem, cp0_epc_i => cp0_epc_mem, excepttype_i => excepttype_mem,
-    new_pc => new_pc, flush => flush, cp0_ebase_i => EBase);
+    rst => rst, 
+    stallreq_from_ex => stallreq_from_ex, 
+    stallreq_from_id => stallreq_from_id, 
+    stall => stall, 
+    stallreq_from_mem => stallreq_from_mem, 
+    cp0_epc_i => cp0_epc_mem, 
+    excepttype_i => excepttype_mem,
+    new_pc => new_pc, 
+    flush => flush, 
+    cp0_ebase_i => EBase
+    );
 
   memcontrol0: memcontrol port map(
-    rst => rst, clk => clk, inst_data_i => inst_data, inst_addr_o => inst_addr, inst_ce_o => inst_ce, ram_data_i => ram_data_i,
-    ram_addr_o => ram_addr_o, ram_data_o => ram_data_o, ram_we_o => ram_we_o, ram_align => ram_align, ram_ce_o => ram_ce_o, stallreq => stallreq_from_mem,
-    ope_addr => ope_addr, write_data => ope_data, read_data => mmu_result_data, ope_we => ope_we, ope_ce => ope_ce, data_ready => data_ready, align_type => align_type
+    rst => rst, 
+    clk => clk, 
+    inst_data_i => inst_data, 
+    inst_addr_o => inst_addr, 
+    inst_ce_o => inst_ce, 
+    ram_data_i => ram_data_i,
+    ram_addr_o => ram_addr_o, 
+    ram_data_o => ram_data_o, 
+    ram_we_o => ram_we_o, 
+    ram_align => ram_align, 
+    ram_ce_o => ram_ce_o, 
+    stallreq => stallreq_from_mem,
+    ope_addr => ope_addr, 
+    write_data => ope_data, 
+    read_data => mmu_result_data, 
+    ope_we => ope_we, 
+    ope_ce => ope_ce, 
+    data_ready => data_ready, 
+    align_type => align_type
     );
 
   mmu0: mmu port map(
-    clk => clk, rst => rst, ope_addr => ope_addr, write_data => ope_data, ope_we => ope_we, ope_ce => ope_ce, read_data => mmu_result_data, ready => data_ready,
-    align_type => align_type, serial_int => serial_int_mmu, exc_code => exc_code_mmu, tlb_write_struct => tlb_write_struct, tlb_write_enable => tlb_write_enable,
-    to_physical_addr => to_physical_addr, to_physical_data => to_physical_data, to_physical_read_enable => to_physical_read_enable, to_physical_write_enable => to_physical_write_enable,
-    from_physical_data => from_physical_data, from_physical_ready => from_physical_ready, from_physical_serial => from_physical_serial, bad_addr => bad_addr_mmu
+    clk => clk, 
+    rst => rst, 
+    ope_addr => ope_addr, 
+    write_data => ope_data, 
+    ope_we => ope_we, 
+    ope_ce => ope_ce, 
+    read_data => mmu_result_data, 
+    ready => data_ready,
+    align_type => align_type, 
+    serial_int => serial_int_mmu, 
+    exc_code => exc_code_mmu, 
+    tlb_write_struct => tlb_write_struct, 
+    tlb_write_enable => tlb_write_enable,
+    to_physical_addr => to_physical_addr, 
+    to_physical_data => to_physical_data, 
+    to_physical_read_enable => to_physical_read_enable, 
+    to_physical_write_enable => to_physical_write_enable,
+    from_physical_data => from_physical_data, 
+    from_physical_ready => from_physical_ready, 
+    from_physical_serial => from_physical_serial, 
+    bad_addr => bad_addr_mmu
     );
 
 
