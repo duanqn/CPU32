@@ -273,7 +273,7 @@ begin
         data_ready <= flash_data_ready;
         serialport_transmit_signal <= '0';
       elsif addr(23 downto 22) = "01" then -- ram write/read
-        data_ready <= '1';
+        data_ready <= ram_data_ready;
         data_out <= ram_read_data;
         serialport_transmit_signal <= '0';
       elsif addr(23 downto 22) = "10" then -- serialport_read/write

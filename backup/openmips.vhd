@@ -385,7 +385,6 @@ architecture arch of openmips is
     stallreq_from_id: IN STD_LOGIC;
     stallreq_from_ex: IN STD_LOGIC;
     stallreq_from_mem: IN STD_LOGIC;
-    stallreq_from_mem_all: IN STD_LOGIC;
     excepttype_i: IN STD_LOGIC_VECTOR(31 downto 0);
     cp0_epc_i: IN STD_LOGIC_VECTOR(31 downto 0);
     cp0_ebase_i: IN STD_LOGIC_VECTOR(31 downto 0);
@@ -413,7 +412,6 @@ architecture arch of openmips is
 
     --mix
     stallreq: out STD_LOGIC;
-    stallreq_all: out STD_LOGIC;
 
     --down
     ope_addr: out std_logic_vector(31 downto 0);
@@ -555,7 +553,6 @@ architecture arch of openmips is
   signal stallreq_from_ex: STD_LOGIC;
   signal stallreq_from_id: STD_LOGIC;
   signal stallreq_from_mem: STD_LOGIC;
-  signal stallreq_from_mem_all: STD_LOGIC;
   signal new_pc: STD_LOGIC_VECTOR(31 downto 0);
   signal flush: STD_LOGIC;
 
@@ -1003,7 +1000,6 @@ begin
     rst => rst, 
     stallreq_from_ex => stallreq_from_ex, 
     stallreq_from_id => stallreq_from_id, 
-    stallreq_from_mem_all => stallreq_from_mem_all;
     stall => stall, 
     stallreq_from_mem => stallreq_from_mem, 
     cp0_epc_i => cp0_epc_mem, 
@@ -1026,7 +1022,6 @@ begin
     ram_align => ram_align, 
     ram_ce_o => ram_ce_o, 
     stallreq => stallreq_from_mem,
-    stallreq_all => stallreq_from_mem_all,
     ope_addr => ope_addr, 
     write_data => ope_data, 
     read_data => mmu_result_data, 
