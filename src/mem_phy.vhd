@@ -305,6 +305,10 @@ begin
         data_out <= boot_rom(to_integer(unsigned(addr(21 downto 0))));
         data_ready <= '1';
         serialport_transmit_signal <= '0';
+      elsif sel_data = "0000000" then
+        data_out <= (others => '0');
+        data_ready <= '1';
+        serialport_transmit_signal <= '0';
       else
         data_out <= (others => '0');
         data_ready <= '0';
