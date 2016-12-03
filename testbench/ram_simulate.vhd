@@ -53,21 +53,21 @@ END ram_simulate;
  
 ARCHITECTURE behavior OF ram_simulate IS 
 
-type mem_array is array(20 downto 0) of std_logic_vector(31 downto 0);
+type mem_array is array(1023 downto 0) of std_logic_vector(31 downto 0);
 signal memory: mem_array;
 
 constant DELAY: time := 10 ns;
 
 BEGIN
-   baseram_data <= transport memory(to_integer(unsigned('0' & baseram_addr))) after DELAY when baseram_ce = '0' and baseram_oe = '0' else (others => 'Z');
+   baseram_data <= transport memory(to_integer(unsigned(baseram_addr(9 downto 0)))) after DELAY when baseram_ce = '0' and baseram_oe = '0' else (others => 'Z');
    extraram_data <= transport memory(to_integer(unsigned('1' & extraram_addr))) after DELAY when extraram_ce = '0' and extraram_oe = '0' else (others => 'Z');
 process
 begin
     -- Write to baseMemory
     Write_loop : loop 
         wait until falling_edge(baseram_we);
-        memory(to_integer(unsigned('0' & baseram_addr))) <= transport baseram_data after DELAY;
-        report "write base " & integer'image(to_integer(unsigned(baseram_addr))) & " to " & 
+        memory(to_integer(unsigned(baseram_addr(9 downto 0))) <= transport baseram_data after DELAY;
+        report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
               integer'image(to_integer(unsigned(baseram_data)));
     end loop ;
 end process ; 
