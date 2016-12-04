@@ -72,7 +72,7 @@ begin
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";
   inst_o <= inst_i;
   current_inst_addr_o <= pc_i;
-  excepttype_o <= "0000000000000000000" & excepttype_is_eret & "00" & instvalid & excepttype_is_syscall & "00000000";
+  excepttype_o <= "0000000000000000000" & excepttype_is_eret & "00" & not instvalid & excepttype_is_syscall & "00000000";
 
   process(ex_aluop_i)
   begin
