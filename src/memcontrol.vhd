@@ -49,7 +49,7 @@ begin
         align_type <= ram_align;
         write_data <= ram_data_o;
         ram_data_i <= read_data;
-        inst_data_i <= (others => 'Z');
+        inst_data_i <= (others => '0');
       else
         stallreq <= '0';
         ope_ce <= '1';
@@ -58,7 +58,7 @@ begin
         align_type <= ALIGN_TYPE_WORD;
         write_data <= (others => '0');
         inst_data_i <= read_data;
-        ram_data_i <= (others => 'Z');
+        ram_data_i <= (others => '0');
       end if;
     else
       ope_ce <= '0';
@@ -67,8 +67,8 @@ begin
       write_data <= (others => '0');
       align_type <= ALIGN_TYPE_WORD;
       stallreq <= '0';
-      ram_data_i <= (others => 'Z');
-      inst_data_i <= (others => 'Z');
+      ram_data_i <= (others => '0');
+      inst_data_i <= (others => '0');
     end if;
   end process;
 
