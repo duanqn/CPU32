@@ -187,7 +187,7 @@ begin
     elsif addr(31 downto 29) = "110" or addr(31 downto 29) = "111" or addr(31)='0' then
       not_use_mmu <= '0';
     else
-      not_use_mmu <= '1'
+      not_use_mmu <= '1';
     end if;
   end process;
 
