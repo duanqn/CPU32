@@ -188,10 +188,6 @@ begin
     end if;
   end process;
 
-        
-  not_use_mmu <= '1' when addr(31 downto 29) = "100" or addr(31 downto 29) = "101"
-             else '0' ;
-
   special_com1_status <= '1'  when addr(31 downto 0) = VIRTUAL_SERIAL_STATUS
                   else '0';
 
