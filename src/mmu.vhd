@@ -177,6 +177,18 @@ begin
 
 -- combination logic
   -- control signal
+  process(addr)
+  begin
+    if(addr(31 downto 29) = "100" or addr(31 downto 29) = "101") then
+      not_use_mmu <= '1';
+    elsif addr(31 downto 29) = "110" or addr(31 downto 29) = "111" or addr(31)='0' then
+      not_use_mmu <= '0';
+    else
+      not_use_mmu <= '1'
+    end if;
+  end process;
+
+        
   not_use_mmu <= '1' when addr(31 downto 29) = "100" or addr(31 downto 29) = "101"
              else '0' ;
 
