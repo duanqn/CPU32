@@ -163,6 +163,9 @@ begin
         exc_code <= (others => '0');
         bad_addr <= (others => '0');
       end if;
+    else
+      exc_code <= (others => '0');
+      bad_addr <= (others => '0');
     end if;
   end process;
 
