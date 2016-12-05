@@ -44,7 +44,7 @@ begin
       if(ram_ce_o = '1') then
         stallreq <= '1';
         ope_ce <= '1';
-        ope_addr <= ram_data_o;
+        ope_addr <= ram_addr_o;
         ope_we <= ram_we_o;
         align_type <= ram_align;
         write_data <= ram_data_o;
