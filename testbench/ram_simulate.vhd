@@ -62,28 +62,24 @@ BEGIN
    baseram_data <= transport memory(to_integer(unsigned(baseram_addr(9 downto 0)))) after DELAY when baseram_ce = '0' and baseram_oe = '0' else (others => 'Z');
    extraram_data <= transport memory(to_integer(unsigned('1' & extraram_addr))) after DELAY when extraram_ce = '0' and extraram_oe = '0' else (others => 'Z');
 
-process
+process(baseram_we, baseram_data, baseram_addr)
 begin
     -- Write to baseMemory
-    Write_loop : loop 
         if falling_edge(baseram_we) then 
             memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= transport baseram_data after 5 ns;
             report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
                 integer'image(to_integer(unsigned(baseram_data)));
         end if;
-    end loop ;
 end process ; 
 
-process
+process(extraram_we, extraram_data, extraram_addr)
 begin
     -- Write to extraMemory
-    Write_loop : loop 
         if falling_edge(extraram_we) then 
             memory(to_integer(unsigned(extraram_addr(9 downto 0)))) <= transport extraram_data after 5 ns;
             report "write base " & integer'image(to_integer(unsigned(extraram_addr(9 downto 0)))) & " to " & 
                 integer'image(to_integer(unsigned(extraram_data)));
         end if;
-    end loop ;
 end process ; 
 
 END;
