@@ -66,7 +66,7 @@ process
 begin
     -- Write to baseMemory
     Write_loop : loop 
-        if baseram_we = '0' then 
+        if falling_edge(baseram_we) then 
             memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= transport baseram_data after 5 ns;
             report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
                 integer'image(to_integer(unsigned(baseram_data)));
@@ -78,7 +78,7 @@ process
 begin
     -- Write to extraMemory
     Write_loop : loop 
-        if extraram_we = '0' then 
+        if falling_edge(extraram_we) then 
             memory(to_integer(unsigned(extraram_addr(9 downto 0)))) <= transport extraram_data after 5 ns;
             report "write base " & integer'image(to_integer(unsigned(extraram_addr(9 downto 0)))) & " to " & 
                 integer'image(to_integer(unsigned(extraram_data)));
