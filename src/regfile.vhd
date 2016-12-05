@@ -33,7 +33,7 @@ begin
   variable addr: integer;
   begin
     if (clk'event and clk = '1') then
-      if (rst = '0') then
+      if (rst = '1') then
         if(we = '1' and waddr /= "00000") then
           case waddr is
             when "00001" => regs(1) <= wdata;
