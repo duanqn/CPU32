@@ -64,6 +64,10 @@ begin
                                     -- read  ram(ram1)
                                     baseram_ce <= '0';
                                     baseram_oe <= '0';
+                                    baseram_we <= '1';
+                                    extraram_ce <= '1';
+                                    extraram_oe <= '1';
+                                    extraram_we <= '1';
                                     baseram_addr <= ope_addr;
                                     state <= "00001";
                                     data_ready <= '0';
@@ -72,6 +76,9 @@ begin
                                     baseram_oe <= '1';
                                     baseram_ce <= '0';
                                     baseram_we <= '0';
+                                    extraram_ce <= '1';
+                                    extraram_oe <= '1';
+                                    extraram_we <= '1';
                                     baseram_addr <= ope_addr;
                                     baseram_data <= write_data;
                                     state <= "10000";
@@ -81,6 +88,9 @@ begin
                                     extraram_oe <= '1';
                                     extraram_ce <= '0';
                                     extraram_we <= '0';
+                                    baseram_ce <= '1';
+                                    baseram_oe <= '1';
+                                    baseram_we <= '1';
                                     extraram_addr <= ope_addr;
                                     extraram_data <= write_data;
                                     state <= "01000";
@@ -89,6 +99,10 @@ begin
                                     -- read  ram(ram2)
                                     extraram_ce <= '0';
                                     extraram_oe <= '0';
+                                    baseram_ce <= '1';
+                                    baseram_oe <= '1';
+                                    baseram_we <= '1';
+                                    extraram_we <= '1';
                                     extraram_addr <= ope_addr;
                                     state <= "00010";
                                     data_ready <= '0';
