@@ -95,6 +95,8 @@ ARCHITECTURE behavior OF test1 IS
   --BiDirs
    signal baseram_data : std_logic_vector(31 downto 0);
    signal extraram_data : std_logic_vector(31 downto 0);
+   signal baseram_data_backup : std_logic_vector(31 downto 0);
+   signal extraram_data_backup : std_logic_vector(31 downto 0);
    signal flash_data : std_logic_vector(15 downto 0);
 
   --Outputs
@@ -126,39 +128,6 @@ ARCHITECTURE behavior OF test1 IS
 
 
 BEGIN
---process
---    file in_file: text open read_mode is "inst.txt";
---    variable line_str: line;
---    variable address: std_logic_vector(31 downto 0);
---    variable data: std_logic_vector(31 downto 0);
---begin
---    -- Initialize memory by reading file
-    
---    while not endfile(in_file) loop
---        rst <= '0';
---        readline(in_file, line_str);
---        --report line_str;
---        hread(line_str, address);
---        hread(line_str, data);
---        report "addr " & integer'image(to_integer(unsigned(address(30 downto 0))));
---        report "data " & integer'image(to_integer(unsigned(data(30 downto 0))));
---        if address(22) = '0' then
---          baseram_addr <= address(21 downto 2);
---          baseram_oe <= '1';
---          baseram_ce <= '0';
---          baseram_we <= '0';
---          baseram_data <= data;
---        else
---          extraram_addr <= address(21 downto 2);
---          extraram_oe <= '1';
---          extraram_ce <= '0';
---          extraram_we <= '0';
---          extraram_data <= data;
---        end if;
---        wait for 30 ns;
---    end loop;
---    rst <= '1';
---end process ; 
 
 
   -- Instantiate the Unit Under Test (UUT)
@@ -166,12 +135,12 @@ BEGIN
           rst => rst,
           clk => clk,
           baseram_addr => baseram_addr,
-          baseram_data => baseram_data,
+          baseram_data => baseram_data_backup,
           baseram_ce => baseram_ce,
           baseram_oe => baseram_oe,
           baseram_we => baseram_we,
           extraram_addr => extraram_addr,
-          extraram_data => extraram_data,
+          extraram_data => extraram_data_backup,
           extraram_ce => extraram_ce,
           extraram_oe => extraram_oe,
           extraram_we => extraram_we,
@@ -203,6 +172,11 @@ BEGIN
           extraram_oe => extraram_oe
     );
 
+   baseram_data <= baseram_data_backup when baseram_ce = '0' and baseram_we = '0' and baseram_oe = '1' else (others => 'Z');
+   extraram_data <= extraram_data_backup when extraram_ce = '0' and extraram_we = '0' and extraram_oe = '1' else (others => 'Z');
+   baseram_data_backup <= baseram_data when baseram_ce = '0' and baseram_we = '1' and baseram_oe = '0' else (others => 'Z');
+   extraram_data_backup <= extraram_data when extraram_ce = '0' and extraram_we = '1' and extraram_oe = '0' else (others => 'Z');
+   
    -- Clock process definitions
    clk_process :process
    begin
