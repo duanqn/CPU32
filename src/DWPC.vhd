@@ -128,18 +128,19 @@ mem_phy0: mem_phy port map(
   clk => clk, addr => physical_addr, data_in => physical_data_in, data_out => physical_data_out, write_enable => write_enable,
   read_enable => read_enable, busy => busy, serialport_data_ready => serialport_data_ready,
   baseram_we => baseram_we, baseram_oe => baseram_oe, baseram_ce => baseram_ce, baseram_data => baseram_data, baseram_addr => baseram_addr,
-  extraram_we => extraram_we, extraram_oe => extraram_oe, extraram_ce => extraram_ce, extraram_data => extraram_data, extraram_addr => extraram_addr,
+  extraram_we => debug_we, extraram_oe => debug_oe, extraram_ce => debug_ce, extraram_data => extraram_data, extraram_addr => extraram_addr,
   flash_data => flash_data, flash_addr => flash_addr, flash_control_ce0 => flash_control_ce0, flash_control_ce1 => flash_control_ce1, flash_control_ce2 => flash_control_ce2,
   flash_control_byte => flash_control_byte, flash_control_vpen => flash_control_vpen, flash_control_rp => flash_control_rp, flash_control_oe => flash_control_oe,
   flash_control_we => flash_control_we, serialport_txd => serialport_txd, serialport_rxd => serialport_rxd
   );
 
-debug_we <= baseram_we;
-debug_oe <= baseram_oe;
-debug_ce <= baseram_ce;
+baseram_we <= debug_we;
+baseram_ce <= debug_ce;
+baseram_oe <= debug_oe;
 process(debug_ce, debug_oe, debug_we, baseram_data)
 begin
   if(debug_we = '0' and debug_oe = '1' and debug_ce = '0') then 
     debug_data <= baseram_data(15 downto 0);
   end if;
+end process;
 end architecture ; -- arch
