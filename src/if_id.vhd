@@ -37,10 +37,6 @@ begin
       elsif (stall(1) = '0') then
         id_pc <= if_pc;
         id_inst <= if_inst;
-      else
-        -- Never need this but we should cover all possibilities
-        id_pc <= x"00000000";
-        id_inst <= x"00000000";
       end if;
     end if;
   end process;
