@@ -14,6 +14,8 @@ ENTITY DWPC is
     baseram_oe: out std_logic;
     baseram_we: out std_logic;
 
+    debug_data: out STD_LOGIC_VECTOR(15 downto 0);
+
     extraram_addr: out std_logic_vector(19 downto 0);
     extraram_data: inout std_logic_vector(31 downto 0);
     extraram_ce: out std_logic;
@@ -128,5 +130,9 @@ mem_phy0: mem_phy port map(
   flash_control_we => flash_control_we, serialport_txd => serialport_txd, serialport_rxd => serialport_rxd
   );
 
-
+process(baseram_ce, baseram_oe, baseram_we, baseram_data)
+begin
+  if(baseram_we = '0' and baseram_oe = '1' and baseram_ce = '0') then 
+    debug_data <= baseram_data(15 downto 0);
+  end if;
 end architecture ; -- arch
