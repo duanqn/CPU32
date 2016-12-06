@@ -110,6 +110,10 @@ signal busy: STD_LOGIC;
 signal ready_data: STD_LOGIC;
 signal serialport_data_ready: STD_LOGIC;
 
+signal debug_ce: STD_LOGIC;
+signal debug_oe: STD_LOGIC;
+signal debug_we: STD_LOGIC;
+
 begin
 
 cpu0: openmips port map(
@@ -130,9 +134,12 @@ mem_phy0: mem_phy port map(
   flash_control_we => flash_control_we, serialport_txd => serialport_txd, serialport_rxd => serialport_rxd
   );
 
-process(baseram_ce, baseram_oe, baseram_we, baseram_data)
+debug_we <= baseram_we;
+debug_oe <= baseram_oe;
+debug_ce <= baseram_ce;
+process(debug_ce, debug_oe, debug_we, baseram_data)
 begin
-  if(baseram_we = '0' and baseram_oe = '1' and baseram_ce = '0') then 
+  if(debug_we = '0' and debug_oe = '1' and debug_ce = '0') then 
     debug_data <= baseram_data(15 downto 0);
   end if;
 end architecture ; -- arch
