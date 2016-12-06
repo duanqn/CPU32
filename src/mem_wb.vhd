@@ -19,7 +19,7 @@ ENTITY mem_wb is
     stall: in STD_LOGIC_VECTOR(5 downto 0);
     flush: in std_logic;
     -- output
-	  wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
+	wb_wd: out STD_LOGIC_VECTOR(4 downto 0);
     wb_wreg: out STD_LOGIC;
     wb_wdata: out STD_LOGIC_VECTOR(31 downto 0);
     wb_hi: out STD_LOGIC_VECTOR(31 downto 0);

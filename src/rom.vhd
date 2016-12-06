@@ -1,5 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
+use work.CPU32.all;
+
 
 package rom is
 

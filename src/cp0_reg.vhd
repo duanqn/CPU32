@@ -29,12 +29,12 @@ entity cp0_reg is
     EPC_o : out std_logic_vector(31 downto 0);
     Status_o : out std_logic_vector(31 downto 0);
 
-    BadVAddr_o : out std_logic_vector(31 downto 0);
-    Count_o : out std_logic_vector(31 downto 0);
-    Compare_o : out std_logic_vector(31 downto 0);
+    --BadVAddr_o : out std_logic_vector(31 downto 0);
+    --Count_o : out std_logic_vector(31 downto 0);
+    --Compare_o : out std_logic_vector(31 downto 0);
 
     EBase_o : out std_logic_vector(31 downto 0);
-    timer_int_o : out std_logic;
+    --timer_int_o : out std_logic;
 
     excepttype_i: in STD_LOGIC_VECTOR(31 downto 0);
     current_inst_address_i: in STD_LOGIC_VECTOR(31 downto 0);
@@ -45,7 +45,7 @@ end cp0_reg;
 
 architecture behave of cp0_reg is
   type register_bank is array(31 downto 0) of std_logic_vector(31 downto 0);
-  signal register_values: register_bank := (11=>x"00FFFFFF", 12=>x"10000000", 15=>x"80000180",others => (others => '0'));
+  signal register_values: register_bank := (11=>x"00000000", 12=>x"10000000", 15=>x"80000180",others => (others => '0'));
 
 begin
 
@@ -53,17 +53,17 @@ begin
   EntryLo0_o <= register_values(2);
   EntryLo1_o <= register_values(3);
   PageMask_o <= register_values(5);
-  BadVAddr_o <= register_values(8);
-  Count_o <= register_values(9);
+  --BadVAddr_o <= register_values(8);
+  --Count_o <= register_values(9);
   EntryHi_o <= register_values(10);
-  Compare_o <= register_values(11);
+  --Compare_o <= register_values(11);
   Status_o <= register_values(12);
   Cause_o <= register_values(13);
   EPC_o <= register_values(14);
   EBase_o <= register_values(15);
 
   register_values(13)(14 downto 11) <= mmu_int_i;
-  timer_int_o <= register_values(13)(10);
+  --timer_int_o <= register_values(13)(10);
 
   write_operation : process(rst, clk, we_i, waddr_i, data_i)
   begin
@@ -91,7 +91,7 @@ begin
       --EPC_o init
       register_values(14) <= X"00000000";
       --EBase_o init(not sure on the 9 to 0 bits)
-      register_values(15) <= X"00000000";
+      register_values(15) <= X"80000180";
 
       register_values(1) <= X"00000000";
       register_values(4) <= X"00000000";
@@ -143,7 +143,19 @@ begin
             --Compare
             when "01011" => register_values(11) <= data_i;
             --Status
-            when "01100" => register_values(12) <= data_i;
+            when "01100" => register_values(12)(30 downto 26) <= data_i(30 downto 26);
+                            register_values(12)(22) <= data_i(22);
+                            register_values(12)(17) <= data_i(17);
+                            register_values(12)(15 downto 8) <= data_i(15 downto 8);
+                            register_values(12)(2 downto 0) <= data_i(2 downto 0);
+                            --TS
+                            if data_i(21) = '0' then
+                              register_values(12)(21) <= '0';
+                            end if;
+                            --NMI
+                            if data_i(19) = '0' then
+                              register_values(12)(19) <= '0';
+                            end if;
             --EPC
             when "01110" => register_values(14) <= data_i;
             --Cause

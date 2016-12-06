@@ -77,7 +77,7 @@ architecture arch of mem is
   signal mem_we: STD_LOGIC;
 	--signal zero32: STD_LOGIC_VECTOR(31 downto 0);
 	signal cp0_status: STD_LOGIC_VECTOR(31 downto 0);
-	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0);
+	signal cp0_cause: STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
 	signal cp0_epc: STD_LOGIC_VECTOR(31 downto 0);
   signal excepttype: STD_LOGIC_VECTOR(31 downto 0);
 begin
@@ -138,8 +138,6 @@ or excepttype(31)));
 			cp0_reg_write_addr_o <= "00000";
 			cp0_reg_data_o <= X"00000000";
       tlb_write_enable <= '0';
-
-
     else
       wd_o <= wd_i;
       wreg_o <= wreg_i;
@@ -165,6 +163,8 @@ or excepttype(31)));
           mem_we <= '0';
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
+          mem_data_o <= X"00000000";
+          tlb_write_struct <= (others => '0');
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -176,13 +176,15 @@ or excepttype(31)));
             when "11" =>
               wdata_o <= (31 downto 8 => mem_data_i(7)) & mem_data_i(7 downto 0);
             when others =>
-              wdata_o <= X"00000000";
+              wdata_o <= (others => '0');
           end case;
         when EXE_LBU_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
+          mem_data_o <= X"00000000";
+          tlb_write_struct <= (others => '0');
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -194,13 +196,15 @@ or excepttype(31)));
             when "11" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(7 downto 0);
             when others =>
-              wdata_o <= X"00000000";
+              wdata_o <= (others => '0');
           end case;
         when EXE_LHU_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
+          mem_data_o <= X"00000000";
+          tlb_write_struct <= (others => '0');
           mem_align <= ALIGN_TYPE_HALF_WORD;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
@@ -215,7 +219,9 @@ or excepttype(31)));
           mem_we <= '0';
           wdata_o <= mem_data_i;
           mem_align <= ALIGN_TYPE_WORD;
+          tlb_write_struct <= (others => '0');
           mem_ce_o <= '1';
+          mem_data_o <= X"00000000";
           tlb_write_enable <= '0';
         when EXE_SB_OP =>
           mem_addr_o <= mem_addr_i;
@@ -223,6 +229,7 @@ or excepttype(31)));
           mem_data_o <= reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0) & reg2_i(7 downto 0);
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
+          tlb_write_struct <= (others => '0');
           mem_align <= ALIGN_TYPE_BYTE;
         when EXE_SW_OP =>
           mem_addr_o <= mem_addr_i;
@@ -231,6 +238,7 @@ or excepttype(31)));
           mem_align <= ALIGN_TYPE_WORD;
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
+          tlb_write_struct <= (others => '0');
         when others =>
           mem_we <= '0';
           mem_addr_o <= X"00000000";
@@ -238,6 +246,7 @@ or excepttype(31)));
           mem_ce_o <= '0';
           mem_data_o <= X"00000000";
           tlb_write_enable <= '0';
+          tlb_write_struct <= (others => '0');
       end case ;
     end if;
   end process ; -- identifier
@@ -277,6 +286,9 @@ or excepttype(31)));
 			cp0_cause(9 downto 8) <= wb_cp0_reg_data(9 downto 8);
 			cp0_cause(22) <= wb_cp0_reg_data(22);
 			cp0_cause(23) <= wb_cp0_reg_data(23);
+      cp0_cause(31 downto 24) <= (others => '0');
+      cp0_cause(21 downto 10) <= (others => '0');
+      cp0_cause(7 downto 0) <= (others => '0');
 		else
 			cp0_cause <= cp0_cause_i;
 	  end if;
@@ -291,14 +303,19 @@ or excepttype(31)));
 			if (current_inst_addr_i /= X"00000000") then
 				if ((cp0_cause(15 downto 8) and (cp0_status(15 downto 8))) /= "00000000" and (cp0_status(1) = '0') and (cp0_status(0) = '1')) then
 					excepttype <= X"00000007"; -- Interrupt
+          badAddr_o <= X"00000000";
 				elsif (excepttype_i(8) = '1') then
 					excepttype <= X"00000008"; -- Syscall
+          badAddr_o <= X"00000000";
 				elsif (excepttype_i(9) = '1') then
 					excepttype <= X"0000000a"; -- Invalid instruction
+          badAddr_o <= X"00000000";
 				elsif (excepttype_i(11) = '1') then
 					excepttype <= X"0000000c"; -- Overflow
+          badAddr_o <= X"00000000";
 				elsif (excepttype_i(12) = '1') then
 					excepttype <= X"0000000e"; -- ERET
+          badAddr_o <= X"00000000";
         elsif (mmu_exc_code = "100") then
           excepttype <= x"00000004";  -- ADEL
           badAddr_o <= mmu_badAddr;
