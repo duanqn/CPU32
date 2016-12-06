@@ -183,7 +183,6 @@ BEGIN
     if(baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
       baseram_data_in <= baseram_data_backup;
     end if;
-  end;
   end process;
 
   process(baseram_data_out, baseram_ce, baseram_we, baseram_oe)
@@ -191,7 +190,6 @@ BEGIN
     if(baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1') then
       baseram_data_backup <= baseram_data_out;
     end if;
-  end;
   end process;
 
    --baseram_data_in <= baseram_data_backup when baseram_ce = '0' and baseram_we = '0' and baseram_oe = '1' else (others => 'Z');
