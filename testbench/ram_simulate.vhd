@@ -67,7 +67,7 @@ BEGIN
 process(baseram_we, baseram_data_in, baseram_addr, baseram_oe, baseram_ce)
 begin
     -- Write to baseMemory
-        if rising_edge(baseram_we) then 
+        if (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then 
             memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= baseram_data_in;
             report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
                 integer'image(to_integer(unsigned(baseram_data_in)));
