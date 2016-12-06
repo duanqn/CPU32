@@ -143,7 +143,19 @@ begin
             --Compare
             when "01011" => register_values(11) <= data_i;
             --Status
-            when "01100" => register_values(12) <= data_i;
+            when "01100" => register_values(12)(30 downto 26) <= data_i(30 downto 26);
+                            register_values(12)(22) <= data_i(22);
+                            register_values(12)(17) <= data_i(17);
+                            register_values(12)(15 downto 8) <= data_i(15 downto 8);
+                            register_values(12)(2 downto 0) <= data_i(2 downto 0);
+                            --TS
+                            if data_i(21) = '0' then
+                              register_values(12)(21) <= '0';
+                            end if;
+                            --NMI
+                            if data_i(19) = '0' then
+                              register_values(12)(19) <= '0';
+                            end if;
             --EPC
             when "01110" => register_values(14) <= data_i;
             --Cause
