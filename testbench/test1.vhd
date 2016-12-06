@@ -178,9 +178,25 @@ BEGIN
           extraram_oe => extraram_oe
     );
 
-   baseram_data_in <= baseram_data_backup when baseram_ce = '0' and baseram_we = '0' and baseram_oe = '1' else (others => 'Z');
+  process(baseram_data_backup, baseram_ce, baseram_we, baseram_oe)
+  begin
+    if(baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
+      baseram_data_in <= baseram_data_backup;
+    end if;
+  end;
+  end process;
+
+  process(baseram_data_out, baseram_ce, baseram_we, baseram_oe)
+  begin
+    if(baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1') then
+      baseram_data_backup <= baseram_data_out;
+    end if;
+  end;
+  end process;
+
+   --baseram_data_in <= baseram_data_backup when baseram_ce = '0' and baseram_we = '0' and baseram_oe = '1' else (others => 'Z');
    extraram_data_in <= extraram_data_backup when extraram_ce = '0' and extraram_we = '0' and extraram_oe = '1' else (others => 'Z');
-   baseram_data_backup <= baseram_data_out when baseram_ce = '0' and baseram_we = '1' and baseram_oe = '0' else (others => 'Z');
+   --baseram_data_backup <= baseram_data_out when baseram_ce = '0' and baseram_we = '1' and baseram_oe = '0' else (others => 'Z');
    extraram_data_backup <= extraram_data_out when extraram_ce = '0' and extraram_we = '1' and extraram_oe = '0' else (others => 'Z');
    
    -- Clock process definitions
