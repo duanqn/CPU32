@@ -130,8 +130,8 @@ package CPU32 is
 
   -- mmu
     constant TLB_ENTRY_WIDTH :  integer := 63;
-    constant TLB_NUM_ENTRY : integer := 128;
-    constant TLB_INDEX_WIDTH : integer := 7;
+    constant TLB_NUM_ENTRY : integer := 64;
+    constant TLB_INDEX_WIDTH : integer := 6;
     constant TLB_WRITE_STRUCT_WIDTH : integer := TLB_ENTRY_WIDTH + TLB_INDEX_WIDTH;
 
     constant VIRTUAL_SERIAL_DATA : std_logic_vector(31 downto 0) := x"bFD003F8";
