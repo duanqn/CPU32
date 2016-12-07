@@ -152,6 +152,12 @@ signal serialport_state : STD_LOGIC_VECTOR(1 downto 0) := "00";
 signal serialport_write_enable : STD_LOGIC := '0';
 
 
+signal data_ready_part : STD_LOGIC := '0';
+signal data_ready_serialport : STD_LOGIC := '0';
+
+
+
+
 begin
     u3: async_receiver port map(
       clk => clk, RxD => serialport_rxd,
@@ -181,7 +187,7 @@ begin
       extraram_addr => extraram_addr, extraram_data => extraram_data,
       extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we, data_ready => ram_data_ready);
 
-    serialport_transmit_signal <= write_enable and (not serialport_transmit_busy);
+    serialport_transmit_signal <= serialport_write_enable and (not serialport_transmit_busy);
 
     process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in)
     begin
@@ -268,37 +274,60 @@ begin
       end if;
     end process;
 
-
-    process(clk, flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
+    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
     begin
       if addr(23 downto 22) = "00" then -- flash read
         data_out <= X"0000" & flash_read_data;
-        data_ready <= flash_data_ready;
+        data_ready_part <= flash_data_ready;
       elsif addr(23 downto 22) = "01" then -- ram write/read
-        data_ready <= '1';
+        data_ready_part <= '1';
         data_out <= ram_read_data;
       elsif addr(23 downto 22) = "10" then
        -- serialport_read/write
         data_out <= X"000000" & serialport_data_latch;
-
-        if serialport_transmit_busy = '0' then
-          data_ready <= '1';
-        else
-          data_ready <= '0';
-        end if;
+        data_ready_part <= '0';
+        
       elsif addr(23 downto 22) = "11" then -- rom_read
         data_out <= boot_rom(to_integer(unsigned(addr(5 downto 0))));
-        data_ready <= '1';
+        data_ready_part <= '1';
       else
         data_out <= (others => '0');
-        data_ready <= '0';
+        data_ready_part <= '0';
       end if;
     end process;
 
+    process(clk)
+    begin
+      if (clk'event and clk = '1') then
+        case serialport_state is
+          when "00" =>
+            if(addr(23 downto 22)) = "10" and write_enable = '1' then
+              serialport_state <= "01";
+              serialport_write_enable <= '1';
+              data_ready_serialport <= '0';
+            end if;
+          when "01" =>
+            serialport_state <= "11";
+          when "11" =>
+            serialport_write_enable <= '0';
+            if serialport_transmit_busy = '0' then
+              serialport_state <= "10";
+              data_ready_serialport <= '1';
+            end if;
+          when "10" =>
+            serialport_state <= "00";
+        end case;
+      end if;
+    end process;
     
-
-
-
+    process(data_ready_serialport, addr, data_ready_part, write_enable)
+    begin
+      if(addr(23 downto 22) = "10" and write_enable = '1') then
+        data_ready <= data_ready_serialport;
+      else 
+        data_ready <= data_ready_part;
+      end if;
+    end process;
     busy <= not data_ready;
 
 end behave;
