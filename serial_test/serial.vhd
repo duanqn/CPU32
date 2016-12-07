@@ -1,7 +1,6 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.std_logic_unsigned.ALL;
-use work.CPU32.all;
 
 entity serial is
   PORT (
@@ -17,7 +16,7 @@ entity serial is
     rdn:out STD_LOGIC;
     tbre:in STD_LOGIC;
     tsre:in STD_LOGIC;
-    wrn:out STD_LOGIC;
+    wrn:out STD_LOGIC
     
   );
 end serial;
@@ -51,7 +50,7 @@ begin
             state <= "10";
           end if;
         when "00" =>
-          if tbse = '1' then
+          if tsre = '1' then
            state <= "01";
           else
             state <= "00";
@@ -59,5 +58,6 @@ begin
         when others=>NULL;
       end case;
     end if;
-  end
+  end process;
 end behave;
+
