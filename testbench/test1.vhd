@@ -74,14 +74,12 @@ ARCHITECTURE behavior OF test1 IS
     COMPONENT ram_simulate
     Port(
       baseram_addr : IN  std_logic_vector(19 downto 0);
-      baseram_data_in : IN  std_logic_vector(31 downto 0);
-      baseram_data_out : OUT  std_logic_vector(31 downto 0);      
+      baseram_data: INOUT  std_logic_vector(31 downto 0);  
       baseram_ce : IN  std_logic;
       baseram_oe : IN  std_logic;
       baseram_we : IN  std_logic;
       extraram_addr : IN  std_logic_vector(19 downto 0);
-      extraram_data_in : IN  std_logic_vector(31 downto 0);
-      extraram_data_out : OUT  std_logic_vector(31 downto 0);
+      extraram_data : INOUT  std_logic_vector(31 downto 0);
       extraram_ce : IN  std_logic;
       extraram_oe : IN  std_logic;
       extraram_we : IN  std_logic
