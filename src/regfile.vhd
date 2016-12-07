@@ -33,7 +33,7 @@ begin
   variable addr: integer;
   begin
     if (clk'event and clk = '1') then
-      if (rst = '0') then
+      if (rst = '1') then
         if(we = '1' and waddr /= "00000") then
           case waddr is
             when "00001" => regs(1) <= wdata;
@@ -116,7 +116,7 @@ begin
         when "11101" => rdata1 <= regs(29); 
         when "11110" => rdata1 <= regs(30); 
         when "11111" => rdata1 <= regs(31); 
-        when others => null;
+        when others => rdata1 <= x"00000000";
       end case;
     else
       rdata1 <= x"00000000";
@@ -165,7 +165,7 @@ begin
         when "11101" => rdata2 <= regs(29); 
         when "11110" => rdata2 <= regs(30); 
         when "11111" => rdata2 <= regs(31); 
-        when others => null;
+        when others => rdata2 <= x"00000000";
       end case;
     else
       rdata2 <= x"00000000";

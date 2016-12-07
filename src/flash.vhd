@@ -1,5 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use work.CPU32.all;
+
 
 
 entity flash is
@@ -11,6 +13,8 @@ entity flash is
            read_enable: in std_logic;
            write_enable: in std_logic;
            erase_enable: in std_logic;
+
+           data_ready: out std_logic;
            
            flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
            flash_data : inout  STD_LOGIC_VECTOR (15 downto 0);
@@ -48,18 +52,23 @@ begin
                     -- read state 0
                         flash_control_we <= '0';
                         flash_data <= X"00FF";
+                        data_ready <= '0';
                         state := 1;
                     elsif (write_enable = '1') then
                     -- write state 0
                         flash_control_we <= '0';
                         flash_data <= X"0040";
+                        data_ready <= '0';
                         state := 11;
                     elsif (erase_enable = '1') then 
                     -- erase state 0
                         flash_control_we <= '0';
                         flash_data <= X"0020";
+                        data_ready <= '0';
                         state := 21;
                     else
+                        data_ready <= '1';
+                        flash_data <= X"0000";
                         state := 0;
                     end if;
                 -- read state 1
@@ -76,9 +85,12 @@ begin
                     flash_addr <= addr & '0';
                     state := 4;
                 -- read state 4
-                when 4 =>
+                when 4 => 
+                    state := 5;
+                when 5 =>
                     data_out <= flash_data;
                     flash_control_oe <= '1';
+                    data_ready <= '1';
                     state := 0;
                     
                 -- write state 1
@@ -132,6 +144,7 @@ begin
                     flash_control_oe <= '1';
                     if (flash_data(7) = '1') then
                         state := 0;
+                        data_ready <= '1';
                     else 
                         state := 31;
                     end if;
@@ -140,6 +153,7 @@ begin
             end case;
         end if;
     end process;
+
 
 end Behavioral;
 

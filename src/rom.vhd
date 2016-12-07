@@ -1,5 +1,7 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.all;
+use work.CPU32.all;
+
 
 package rom is
 
@@ -7,22 +9,22 @@ constant ROM_SIZE : integer := 84;
 TYPE ROM is array(0 to ROM_SIZE - 1) of std_logic_vector(31 downto 0);
 
 constant boot_rom : ROM := (
-X"00000000",
-X"10000001",
-X"00000000",
-X"3c10be00",
-X"240f0000",
-X"020f7821",
-X"8de90000",
-X"8def0004",
-X"000f7c00",
-X"012f4825",
-X"3c08464c",
-X"3508457f",
-X"11090003",
-X"00000000",
-X"10000042",
-X"00000000",
+x"00210826",
+x"24020001",
+x"3C05BFD0",
+x"24A503F8",
+x"01084026",
+x"340A0014",
+x"00220821",
+x"00221021",
+x"ACA10000",
+x"ACA20000",
+x"25080001",
+x"01481823",
+x"1C60FFF9",
+x"00000000",
+x"1000FFFF",
+x"00000000",
 X"240f0038",
 X"020f7821",
 X"8df10000",
@@ -91,8 +93,6 @@ X"00000000",
 X"1000ffff",
 X"00000000",
 X"00000000"
-    ); 
+    );
 
 end rom;
-
-

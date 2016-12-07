@@ -148,8 +148,6 @@ end component;
 signal serialport_transmit_signal : std_logic := '0';
 signal serialport_transmit_data : std_logic_vector(7 downto 0);
 signal serialport_transmit_busy : std_logic := '0';
-signal serialport_state : STD_LOGIC_VECTOR(1 downto 0) := "00";
-signal serialport_write_enable : STD_LOGIC := '0';
 
 
 begin
@@ -181,7 +179,7 @@ begin
       extraram_addr => extraram_addr, extraram_data => extraram_data,
       extraram_ce => extraram_ce, extraram_oe => extraram_oe, extraram_we => extraram_we, data_ready => ram_data_ready);
 
-    serialport_transmit_signal <= write_enable and (not serialport_transmit_busy);
+
 
     process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in)
     begin
@@ -268,37 +266,35 @@ begin
       end if;
     end process;
 
-
-    process(clk, flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
+    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable)
     begin
       if addr(23 downto 22) = "00" then -- flash read
         data_out <= X"0000" & flash_read_data;
         data_ready <= flash_data_ready;
+        serialport_transmit_signal <= '0';
       elsif addr(23 downto 22) = "01" then -- ram write/read
-        data_ready <= '1';
+        data_ready <= ram_data_ready;
         data_out <= ram_read_data;
-      elsif addr(23 downto 22) = "10" then
-       -- serialport_read/write
+        serialport_transmit_signal <= '0';
+      elsif addr(23 downto 22) = "10" then -- serialport_read/write
         data_out <= X"000000" & serialport_data_latch;
-
         if serialport_transmit_busy = '0' then
+          serialport_transmit_signal <= '0';
           data_ready <= '1';
         else
+          serialport_transmit_signal <= '1';
           data_ready <= '0';
         end if;
       elsif addr(23 downto 22) = "11" then -- rom_read
-        data_out <= boot_rom(to_integer(unsigned(addr(5 downto 0))));
+        data_out <= boot_rom(to_integer(unsigned(addr(21 downto 0))));
         data_ready <= '1';
+        serialport_transmit_signal <= '0';
       else
         data_out <= (others => '0');
         data_ready <= '0';
+        serialport_transmit_signal <= '0';
       end if;
     end process;
-
-    
-
-
-
     busy <= not data_ready;
 
 end behave;

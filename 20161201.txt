@@ -1,0 +1,21 @@
+仿真分工
+async.v		潘星宇
+clock.vhd	潘星宇	*
+cp0_reg.vhd	段清楠
+ctrl.vhd	段清楠	*
+ex.vhd		王澎	*
+ex_mem.vhd	王澎
+flash.vhd	潘星宇
+hilo_reg.vhd	王澎
+id.vhd		段清楠	*
+id_ex.vhd	段清楠
+if_id.vhd	段清楠
+mem.vhd		段清楠	*
+mem_phy.vhd	潘星宇	*
+mem_wb.vhd 	王澎
+memcontrol.vhd	潘星宇	*
+mmu.vhd		潘星宇	*
+pc_reg.vhd	段清楠
+ram.vhd		潘星宇
+rom.vhd		潘星宇
+regfile.vhd	王澎

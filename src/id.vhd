@@ -36,7 +36,9 @@ entity id is
     is_in_delayslot_o:out STD_LOGIC;
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
     stallreq:out STD_LOGIC; -- =1 -> stall pipeline
-    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0)
+    ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0);
+    excepttype_o:out STD_LOGIC_VECTOR(31 downto 0);
+    current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0)
   );
 end id;
 
@@ -55,6 +57,10 @@ signal stallreq_for_reg1_loadrelate: STD_LOGIC;
 signal stallreq_for_reg2_loadrelate: STD_LOGIC;
 signal pre_inst_is_load: STD_LOGIC;
 
+signal excepttype_is_syscall: STD_LOGIC;
+signal excepttype_is_eret: STD_LOGIC;
+
+
 begin
   op<=inst_i(31 downto 26);
   op2<=inst_i(10 downto 6);
@@ -65,7 +71,8 @@ begin
   pc_plus_4 <= pc_i + x"00000004";
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";
   inst_o <= inst_i;
-
+  current_inst_addr_o <= pc_i;
+  excepttype_o <= "0000000000000000000" & excepttype_is_eret & "00" & not instvalid & excepttype_is_syscall & "00000000";
 
   process(ex_aluop_i)
   begin
@@ -93,6 +100,45 @@ begin
       branch_target_address_o <= x"00000000";
       branch_flag_o <= '0';
       next_inst_in_delayslot_o <= '0';
+      excepttype_is_eret <= '0';
+      excepttype_is_syscall <= '0';
+
+    elsif (inst_i = "01000010000000000000000000011000") then
+      wreg_o <= '0';
+      aluop_o <= EXE_ERET_OP;
+      alusel_o <= EXE_RES_NOP;
+      reg1_read_o <= '0';
+      reg2_read_o <= '0';
+      wd_o <= "00000";
+      reg1_addr_o <= "00000";
+      reg2_addr_o <= "00000";
+      imm <= x"00000000";
+      instvalid <= '1';
+      excepttype_is_eret <= '1';
+      excepttype_is_syscall <= '0';
+      branch_flag_o <= '0';
+      next_inst_in_delayslot_o <= '0';
+      branch_target_address_o <= x"00000000";
+      link_addr_o <= x"00000000";
+
+    elsif (inst_i = "01000010000000000000000000000010") then
+      wreg_o <= '0';
+      aluop_o <= EXE_TLBWI_OP;
+      alusel_o <= EXE_RES_NOP;
+      reg1_read_o <= '0';
+      reg2_read_o <= '0';
+      wd_o <= "00000";
+      reg1_addr_o <= "00000";
+      reg2_addr_o <= "00000";
+      imm <= x"00000000";
+      instvalid <= '1';
+      excepttype_is_eret <= '0';
+      excepttype_is_syscall <= '0';
+      branch_flag_o <= '0';
+      next_inst_in_delayslot_o <= '0';
+      branch_target_address_o <= x"00000000";
+      link_addr_o <= x"00000000";
+
     else
       case op is
         when EXE_ORI =>  --ORI
@@ -106,7 +152,12 @@ begin
           imm <= "0000000000000000"&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_ANDI =>
           wreg_o <= '1';
           aluop_o <= EXE_AND_OP;
@@ -118,7 +169,12 @@ begin
           imm <= "0000000000000000"&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_XORI =>
           wreg_o <= '1';
           aluop_o <= EXE_XOR_OP;
@@ -130,7 +186,12 @@ begin
           imm <= "0000000000000000"&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_LUI => -- op
           wreg_o <= '1';
           aluop_o <= EXE_OR_OP;
@@ -142,7 +203,12 @@ begin
 			    imm <= inst_i(15 downto 0)&"0000000000000000";
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= "00000";
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_SLTI =>  -- op
           wreg_o <= '1';
           aluop_o <= EXE_SLT_OP;
@@ -154,7 +220,12 @@ begin
           imm <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_SLTIU =>  -- op
           wreg_o <= '1';
           aluop_o <= EXE_SLTU_OP;
@@ -166,7 +237,12 @@ begin
           imm <= "0000000000000000"&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_ADDIU =>
           wreg_o <= '1';
           aluop_o <= EXE_ADDIU_OP;
@@ -178,7 +254,12 @@ begin
           imm <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0);
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_J =>
           wreg_o <= '0';
           aluop_o <= EXE_J_OP;
@@ -187,21 +268,31 @@ begin
           reg2_read_o <= '0';
           link_addr_o <= x"00000000";
           branch_flag_o <= '1';
+          wd_o <= "00000";
+          imm <= x"00000000";
           next_inst_in_delayslot_o <= '1';
+          reg1_addr_o <= "00000";
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           branch_target_address_o <= pc_plus_4(31 downto 28)&inst_i(25 downto 0)&"00";
-
         when EXE_JAL =>
           wreg_o <= '1';
           aluop_o <= EXE_JAL_OP;
           alusel_o <= EXE_RES_JUMP_BRANCH;
           reg1_read_o <= '0';
           reg2_read_o <= '0';
-          wd_o <= "11111";
+          wd_o <= "00000";
+          imm <= x"00000000";
+          reg1_addr_o <= "00000";
+          reg2_addr_o <= "00000";
           link_addr_o <= pc_plus_8;
           branch_flag_o <= '1';
           next_inst_in_delayslot_o <= '1';
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           branch_target_address_o <= pc_plus_4(31 downto 28)&inst_i(25 downto 0)&"00";
         when EXE_BEQ =>
           wreg_o <= '0';
@@ -212,11 +303,17 @@ begin
 			    reg1_addr_o <= inst_i(25 downto 21);
 			    reg2_addr_o <= inst_i(20 downto 16);
           instvalid <= '1';
+          wd_o <= "00000";
+          imm <= x"00000000";
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
           if reg1_o = reg2_o then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
           else
+            branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
             next_inst_in_delayslot_o <= '0';
           end if;
@@ -227,12 +324,19 @@ begin
           reg1_read_o <= '1';
           reg2_read_o <= '0';
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
           instvalid <= '1';
+          wd_o <= "00000";
+          imm <= x"00000000";
+          link_addr_o <= x"00000000";
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           if (reg1_o(31) = '0' and (not (reg1_o = x"00000000"))) then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
           else
+            branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
             next_inst_in_delayslot_o <= '0';
           end if;
@@ -243,12 +347,19 @@ begin
           reg1_read_o <= '1';
           reg2_read_o <= '0';
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
+          wd_o <= "00000";
+          imm <= x"00000000";
           instvalid <= '1';
+          link_addr_o <= x"00000000";
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           if (reg1_o(31) = '1' or reg1_o = x"00000000") then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
           else
+            branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
             next_inst_in_delayslot_o <= '0';
           end if;
@@ -260,12 +371,18 @@ begin
           reg2_read_o <= '1';
 			    reg1_addr_o <= inst_i(25 downto 21);
 			    reg2_addr_o <= inst_i(20 downto 16);
+          link_addr_o <= x"00000000";
+          wd_o <= "00000";
+          imm <= x"00000000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           if reg1_o /= reg2_o then
             branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
             branch_flag_o <= '1';
             next_inst_in_delayslot_o <= '1';
           else
+            branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
             next_inst_in_delayslot_o <= '0';
           end if;
@@ -280,7 +397,13 @@ begin
           next_inst_in_delayslot_o <= '0';
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
+          imm <= x"00000000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_LBU =>
           wreg_o <= '1';
           aluop_o <= EXE_LBU_OP;
@@ -291,7 +414,13 @@ begin
           reg2_read_o <= '0';
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
+          imm <= x"00000000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_LHU =>
           wreg_o <= '1';
           aluop_o <= EXE_LHU_OP;
@@ -302,7 +431,13 @@ begin
           reg2_read_o <= '0';
           wd_o <= inst_i(20 downto 16);
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
+          imm <= x"00000000";
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_LW =>
           wreg_o <= '1';
           aluop_o <= EXE_LW_OP;
@@ -312,8 +447,14 @@ begin
           reg1_read_o <= '1';
           reg2_read_o <= '0';
 			    reg1_addr_o <= inst_i(25 downto 21);
+          reg2_addr_o <= "00000";
 			    wd_o <= inst_i(20 downto 16);
+          imm <= x"00000000";
 			    instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_SB =>
           wreg_o <= '0';
           aluop_o <= EXE_SB_OP;
@@ -324,7 +465,13 @@ begin
           reg2_read_o <= '1';
 			    reg1_addr_o <= inst_i(25 downto 21);
 			    reg2_addr_o <= inst_i(20 downto 16);
+          imm <= x"00000000";
           instvalid <= '1';
+          wd_o <= "00000";
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         when EXE_SW =>
           wreg_o <= '0';
           aluop_o <= EXE_SW_OP;
@@ -333,9 +480,15 @@ begin
           reg2_read_o <= '1';
           branch_flag_o <= '0';
           next_inst_in_delayslot_o <= '0';
+          wd_o <= "00000";
+          imm <= x"00000000";
 			    reg1_addr_o <= inst_i(25 downto 21);
 			    reg2_addr_o <= inst_i(20 downto 16);
           instvalid <= '1';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
+          link_addr_o <= x"00000000";
+          branch_target_address_o <= x"00000000";
         ----------------------APPEND OP HERE----------------------
         when EXE_REGIMM_INST =>
           case op4 is
@@ -346,12 +499,19 @@ begin
               reg1_read_o <= '1';
               reg2_read_o <= '0';
 				      reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= "00000";
               instvalid <= '1';
+              wd_o <= "00000";
+              imm <= x"00000000";
+              link_addr_o <= x"00000000";
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               if (reg1_o(31) = '0') then
                 branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
                 branch_flag_o <= '1';
                 next_inst_in_delayslot_o <= '1';
               else
+                branch_target_address_o <= x"00000000";
                 branch_flag_o <= '0';
                 next_inst_in_delayslot_o <= '0';
               end if;
@@ -362,14 +522,19 @@ begin
               reg1_read_o <= '1';
               reg2_read_o <= '0';
 				      reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= "00000";
               link_addr_o <= pc_plus_8;
-              wd_o <= "11111";
+              wd_o <= "00000";
+              imm <= x"00000000";
               instvalid <= '1';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               if (reg1_o(31) = '0') then
                 branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
                 branch_flag_o <= '1';
                 next_inst_in_delayslot_o <= '1';
               else
+                branch_target_address_o <= x"00000000";
                 branch_flag_o <= '0';
                 next_inst_in_delayslot_o <= '0';
               end if;
@@ -380,12 +545,19 @@ begin
               reg1_read_o <= '1';
               reg2_read_o <= '0';
 				      reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= "00000";
               instvalid <= '1';
+              wd_o <= "00000";
+              imm <= x"00000000";
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
+              link_addr_o <= x"00000000";
               if (reg1_o(31) = '1') then
                 branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
                 branch_flag_o <= '1';
                 next_inst_in_delayslot_o <= '1';
               else
+                branch_target_address_o <= x"00000000";
                 branch_flag_o <= '0';
                 next_inst_in_delayslot_o <= '0';
               end if;
@@ -396,19 +568,40 @@ begin
               reg1_read_o <= '1';
               reg2_read_o <= '0';
 				      reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= "00000";
               link_addr_o <= pc_plus_8;
-              wd_o <= "11111";
+              wd_o <= "00000";
+              imm <= x"00000000";
               instvalid <= '1';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               if (reg1_o(31) = '0') then
                 branch_target_address_o <= pc_plus_4 + imm_sll2_signedext;
                 branch_flag_o <= '1';
                 next_inst_in_delayslot_o <= '1';
               else
+                branch_target_address_o <= x"00000000";
                 branch_flag_o <= '0';
                 next_inst_in_delayslot_o <= '0';
               end if;
             when others =>
-              NULL;
+              --Invalid
+              aluop_o <= "00000000";
+              alusel_o <= "000";
+              wd_o <= inst_i(15 downto 11);
+              wreg_o <= '0';
+              instvalid<='0';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
+              reg1_read_o <= '0';
+              reg2_read_o <= '0';
+              reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= inst_i(20 downto 16);
+              imm <= x"00000000";
+              link_addr_o <= x"00000000";
+              branch_target_address_o <= x"00000000";
+              branch_flag_o <= '0';
+              next_inst_in_delayslot_o <= '0';
           end case;
         when EXE_SPECIAL =>
           case op2 is
@@ -425,7 +618,12 @@ begin
 						      reg1_addr_o <= inst_i(25 downto 21);
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
+                  imm <= x"00000000";
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_AND => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_AND_OP;
@@ -437,7 +635,12 @@ begin
 						      reg1_addr_o <= inst_i(25 downto 21);
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
+                  imm <= x"00000000";
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_XOR => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_XOR_OP;
@@ -449,7 +652,12 @@ begin
                   branch_flag_o <= '0';
                   next_inst_in_delayslot_o <= '0';
 						      wd_o <= inst_i(15 downto 11);
+                  imm <= x"00000000";
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_NOR => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_NOR_OP;
@@ -460,8 +668,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SLLV =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SLL_OP;
@@ -472,8 +685,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SRLV =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SRL_OP;
@@ -484,8 +702,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SRAV =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SRA_OP;
@@ -496,46 +719,81 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_MFHI =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_MFHI_OP;
                   alusel_o <= EXE_RES_MOVE;
                   reg1_read_o <= '0';
                   reg2_read_o <= '0';
+                  reg1_addr_o <= "00000";
+                  reg2_addr_o <= "00000";
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_MTHI =>  -- op3
                   wreg_o <= '0';
                   aluop_o <= EXE_MTHI_OP;
+                  alusel_o <= "000";
                   reg1_read_o <= '1';
                   reg2_read_o <= '0';
 						      reg1_addr_o <= inst_i(25 downto 21);
+                  reg2_addr_o <= "00000";
                   branch_flag_o <= '0';
                   next_inst_in_delayslot_o <= '0';
+                  wd_o <= "00000";
+                  imm <= x"00000000";
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_MFLO =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_MFLO_OP;
                   alusel_o <= EXE_RES_MOVE;
                   reg1_read_o <= '0';
                   reg2_read_o <= '0';
+                  reg1_addr_o <= "00000";
+                  reg2_addr_o <= "00000";
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
                   next_inst_in_delayslot_o <= '0';
+                  imm <= x"00000000";
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_MTLO =>  -- op3
                   wreg_o <= '0';
                   aluop_o <= EXE_MTLO_OP;
+                  alusel_o <= "000";
                   reg1_read_o <= '1';
                   reg2_read_o <= '0';
 						      reg1_addr_o <= inst_i(25 downto 21);
+                  reg2_addr_o <= "00000";
                   branch_flag_o <= '0';
+                  wd_o <= "00000";
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SLT => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SLT_OP;
@@ -546,8 +804,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SLTU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SLTU_OP;
@@ -558,8 +821,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_ADDU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_ADDU_OP;
@@ -570,8 +838,13 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
 						      wd_o <= inst_i(15 downto 11);
                   branch_flag_o <= '0';
+                  imm <= x"00000000";
                   next_inst_in_delayslot_o <= '0';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_SUBU => -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_SUBU_OP;
@@ -582,18 +855,30 @@ begin
 						      reg2_addr_o <= inst_i(20 downto 16);
                   wd_o <= inst_i(15 downto 11);
 						      instvalid <= '1';
+                  imm <= x"00000000";
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
                   branch_flag_o <= '0';
                   next_inst_in_delayslot_o <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_MULT => -- op3
                   wreg_o <= '0';  -- Write Hi-Lo register instead
                   aluop_o <= EXE_MULT_OP;
+                  alusel_o <= "000";
                   reg1_read_o <= '1';
                   reg2_read_o <= '1';
 						      reg1_addr_o <= inst_i(25 downto 21);
 						      reg2_addr_o <= inst_i(20 downto 16);
                   instvalid <= '1';
+                  wd_o <= "00000";
+                  imm <= x"00000000";
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
                   branch_flag_o <= '0';
                   next_inst_in_delayslot_o <= '0';
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
                 when EXE_JR =>  -- op3
                   wreg_o <= '0';
                   aluop_o <= EXE_JR_OP;
@@ -601,11 +886,16 @@ begin
                   reg1_read_o <= '1';
                   reg2_read_o <= '0';
 						      reg1_addr_o <= inst_i(25 downto 21);
+                  reg2_addr_o <= "00000";
                   link_addr_o <= x"00000000";
+                  wd_o <= "00000";
+                  imm <= x"00000000";
                   branch_target_address_o <= reg1_o;
                   branch_flag_o <= '1';
                   next_inst_in_delayslot_o <= '1';
                   instvalid <= '1';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
                 when EXE_JALR =>  -- op3
                   wreg_o <= '1';
                   aluop_o <= EXE_JALR_OP;
@@ -613,18 +903,71 @@ begin
                   reg1_read_o <= '1';
                   reg2_read_o <= '0';
 						      reg1_addr_o <= inst_i(25 downto 21);
+                  reg2_addr_o <= "00000";
                   wd_o <= inst_i(15 downto 11);
+                  imm <= x"00000000";
                   link_addr_o <= pc_plus_8;
                   branch_target_address_o <= reg1_o;
                   branch_flag_o <= '1';
                   next_inst_in_delayslot_o <= '1';
                   instvalid <= '1';
-
-
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                when "001100" =>  -- op3 EXE_SYSCALL
+                  wreg_o <= '0';
+                  aluop_o <= EXE_SYSCALL_OP;
+                  alusel_o <= EXE_RES_NOP;
+                  reg1_read_o <= '0';
+                  reg2_read_o <= '0';
+                  instvalid <= '1';
+                  wd_o <= "00000";
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '1';
+                  link_addr_o <= x"00000000";
+                  reg1_addr_o <= "00000";
+                  reg2_addr_o <= "00000";
+                  imm <= x"00000000";
+                  branch_target_address_o <= x"00000000";
+                  branch_flag_o <= '0';
+                  next_inst_in_delayslot_o <= '0';
                 ----------------------APPEND OP3 HERE----------------------
-                when others => NULL;
+                when others =>
+                  --Invalid
+                  aluop_o <= "00000000";
+                  alusel_o <= "000";
+                  wd_o <= inst_i(15 downto 11);
+                  wreg_o <= '0';
+                  instvalid<='0';
+                  excepttype_is_eret <= '0';
+                  excepttype_is_syscall <= '0';
+                  reg1_read_o <= '0';
+                  reg2_read_o <= '0';
+                  reg1_addr_o <= inst_i(25 downto 21);
+                  reg2_addr_o <= inst_i(20 downto 16);
+                  imm <= x"00000000";
+                  link_addr_o <= x"00000000";
+                  branch_target_address_o <= x"00000000";
+                  branch_flag_o <= '0';
+                  next_inst_in_delayslot_o <= '0';
               end case; -- op3
-            when others => NULL;
+            when others =>
+              --Invalid
+              aluop_o <= "00000000";
+              alusel_o <= "000";
+              wd_o <= inst_i(15 downto 11);
+              wreg_o <= '0';
+              instvalid<='0';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
+              reg1_read_o <= '0';
+              reg2_read_o <= '0';
+              reg1_addr_o <= inst_i(25 downto 21);
+              reg2_addr_o <= inst_i(20 downto 16);
+              imm <= x"00000000";
+              link_addr_o <= x"00000000";
+              branch_target_address_o <= x"00000000";
+              branch_flag_o <= '0';
+              next_inst_in_delayslot_o <= '0';
           end case; -- op2
           if inst_i(25 downto 21) = "00000" then -- inst_i(31 downto 21) = "00000000000"
             if op3 = EXE_SLL then
@@ -634,65 +977,99 @@ begin
               reg1_read_o <= '0';
               reg2_read_o <= '1';
 				      reg2_addr_o <= inst_i(20 downto 16);
+              reg1_addr_o <= "00000";
               imm(4 downto 0) <= inst_i(10 downto 6);
+              imm(31 downto 5) <= (others => '0');
               wd_o <= inst_i(15 downto 11);
               instvalid <= '1';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               branch_flag_o <= '0';
               next_inst_in_delayslot_o <= '0';
+              link_addr_o <= x"00000000";
+              branch_target_address_o <= x"00000000";
             elsif op3 = EXE_SRL then
               wreg_o <= '1';
               aluop_o <= EXE_SRL_OP;
               alusel_o <= EXE_RES_SHIFT;
               reg1_read_o <= '0';
               reg2_read_o <= '1';
+              reg1_addr_o <= "00000";
 				      reg2_addr_o <= inst_i(20 downto 16);
               imm(4 downto 0) <= inst_i(10 downto 6);
+              imm(31 downto 5) <= (others => '0');
               wd_o <= inst_i(15 downto 11);
               instvalid <= '1';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               branch_flag_o <= '0';
               next_inst_in_delayslot_o <= '0';
+              link_addr_o <= x"00000000";
+              branch_target_address_o <= x"00000000";
             elsif op3 = EXE_SRA then
               wreg_o <= '1';
               aluop_o <= EXE_SRA_OP;
               alusel_o <= EXE_RES_SHIFT;
               reg1_read_o <= '0';
               reg2_read_o <= '1';
+              reg1_addr_o <= "00000";
 				      reg2_addr_o <= inst_i(20 downto 16);
               imm(4 downto 0) <= inst_i(10 downto 6);
+              imm(31 downto 5) <= (others => '0');
               wd_o <= inst_i(15 downto 11);
               instvalid <= '1';
+              excepttype_is_eret <= '0';
+              excepttype_is_syscall <= '0';
               branch_flag_o <= '0';
               next_inst_in_delayslot_o <= '0';
+              link_addr_o <= x"00000000";
+              branch_target_address_o <= x"00000000";
             end if;
           end if;
 
         when EXE_CP0 =>
-          if (inst_i(25 downto 21) = "00000" AND inst_i(10 downto 3)) then
+          if ((inst_i(25 downto 21) = "00000") AND (inst_i(10 downto 2) = "000000000")) then
             aluop_o <= EXE_MFC0_OP;
             alusel_o <= EXE_RES_MOVE;
             wd_o <= inst_i(20 downto 16);
             wreg_o <= '1';
             instvalid <= '1';
+            excepttype_is_eret <= '0';
+            excepttype_is_syscall <= '0';
             reg1_read_o <= '0';
             reg2_read_o <= '0';
+            reg1_addr_o <= "00000";
+            reg2_addr_o <= "00000";
             branch_flag_o <= '0';
+            imm <= X"00000000";
             next_inst_in_delayslot_o <= '0';
-          elsif (inst_i(25 downto 21) = "00100" AND inst_i(10 downto 3)) then
+            link_addr_o <= x"00000000";
+            branch_target_address_o <= x"00000000";
+          elsif ((inst_i(25 downto 21) = "00100") AND (inst_i(10 downto 2) = "000000000")) then
             aluop_o <= EXE_MTC0_OP;
             alusel_o <= EXE_RES_NOP;
             wreg_o <= '0';
+            wd_o <= "00000";
             instvalid <= '1';
+            excepttype_is_eret <= '0';
+            excepttype_is_syscall <= '0';
             reg1_read_o <= '1';
             reg1_addr_o <= inst_i(20 downto 16);
+            reg2_addr_o <= "00000";
             reg2_read_o <= '0';
             branch_flag_o <= '0';
+            imm <= X"00000000";
             next_inst_in_delayslot_o <= '0';
+            link_addr_o <= x"00000000";
+            branch_target_address_o <= x"00000000";
           else
             aluop_o <= "00000000";
             alusel_o <= "000";
             wd_o <= inst_i(15 downto 11);
             wreg_o <= '0';
             instvalid<='0';
+            excepttype_is_eret <= '0';
+            excepttype_is_syscall <= '0';
             reg1_read_o <= '0';
             reg2_read_o <= '0';
             reg1_addr_o <= inst_i(25 downto 21);
@@ -701,7 +1078,7 @@ begin
             link_addr_o <= x"00000000";
             branch_target_address_o <= x"00000000";
             branch_flag_o <= '0';
-            next_inst_in_delayslot_o <= '0'
+            next_inst_in_delayslot_o <= '0';
           end if;
 
         when others =>  -- op
@@ -710,6 +1087,8 @@ begin
           wd_o <= inst_i(15 downto 11);
           wreg_o <= '0';
           instvalid<='0';
+          excepttype_is_eret <= '0';
+          excepttype_is_syscall <= '0';
           reg1_read_o <= '0';
           reg2_read_o <= '0';
           reg1_addr_o <= inst_i(25 downto 21);

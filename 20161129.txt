@@ -1,0 +1,6 @@
+2016-11-29 工作文档
+1、mem与memcontrol相连，memcontrol与mmu相连。
+2、mmu得到的异常信号（2个，类型和badVAddr）连回mem
+3、mmu的中断信号int连到cp0去更改status值
+4、mem计算异常，将结果输出到cp0和ctrl模块
+5、mem和cp0段新增异常：TLB modify, TLBL, TBLS, ADEL, ADES共5个。

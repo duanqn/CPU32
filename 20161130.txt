@@ -1,0 +1,16 @@
+2016-11-30 工作文档
+中断处理：CP0 Cause(8-9)处理软件中断（同步），Cause(10-15)处理硬件中断。
+分配中断号：
+Cause(10)	时钟中断
+Cause(11)	键盘
+Cause(12)	COM1
+Cause(13)	COM2
+Cause(14)	MMU备用
+Cause(15)	保留
+其中Cause(11-14)与mmu相连，mmu生成4位中断信号直接控制Cause寄存器。
+相应位为1表示中断，0表示不发生中断。
+
+TLB需要的CP0寄存器：
+Index(0), EntryLo0(2), EntryLo1(3), Pagemask(5), EntryHi(10)	--连接到MEM段
+处理TLBWI指令：
+在ID段识别指令，置aluop=10000010(EXE_TLBWI_OP)，不做其他操作，直接穿过EX传递到MEM段，MEM检测到这一EXE_TLBWI_OP之后给mmu发出信号修改TLB（根据上面5个寄存器的值计算）
