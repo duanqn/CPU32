@@ -219,11 +219,11 @@ begin
   to_physical_data_reg <= write_data;
 
   to_physical_read_enable_reg <= '1'
-                      when( special_com1_status = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '0' and ope_ce = '1')
+                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '0' and ope_ce = '1')
                     else '0';
 
   to_physical_write_enable_reg <= '1'
-                      when( special_com1_status = '0' and no_exception_accur = '1' and from_physical_ready = '1' and ope_we = '1' and ope_ce = '1')
+                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '1' and ope_ce = '1')
                     else '0';
 
   -- to top mem level

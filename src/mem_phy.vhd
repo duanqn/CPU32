@@ -148,7 +148,7 @@ end component;
 signal serialport_transmit_signal : std_logic := '0';
 signal serialport_transmit_data : std_logic_vector(7 downto 0);
 signal serialport_transmit_busy : std_logic := '0';
-signal serialport_state : STD_LOGIC_VECTOR(1 downto 0) := "00";
+signal serialport_state : STD_LOGIC_VECTOR(2 downto 0) := "000";
 signal serialport_write_enable : STD_LOGIC := '0';
 
 
@@ -286,7 +286,7 @@ begin
        -- serialport_read/write
         data_out <= X"000000" & serialport_data_latch;
         data_ready_part <= '0';
-        
+
       elsif addr(23 downto 22) = "11" then -- rom_read
         data_out <= boot_rom(to_integer(unsigned(addr(5 downto 0))));
         data_ready_part <= '1';
@@ -300,31 +300,34 @@ begin
     begin
       if (clk'event and clk = '1') then
         case serialport_state is
-          when "00" =>
+          when "000" =>
             if(addr(23 downto 22)) = "10" and write_enable = '1' then
-              serialport_state <= "01";
+              serialport_state <= "001";
               serialport_write_enable <= '1';
               data_ready_serialport <= '0';
             end if;
-          when "01" =>
-            serialport_state <= "11";
-          when "11" =>
+          when "001" =>
+            serialport_state <= "011";
+          when "011" =>
             serialport_write_enable <= '0';
             if serialport_transmit_busy = '0' then
-              serialport_state <= "10";
+              serialport_state <= "010";
               data_ready_serialport <= '1';
             end if;
-          when "10" =>
-            serialport_state <= "00";
+          when "010" =>
+            serialport_state <= "110";
+          when "110" =>
+            serialport_state <= "000";
+          when others => null;
         end case;
       end if;
     end process;
-    
+
     process(data_ready_serialport, addr, data_ready_part, write_enable)
     begin
       if(addr(23 downto 22) = "10" and write_enable = '1') then
         data_ready <= data_ready_serialport;
-      else 
+      else
         data_ready <= data_ready_part;
       end if;
     end process;
