@@ -38,7 +38,7 @@ begin
   begin
     if (clk'event and clk = '1') then
       if (ce = '0') then
-        pc <= x"80000000";
+        pc <= x"90000000";
       elsif (flush = '1') then
         pc <= new_pc;
       elsif (stall(0) = '0') then
