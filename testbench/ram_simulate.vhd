@@ -38,14 +38,13 @@ USE STD.TextIO.All;
 ENTITY ram_simulate IS
   Port(
     baseram_addr : IN  std_logic_vector(19 downto 0);
-    baseram_data_in : IN  std_logic_vector(31 downto 0);
-    baseram_data_out : OUT std_logic_vector(31 downto 0);
+    --baseram_data_in : IN  std_logic_vector(31 downto 0);
+    baseram_data : INOUT std_logic_vector(31 downto 0);
     baseram_ce : IN  std_logic;
     baseram_oe : IN  std_logic;
     baseram_we : IN  std_logic;
     extraram_addr : IN  std_logic_vector(19 downto 0);
-    extraram_data_in : IN  std_logic_vector(31 downto 0);
-    extraram_data_out : OUT std_logic_vector(31 downto 0);
+    extraram_data : INOUT  std_logic_vector(31 downto 0);
     extraram_ce : IN  std_logic;
     extraram_oe : IN  std_logic;
     extraram_we : IN  std_logic
@@ -61,16 +60,16 @@ signal memory: mem_array := (others => (others => '0'));
 constant DELAY: time := 10 ns;
 
 BEGIN
-   baseram_data_out <= transport memory(to_integer(unsigned(baseram_addr(9 downto 0)))) after DELAY when baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1' else (others => 'Z');
-   extraram_data_out <= transport memory(to_integer(unsigned('1' & extraram_addr))) after DELAY when extraram_ce = '0' and extraram_oe = '0' and extraram_we = '1' else (others => 'Z');
+   baseram_data <= transport memory(to_integer(unsigned(baseram_addr(9 downto 0)))) after DELAY when baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1' else (others => 'Z');
+   extraram_data <= transport memory(to_integer(unsigned('1' & extraram_addr))) after DELAY when extraram_ce = '0' and extraram_oe = '0' and extraram_we = '1' else (others => 'Z');
 
 process(baseram_we, baseram_data_in, baseram_addr, baseram_oe, baseram_ce)
 begin
     -- Write to baseMemory
         if (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then 
-            memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= baseram_data_in;
+            memory(to_integer(unsigned(baseram_addr(9 downto 0)))) <= baseram_data;
             report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & 
-                integer'image(to_integer(unsigned(baseram_data_in)));
+                integer'image(to_integer(unsigned(baseram_data)));
         end if;
 end process ; 
 

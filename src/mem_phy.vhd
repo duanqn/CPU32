@@ -148,6 +148,8 @@ end component;
 signal serialport_transmit_signal : std_logic := '0';
 signal serialport_transmit_data : std_logic_vector(7 downto 0);
 signal serialport_transmit_busy : std_logic := '0';
+signal serialport_state : STD_LOGIC_VECTOR(1 downto 0) := "00";
+signal serialport_write_enable : STD_LOGIC := '0';
 
 
 begin
@@ -266,7 +268,8 @@ begin
       end if;
     end process;
 
-    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
+
+    process(clk, flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
     begin
       if addr(23 downto 22) = "00" then -- flash read
         data_out <= X"0000" & flash_read_data;
@@ -274,8 +277,10 @@ begin
       elsif addr(23 downto 22) = "01" then -- ram write/read
         data_ready <= '1';
         data_out <= ram_read_data;
-      elsif addr(23 downto 22) = "10" then -- serialport_read/write
+      elsif addr(23 downto 22) = "10" then
+       -- serialport_read/write
         data_out <= X"000000" & serialport_data_latch;
+
         if serialport_transmit_busy = '0' then
           data_ready <= '1';
         else
@@ -289,6 +294,11 @@ begin
         data_ready <= '0';
       end if;
     end process;
+
+    
+
+
+
     busy <= not data_ready;
 
 end behave;
