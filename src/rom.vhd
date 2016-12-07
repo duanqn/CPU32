@@ -9,9 +9,9 @@ constant ROM_SIZE : integer := 84;
 TYPE ROM is array(0 to ROM_SIZE - 1) of std_logic_vector(31 downto 0);
 
 constant boot_rom : ROM := (
-x"00210826",
-x"24020001",
-x"3C05BFD0",
+x"3C018000",
+x"00200008",
+x"00000000",
 x"24A503F8",
 x"01084026",
 x"340A0014",
