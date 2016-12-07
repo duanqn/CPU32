@@ -22,7 +22,7 @@ module async_transmitter(
 // TxD_data is latched so that it doesn't have to stay valid while it is being sent
 
 parameter ClkFrequency = 50000000;	// frequency
-parameter Baud = 38400; // baudrate
+parameter Baud = 115200; // baudrate
 
 /*generate
 	if(ClkFrequency<Baud*8 && (ClkFrequency % Baud!=0)) ASSERTION_ERROR PARAMETER_OUT_OF_RANGE("Frequency incompatible with requested Baud rate");
@@ -85,7 +85,7 @@ module async_receiver(
 );
 
 parameter ClkFrequency = 50000000;  // frequency
-parameter Baud = 38400; // baudrate
+parameter Baud = 115200; // baudrate
 
 parameter Oversampling = 16; //8;  // needs to be a power of 2
 // we oversample the RxD line at a fixed rate to capture each RxD data bit at the "right" time
