@@ -85,7 +85,9 @@ begin
                     flash_addr <= addr & '0';
                     state := 4;
                 -- read state 4
-                when 4 =>
+                when 4 => 
+                    state := 5;
+                when 5 =>
                     data_out <= flash_data;
                     flash_control_oe <= '1';
                     data_ready <= '1';

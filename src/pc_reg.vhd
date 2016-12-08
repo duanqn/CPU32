@@ -21,7 +21,6 @@ entity pc_reg is
 end pc_reg;
 
 architecture counter of pc_reg is
-signal counter:STD_LOGIC_VECTOR(31 downto 0) := x"00000000";
 
 begin
   process(clk)
@@ -39,7 +38,7 @@ begin
   begin
     if (clk'event and clk = '1') then
       if (ce = '0') then
-        pc <= x"00000000";
+        pc <= x"90000000";
       elsif (flush = '1') then
         pc <= new_pc;
       elsif (stall(0) = '0') then

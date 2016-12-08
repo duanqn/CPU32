@@ -72,7 +72,7 @@ begin
   imm_sll2_signedext <= inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15)&inst_i(15 downto 0)&"00";
   inst_o <= inst_i;
   current_inst_addr_o <= pc_i;
-  excepttype_o <= "0000000000000000000" & excepttype_is_eret & "00" & instvalid & excepttype_is_syscall & "00000000";
+  excepttype_o <= "0000000000000000000" & excepttype_is_eret & "00" & not instvalid & excepttype_is_syscall & "00000000";
 
   process(ex_aluop_i)
   begin
@@ -283,7 +283,7 @@ begin
           alusel_o <= EXE_RES_JUMP_BRANCH;
           reg1_read_o <= '0';
           reg2_read_o <= '0';
-          wd_o <= "00000";
+          wd_o <= "11111";
           imm <= x"00000000";
           reg1_addr_o <= "00000";
           reg2_addr_o <= "00000";
