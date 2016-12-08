@@ -10,16 +10,16 @@ USE STD.TextIO.All;
 
 ENTITY flash_simulate IS
   Port(
-    flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
+    flash_addr : in  STD_LOGIC_VECTOR (22 downto 0);
     flash_data : inout  STD_LOGIC_VECTOR (15 downto 0);
-    flash_control_ce0 : out  STD_LOGIC;
-    flash_control_ce1 : out  STD_LOGIC;
-    flash_control_ce2 : out  STD_LOGIC;
-    flash_control_byte : out  STD_LOGIC;
-    flash_control_vpen : out  STD_LOGIC;
-    flash_control_rp : out  STD_LOGIC;
-    flash_control_oe : out  STD_LOGIC;
-    flash_control_we : out  STD_LOGIC
+    flash_control_ce0 : in  STD_LOGIC;
+    flash_control_ce1 : in  STD_LOGIC;
+    flash_control_ce2 : in  STD_LOGIC;
+    flash_control_byte : in  STD_LOGIC;
+    flash_control_vpen : in  STD_LOGIC;
+    flash_control_rp : in  STD_LOGIC;
+    flash_control_oe : in  STD_LOGIC;
+    flash_control_we : in  STD_LOGIC
     );
 
 END flash_simulate;
