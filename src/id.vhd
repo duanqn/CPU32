@@ -283,7 +283,7 @@ begin
           alusel_o <= EXE_RES_JUMP_BRANCH;
           reg1_read_o <= '0';
           reg2_read_o <= '0';
-          wd_o <= "00000";
+          wd_o <= "11111";
           imm <= x"00000000";
           reg1_addr_o <= "00000";
           reg2_addr_o <= "00000";
