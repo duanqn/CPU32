@@ -26,7 +26,7 @@ END flash_simulate;
 
 ARCHITECTURE behavior OF flash_simulate IS
 
-type flash_array is array(262143 downto 0) of bit_vector(31 downto 0);
+type flash_array is array(262143 downto 0) of bit_vector(15 downto 0);
 signal flash_memory: flash_array := (others => (others => '0'));
 
 constant DELAY: time := 10 ns;
