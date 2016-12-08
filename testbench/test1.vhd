@@ -85,6 +85,21 @@ ARCHITECTURE behavior OF test1 IS
       extraram_we : IN  std_logic
     );
     END COMPONENT;
+
+    COMPONENT flash_simulate
+    Port(
+      flash_addr : out  STD_LOGIC_VECTOR (22 downto 0);
+    flash_data : inout  STD_LOGIC_VECTOR (15 downto 0);
+    flash_control_ce0 : out  STD_LOGIC;
+    flash_control_ce1 : out  STD_LOGIC;
+    flash_control_ce2 : out  STD_LOGIC;
+    flash_control_byte : out  STD_LOGIC;
+    flash_control_vpen : out  STD_LOGIC;
+    flash_control_rp : out  STD_LOGIC;
+    flash_control_oe : out  STD_LOGIC;
+    flash_control_we : out  STD_LOGIC
+      );
+    END COMPONENT;
     
 
    --Inputs
@@ -173,6 +188,20 @@ BEGIN
           extraram_we => extraram_we, 
           extraram_oe => extraram_oe
     );
+
+   flash_simulate0: flash_simulate PORT map (
+      flash_addr => flash_addr,
+      flash_data => flash_data,
+      flash_control_ce0 => flash_control_ce0,
+      flash_control_ce1 => flash_control_ce1,
+      flash_control_ce2 => flash_control_ce2,
+      flash_control_byte => flash_control_byte,
+      flash_control_vpen => flash_control_vpen,
+      flash_control_rp => flash_control_rp,
+      flash_control_op => flash_control_op,
+      flash_control_we => flash_control_we
+    );
+
 
   --process(baseram_data_backup, baseram_ce, baseram_we, baseram_oe)
   --begin
