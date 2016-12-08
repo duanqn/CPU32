@@ -198,7 +198,7 @@ BEGIN
       flash_control_byte => flash_control_byte,
       flash_control_vpen => flash_control_vpen,
       flash_control_rp => flash_control_rp,
-      flash_control_op => flash_control_op,
+      flash_control_oe => flash_control_oe,
       flash_control_we => flash_control_we
     );
 
