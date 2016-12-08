@@ -1,3 +1,4 @@
+
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use work.CPU32.all;
@@ -87,10 +88,10 @@ begin
                 -- read state 4
                 when 4 => 
                     state := 5;
-                when 5 =>
                     data_out <= flash_data;
                     flash_control_oe <= '1';
                     data_ready <= '1';
+                when 5 =>
                     state := 0;
                     
                 -- write state 1
