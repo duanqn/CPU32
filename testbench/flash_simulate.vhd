@@ -35,7 +35,7 @@ BEGIN
 process(flash_control_oe)
 begin
     if(flash_control_oe = '0') then
-      flash_data <= transport TO_STDLOGICVECTOR(flash_memory(to_integer(unsigned(flash_addr(17 downto 0))))) after DELAY;
+      flash_data <= transport TO_STDLOGICVECTOR(flash_memory(to_integer(unsigned(flash_addr(17 downto 1))))) after DELAY;
     else
       flash_data <= (others => 'Z');
     end if;
