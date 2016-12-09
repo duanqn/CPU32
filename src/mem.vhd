@@ -168,13 +168,13 @@ or excepttype(31)));
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
-              wdata_o <= (31 downto 8 => mem_data_i(31)) & mem_data_i(31 downto 24);
-            when "01" =>
-              wdata_o <= (31 downto 8 => mem_data_i(23)) & mem_data_i(23 downto 16);
-            when "10" =>
-              wdata_o <= (31 downto 8 => mem_data_i(15)) & mem_data_i(15 downto 8);
-            when "11" =>
               wdata_o <= (31 downto 8 => mem_data_i(7)) & mem_data_i(7 downto 0);
+            when "01" =>
+              wdata_o <= (31 downto 8 => mem_data_i(15)) & mem_data_i(15 downto 8);
+            when "10" =>
+              wdata_o <= (31 downto 8 => mem_data_i(23)) & mem_data_i(23 downto 16);
+            when "11" =>
+              wdata_o <= (31 downto 8 => mem_data_i(31)) & mem_data_i(31 downto 24);
             when others =>
               wdata_o <= (others => '0');
           end case;
@@ -188,13 +188,13 @@ or excepttype(31)));
           mem_align <= ALIGN_TYPE_BYTE;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
-              wdata_o <= (31 downto 8 => '0') & mem_data_i(31 downto 24);
-            when "01" =>
-              wdata_o <= (31 downto 8 => '0') & mem_data_i(23 downto 16);
-            when "10" =>
-              wdata_o <= (31 downto 8 => '0') & mem_data_i(15 downto 8);
-            when "11" =>
               wdata_o <= (31 downto 8 => '0') & mem_data_i(7 downto 0);
+            when "01" =>
+              wdata_o <= (31 downto 8 => '0') & mem_data_i(15 downto 8);
+            when "10" =>
+              wdata_o <= (31 downto 8 => '0') & mem_data_i(23 downto 16);
+            when "11" =>
+              wdata_o <= (31 downto 8 => '0') & mem_data_i(31 downto 24);
             when others =>
               wdata_o <= (others => '0');
           end case;
@@ -208,9 +208,9 @@ or excepttype(31)));
           mem_align <= ALIGN_TYPE_HALF_WORD;
           case( mem_addr_i(1 downto 0) ) is
             when "00" =>
-              wdata_o <= (31 downto 16 => '0') & mem_data_i(31 downto 16);
-            when "10" =>
               wdata_o <= (31 downto 16 => '0') & mem_data_i(15 downto 0);
+            when "10" =>
+              wdata_o <= (31 downto 16 => '0') & mem_data_i(31 downto 16);
             when others =>
               wdata_o <= X"00000000";
           end case;
