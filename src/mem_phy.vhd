@@ -280,7 +280,7 @@ begin
     process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
     begin
       if addr(23 downto 22) = "00" then -- flash read
-        data_out <= X"0000" & flash_read_data;
+        data_out <= flash_read_data & flash_read_data;        
         data_ready_part <= flash_data_ready;
       elsif addr(23 downto 22) = "01" then -- ram write/read
         data_ready_part <= '1';

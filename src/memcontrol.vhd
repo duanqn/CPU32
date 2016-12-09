@@ -55,7 +55,6 @@ begin
           when others => ram_data_i <= (others => '0');
         end case;
         write_data <= ram_data_o;
-        ram_data_i <= read_data;
         inst_data_i <= (others => '0');
       else
         stallreq <= '0';
