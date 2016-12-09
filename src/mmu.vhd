@@ -206,7 +206,7 @@ begin
                  else '0';
 
   -- to physical_level
-  to_physical_addr_reg <= "00" & physical_addr(23 downto 2) -- Flash
+  to_physical_addr_reg <= "00" & physical_addr(22 downto 1) -- Flash
                     when physical_addr(31 downto 24) = x"1E"
                   else  "010" & physical_addr(22 downto 2)    -- RAM
                     when physical_addr(31 downto 23) = "000000000"
