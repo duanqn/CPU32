@@ -47,7 +47,13 @@ begin
         ope_addr <= ram_addr_o;
         ope_we <= ram_we_o;
         align_type <= ram_align;
-        write_data <= ram_data_o;
+        case ram_addr_o(1 downto 0) is
+          when "00" => write_data <= ram_data_o;
+          when "01" => write_data <= X"000000" & ram_data_o(15 downto 8);
+          when "10" => write_data <= X"0000" & ram_data_o(31 downto 16);
+          when "11" => write_data <= X"000000" & ram_data_o(31 downto 24);
+          when others => write_data <= (others => '0');
+        end case;
         ram_data_i <= read_data;
         inst_data_i <= (others => '0');
       else
