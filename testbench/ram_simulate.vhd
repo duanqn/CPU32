@@ -54,21 +54,23 @@ END ram_simulate;
 
 ARCHITECTURE behavior OF ram_simulate IS
 
-type mem_array is array(262143 downto 0) of bit_vector(31 downto 0);
+type mem_array is array(262143 downto 0) of std_logic_vector(31 downto 0);
 signal memory: mem_array := (others => (others => '0'));
+signal keyMemory: std_logic_vector(31 downto 0);
 
 constant DELAY: time := 10 ns;
 
 BEGIN
 extraram_data <= (others => 'Z');
+keyMemory <= memory(220995);
 process(baseram_we, baseram_data, baseram_addr, baseram_oe, baseram_ce)
 begin
     -- Write to baseMemory
     if(baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1') then
-      baseram_data <= transport TO_STDLOGICVECTOR(memory(to_integer(unsigned(baseram_addr(17 downto 0))))) after DELAY;
+      baseram_data <= transport memory(to_integer(unsigned(baseram_addr(17 downto 0)))) after DELAY;
     elsif (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
-        memory(to_integer(unsigned(baseram_addr(17 downto 0)))) <= TO_BITVECTOR(baseram_data);
-        --report "write base " & integer'image(to_integer(unsigned(baseram_addr(9 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
+        memory(to_integer(unsigned(baseram_addr(17 downto 0)))) <= baseram_data;
+        report "write base " & integer'image(to_integer(unsigned(baseram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
     else
       baseram_data <= (others => 'Z');
     end if;
