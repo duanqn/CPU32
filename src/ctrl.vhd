@@ -41,20 +41,20 @@ BEGIN
           when others =>
             new_pc <= "10"&cp0_ebase_i(29 downto 12) & "000110000000";
         end case;
+      ELSIF (stallreq_from_mem_all = '1') THEN
+        stall <= "111111";
+        flush <= '0';
+        new_pc <= X"00000000";
       ELSIF (stallreq_from_ex = '1') THEN
+        stall <= "001111";
+        flush <= '0';
+        new_pc <= X"00000000";
+      ELSIF (stallreq_from_mem = '1') THEN
         stall <= "001111";
         flush <= '0';
         new_pc <= X"00000000";
       ELSIF (stallreq_from_id = '1') THEN
         stall <= "000111";
-        flush <= '0';
-        new_pc <= X"00000000";
-      ELSIF (stallreq_from_mem_all = '1') THEN
-        stall <= "111111";
-        flush <= '0';
-        new_pc <= X"00000000";
-      ELSIF (stallreq_from_mem = '1') THEN
-        stall <= "001111";
         flush <= '0';
         new_pc <= X"00000000";
       ELSE
