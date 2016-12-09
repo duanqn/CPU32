@@ -356,7 +356,7 @@ begin
 
   read_operation : process(clk, rst, raddr_i, register_values)
     begin
-      if (rst = '1') then
+      if (rst = '0') then
         data_o <= X"00000000";
       else
         case( raddr_i ) is
