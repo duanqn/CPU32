@@ -141,7 +141,6 @@ or excepttype(31)));
     else
       wd_o <= wd_i;
       wreg_o <= wreg_i;
-      wdata_o <= wdata_i;
       hi_o <= hi_i;
       lo_o <= lo_i;
       whilo_o <= whilo_i;
@@ -158,6 +157,7 @@ or excepttype(31)));
           tlb_write_enable <= '1';
           tlb_write_struct <= Index_i(TLB_INDEX_WIDTH-1 downto 0) & EntryHi_i(31 downto 13) & EntryLo0_i(25 downto 6) &
           EntryLo0_i(2 downto 1) & EntryLo1_i(25 downto 6) & EntryLo1_i(2 downto 1);
+          wdata_o <= wdata_i;
         when EXE_LB_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '0';
@@ -231,6 +231,7 @@ or excepttype(31)));
           tlb_write_enable <= '0';
           tlb_write_struct <= (others => '0');
           mem_align <= ALIGN_TYPE_BYTE;
+          wdata_o <= wdata_i;
         when EXE_SW_OP =>
           mem_addr_o <= mem_addr_i;
           mem_we <= '1';
@@ -239,6 +240,7 @@ or excepttype(31)));
           mem_ce_o <= '1';
           tlb_write_enable <= '0';
           tlb_write_struct <= (others => '0');
+          wdata_o <= wdata_i;
         when others =>
           mem_we <= '0';
           mem_addr_o <= X"00000000";
@@ -247,6 +249,7 @@ or excepttype(31)));
           mem_data_o <= X"00000000";
           tlb_write_enable <= '0';
           tlb_write_struct <= (others => '0');
+          wdata_o <= wdata_i;
       end case ;
     end if;
   end process ; -- identifier
