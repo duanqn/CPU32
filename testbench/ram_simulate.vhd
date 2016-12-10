@@ -70,7 +70,7 @@ begin
       baseram_data <= transport memory(to_integer(unsigned(baseram_addr(17 downto 0)))) after DELAY;
     elsif (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
         memory(to_integer(unsigned(baseram_addr(17 downto 0)))) <= baseram_data;
-        report "write base " & integer'image(to_integer(unsigned(baseram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
+        --report "write base " & integer'image(to_integer(unsigned(baseram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
     else
       baseram_data <= (others => 'Z');
     end if;
