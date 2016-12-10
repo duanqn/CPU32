@@ -5,7 +5,7 @@ use work.CPU32.all;
 
 package rom is
 
-constant ROM_SIZE : integer := 84;
+constant ROM_SIZE : integer := 86;
 TYPE ROM is array(0 to ROM_SIZE - 1) of std_logic_vector(31 downto 0);
 
 constant boot_rom : ROM := (
@@ -89,6 +89,8 @@ X"2652ffff",
 X"1e40ffd7",
 X"00000000",
 X"02600008",
+X"00000000",
+X"1000ffff",
 X"00000000",
 X"1000ffff",
 X"00000000",
