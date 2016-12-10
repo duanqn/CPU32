@@ -26,7 +26,7 @@ END flash_simulate;
 
 ARCHITECTURE behavior OF flash_simulate IS
 
-type flash_array is array(262143 downto 0) of bit_vector(15 downto 0);
+type flash_array is array(524287 downto 0) of bit_vector(15 downto 0);
 signal flash_memory: flash_array := (others => (others => '0'));
 
 constant DELAY: time := 10 ns;
@@ -35,7 +35,7 @@ BEGIN
 process(flash_control_oe)
 begin
     if(flash_control_oe = '0') then
-      flash_data <= transport TO_STDLOGICVECTOR(flash_memory(to_integer(unsigned(flash_addr(17 downto 1))))) after DELAY;
+      flash_data <= transport TO_STDLOGICVECTOR(flash_memory(to_integer(unsigned(flash_addr(18 downto 1))))) after DELAY;
     else
       flash_data <= (others => 'Z');
     end if;
