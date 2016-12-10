@@ -11,7 +11,7 @@ TYPE ROM is array(0 to ROM_SIZE - 1) of std_logic_vector(31 downto 0);
 constant boot_rom : ROM := (
 x"3C049E00",
 x"3C02000D",
-x"2442AB40",
+x"3442AB40",
 x"3C058000",
 x"00631826",
 x"00834021",
