@@ -37,7 +37,7 @@ end memcontrol;
 
 architecture arch of memcontrol is
 signal state_SB : std_logic_vector(1 downto 0) := "00";
-signal data_ready_SB := '1'
+signal data_ready_SB : std_logic := '1';
 begin
   process(inst_ce_o, ram_ce_o, ram_data_o, ram_we_o, ram_align, read_data, inst_addr_o, ram_addr_o, data_ready)
   begin
@@ -62,7 +62,7 @@ begin
             ope_we <= '0';
             align_type <= ram_align;
           when "01" =>
-            if(data_ready = '1' and read_data /= (others => 'Z')) then
+            if(data_ready = '1' and read_data /= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ") then
               state_SB <= "11";
               ope_we <= '1';
               case ram_addr_o(1 downto 0) is
@@ -76,6 +76,8 @@ begin
               stallreq <= '1';
             end if;
           when "11" => 
+            state_SB <= "00";
+          when others => 
             state_SB <= "00";
           end case;
         end if;
