@@ -113,37 +113,68 @@ begin
     if(clk'event and clk = '1') then 
       case state_SB is
       when "000" => 
-        if(ram_ce_o = '1' and ram_we_o = '1' and ram_align = ALIGN_TYPE_BYTE and ram_addr_o /= VIRTUAL_SERIAL_DATA and ram_addr_o /= VIRTUAL_SERIAL_STATUS) then
+        if(signal_sb = '1') then
           state_SB <= "001";
           data_ready_SB <= '0';
         end if;
       when "001" => 
-        state_SB <= "011";
-        ope_ce_sb <= '1';
-        ope_we_sb <= '0';
-        write_data_sb <= (others => '0');
+        if(signal_sb = '1') then
+          state_SB <= "011";
+          ope_ce_sb <= '1';
+          ope_we_sb <= '0';
+          write_data_sb <= (others => '0');
+        else
+          state_SB <= "000";
+          data_ready_SB <= '1';
+        end if;
       when "011" => 
-        state_SB <= "010";
+        if(signal_sb = '1') then
+          state_SB <= "010";
+        else 
+          state_SB <= "000";
+          data_ready_SB <= '1';
+          ope_ce_sb <= '0';
+          ope_we_sb <= '0';
+        end if;
       when "010" => 
-        case ram_addr_o(1 downto 0) is
-          when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
-          when "01" => write_data_sb <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
-          when "10" => write_data_sb <= read_data(31 downto 24) & ram_data_o(23 downto 16) & read_data(15 downto 0);
-          when "11" => write_data_sb <= ram_data_o(31 downto 24) & read_data(23 downto 0);
-          when others => write_data_sb <= read_data;
-        end case;
-        state_SB <= "110";
-        ope_ce_sb <= '1';
-        ope_we_sb <= '1';
-        data_ready_SB <= '1';
-        stallreq_sb <= '1';
+        if(signal_sb = '1') then
+          case ram_addr_o(1 downto 0) is
+            when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
+            when "01" => write_data_sb <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
+            when "10" => write_data_sb <= read_data(31 downto 24) & ram_data_o(23 downto 16) & read_data(15 downto 0);
+            when "11" => write_data_sb <= ram_data_o(31 downto 24) & read_data(23 downto 0);
+            when others => write_data_sb <= read_data;
+          end case;
+          state_SB <= "110";
+          ope_ce_sb <= '1';
+          ope_we_sb <= '1';
+          data_ready_SB <= '1';
+          stallreq_sb <= '1';
+        else 
+          state_SB <= "000";
+          data_ready_SB <= '1';
+          ope_ce_sb <= '0';
+          ope_we_sb <= '0';
+        end if;
       when "110" => 
-        state_SB <= "111";
-        ope_ce_sb <= '0';
-        ope_we_sb <= '0';
-        write_data_sb <= (others => '0');
+        if(signal_sb = '1') then
+          state_SB <= "111";
+          ope_ce_sb <= '0';
+          ope_we_sb <= '0';
+          write_data_sb <= (others => '0');
+        else
+          ope_ce_sb <= '0';
+          ope_we_sb <= '0';
+          stallreq_sb <= '0';
+          state_SB <= "000";
+        end if;
       when "111" => 
-        state_SB <= "101";
+        if(signal_sb = '1') then
+          state_SB <= "101";
+        else
+          stallreq_sb <= '0';
+          state_SB <= "000";
+        end if; 
       when "101" =>
         stallreq_sb <= '0';
         state_SB <= "000";
