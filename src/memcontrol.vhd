@@ -48,10 +48,11 @@ signal write_data_sb : std_logic_vector(31 downto 0) := (others => '0');
 signal write_data_normal : std_logic_vector(31 downto 0) := (others => '0');
 signal stallreq_sb : std_logic := '0';
 signal stallreq_normal : std_logic := '0';
+signal signal_sb_buffer : std_logic;
 
 
 begin
-
+  signal_sb <= signal_sb_buffer;
   ope_ce <= ope_ce_normal or ope_ce_sb;
   ope_we <= ope_we_normal or ope_we_sb;
 
@@ -69,9 +70,9 @@ begin
           ope_ce_normal <= '0';
           ope_we_normal <= '0';
           write_data_normal <= (others => '0');
-          signal_sb <= '1';
+          signal_sb_buffer <= '1';
         else
-          signal_sb <= '0';
+          signal_sb_buffer <= '0';
           stallreq_normal <= '1';
           ope_ce_normal <= '1';
           ope_addr <= ram_addr_o;
@@ -82,7 +83,7 @@ begin
           inst_data_i <= (others => '0');
         end if;
       else
-        signal_sb <= '0';
+        signal_sb_buffer <= '0';
         stallreq_normal <= '0';
         ope_ce_normal <= '1';
         ope_we_normal <= '0';
@@ -93,7 +94,7 @@ begin
         ram_data_i <= (others => '0');
       end if;
     else
-      signal_sb <= '0';
+      signal_sb_buffer <= '0';
       ope_ce_normal <= '0';
       ope_we_normal <= '0';
       ope_addr <= (others => '0');
@@ -113,12 +114,12 @@ begin
     if(clk'event and clk = '1') then 
       case state_SB is
       when "000" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           state_SB <= "001";
           data_ready_SB <= '0';
         end if;
       when "001" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           state_SB <= "011";
           ope_ce_sb <= '1';
           ope_we_sb <= '0';
@@ -128,7 +129,7 @@ begin
           data_ready_SB <= '1';
         end if;
       when "011" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           state_SB <= "010";
         else 
           state_SB <= "000";
@@ -137,7 +138,7 @@ begin
           ope_we_sb <= '0';
         end if;
       when "010" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           case ram_addr_o(1 downto 0) is
             when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
             when "01" => write_data_sb <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
@@ -157,7 +158,7 @@ begin
           ope_we_sb <= '0';
         end if;
       when "110" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           state_SB <= "111";
           ope_ce_sb <= '0';
           ope_we_sb <= '0';
@@ -169,7 +170,7 @@ begin
           state_SB <= "000";
         end if;
       when "111" => 
-        if(signal_sb = '1') then
+        if(signal_sb_buffer = '1') then
           state_SB <= "101";
         else
           stallreq_sb <= '0';
