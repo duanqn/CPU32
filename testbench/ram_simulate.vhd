@@ -64,9 +64,9 @@ process(baseram_we, baseram_data, baseram_addr, baseram_oe, baseram_ce)
 begin
     -- Write to baseMemory
     if(baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1') then
-      baseram_data <= transport baseram(to_integer(unsigned(baseram_addr(19 downto 0)))) after DELAY;
+      baseram_data <= transport baseram(to_integer(unsigned(baseram_addr(17 downto 0)))) after DELAY;
     elsif (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
-        baseram(to_integer(unsigned(baseram_addr(19 downto 0)))) <= baseram_data;
+        baseram(to_integer(unsigned(baseram_addr(17 downto 0)))) <= baseram_data;
         --report "write base " & integer'image(to_integer(unsigned(baseram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
     else
       baseram_data <= (others => 'Z');
@@ -77,9 +77,9 @@ process(extraram_we, extraram_data, extraram_addr, extraram_oe, extraram_ce)
 begin
     -- Write to baseMemory
     if(extraram_ce = '0' and extraram_oe = '0' and extraram_we = '1') then
-      extraram_data <= transport extraram(to_integer(unsigned(extraram_addr(19 downto 0)))) after DELAY;
+      extraram_data <= transport extraram(to_integer(unsigned(extraram_addr(17 downto 0)))) after DELAY;
     elsif (extraram_ce = '0' and extraram_oe = '1' and extraram_we = '0') then
-        extraram(to_integer(unsigned(extraram_addr(19 downto 0)))) <= extraram_data;
+        extraram(to_integer(unsigned(extraram_addr(17 downto 0)))) <= extraram_data;
         --report "write base " & integer'image(to_integer(unsigned(extraram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(extraram_data)));
     else
       extraram_data <= (others => 'Z');
