@@ -110,10 +110,10 @@ begin
       when "000" => 
         if(ram_ce_o = '1' and ram_we_o = '1' and ram_align = ALIGN_TYPE_BYTE and ram_addr_o /= VIRTUAL_SERIAL_DATA and ram_addr_o /= VIRTUAL_SERIAL_STATUS) then
           state_SB <= "001";
+          data_ready_SB <= '0';
         end if;
       when "001" => 
         state_SB <= "011";
-        data_ready_SB <= '0';
         ope_ce_sb <= '1';
         ope_we_sb <= '0';
         write_data_sb <= (others => '0');
