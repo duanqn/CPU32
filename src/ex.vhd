@@ -275,6 +275,7 @@ end ex;
           CASE aluop_i IS
             WHEN EXE_SLL_OP =>
               CASE reg1_i(4 downto 0) is
+                when "00000" => shiftres <= reg2_i(31 downto 0);
                 when "00001" => shiftres <= reg2_i(30 downto 0) & '0';
                 when "00010" => shiftres <= reg2_i(29 downto 0) & "00";
                 when "00011" => shiftres <= reg2_i(28 downto 0) & "000";
@@ -310,6 +311,7 @@ end ex;
               END CASE;
             WHEN EXE_SRL_OP =>
               CASE reg1_i(4 downto 0) is
+                when "00000" => shiftres <= reg2_i(31 downto 0);
                 when "00001" => shiftres <= "0" & reg2_i(31 downto 1);
                 when "00010" => shiftres <= "00" & reg2_i(31 downto 2);
                 when "00011" => shiftres <= "000" & reg2_i(31 downto 3);
@@ -345,6 +347,8 @@ end ex;
               END CASE;
             WHEN EXE_SRA_OP =>
               CASE reg1_i(4 downto 0) is
+                when "00000" =>
+                  shiftres <= reg2_i(31 downto 0);
                 when "00001" =>
                   if reg2_i(31) = '0' then shiftres <= "0" & reg2_i(31 downto 1);
                   ELSE shiftres  <= "1" & reg2_i(31 downto 1);

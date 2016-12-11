@@ -218,7 +218,7 @@ Disassembly of section .text:
 8000030c:	00e09821 	move	s3,a3
 80000310:	26f734c8 	addiu	s7,s7,13512
 80000314:	27de3620 	addiu	s8,s8,13856
-80000318:	92640000 	lbu	a0,0(s3)
+80000318:	92640000 	lbu	a0,0(s3)   # 得到 “++se”
 8000031c:	24030025 	li	v1,37
 80000320:	10830011 	beq	a0,v1,80000368 <vprintfmt+0xa0>
 80000324:	26620001 	addiu	v0,s3,1
@@ -8715,25 +8715,25 @@ Disassembly of section .text:
 800083c0:	24c66140 	addiu	a2,a2,24896
 
 800083c4 <buddy_free_pages_sub>:
-800083c4:	27bdffb0 	addiu	sp,sp,-80
-800083c8:	afb00028 	sw	s0,40(sp)
-800083cc:	8c90000c 	lw	s0,12(a0)
+800083c4:	27bdffb0 	addiu	sp,sp,-80 # 建栈
+800083c8:	afb00028 	sw	s0,40(sp)  
+800083cc:	8c90000c 	lw	s0,12(a0)  #s0 = *(a0+12)(zone_num)
 800083d0:	afb30034 	sw	s3,52(sp)
-800083d4:	3c13800d 	lui	s3,0x800d
+800083d4:	3c13800d 	lui	s3,0x800d  
 800083d8:	afb20030 	sw	s2,48(sp)
-800083dc:	26737c5c 	addiu	s3,s3,31836
-800083e0:	00109080 	sll	s2,s0,0x2
-800083e4:	02721021 	addu	v0,s3,s2
-800083e8:	8c420000 	lw	v0,0(v0)
+800083dc:	26737c5c 	addiu	s3,s3,31836  #s3 = 800d7c5c
+800083e0:	00109080 	sll	s2,s0,0x2  # s2 = s0 << 2
+800083e4:	02721021 	addu	v0,s3,s2  # v0 = s3 + s2; (v0 = zones[page->zone_num])
+800083e8:	8c420000 	lw	v0,0(v0)  # v0 = *v0 (v0 = zones[page->zone_num].mem_base)
 800083ec:	afb70044 	sw	s7,68(sp)
-800083f0:	24170001 	li	s7,1
+800083f0:	24170001 	li	s7,1   # s7 = 1
 800083f4:	afb5003c 	sw	s5,60(sp)
-800083f8:	00b7b804 	sllv	s7,s7,a1
-800083fc:	0082a823 	subu	s5,a0,v0
-80008400:	0015a943 	sra	s5,s5,0x5
-80008404:	26e3ffff 	addiu	v1,s7,-1
-80008408:	00751824 	and	v1,v1,s5
-8000840c:	afb40038 	sw	s4,56(sp)
+800083f8:	00b7b804 	sllv	s7,s7,a1  #s7 = s7 << a1; (a1 = order; s7 = 1 << order)
+800083fc:	0082a823 	subu	s5,a0,v0  #s5 = a0 - v0; (a0 = base) (s5 = page - zones[page->zone_num].mem_base)
+80008400:	0015a943 	sra	s5,s5,0x5  # s5 = s5 >> 5;  (pageidx)
+80008404:	26e3ffff 	addiu	v1,s7,-1   # v1 = s7 - 1;
+80008408:	00751824 	and	v1,v1,s5   # v1 = v1 and s5;
+8000840c:	afb40038 	sw	s4,56(sp)  
 80008410:	afb1002c 	sw	s1,44(sp)
 80008414:	afbf004c 	sw	ra,76(sp)
 80008418:	afbe0048 	sw	s8,72(sp)

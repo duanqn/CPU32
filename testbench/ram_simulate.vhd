@@ -67,7 +67,7 @@ process(baseram_we, baseram_data, baseram_addr, baseram_oe, baseram_ce)
 begin
     -- Write to baseMemory
     if(baseram_ce = '0' and baseram_oe = '0' and baseram_we = '1') then
-      baseram_data <= transport memory(to_integer(unsigned(baseram_addr(17 downto 0)))) after DELAY;
+      baseram_data <= transport memory(to_integer(unsigned(baseram_addr(18 downto 0)))) after DELAY;
     elsif (baseram_ce = '0' and baseram_oe = '1' and baseram_we = '0') then
         memory(to_integer(unsigned(baseram_addr(17 downto 0)))) <= baseram_data;
         --report "write base " & integer'image(to_integer(unsigned(baseram_addr(17 downto 0)))) & " to " & integer'image(to_integer(unsigned(baseram_data)));
