@@ -82,9 +82,7 @@ architecture arch of mem is
   signal excepttype: STD_LOGIC_VECTOR(31 downto 0);
 begin
 
-  mem_we_o <= mem_we and (not (excepttype(0)
-or excepttype(1)
-or excepttype(2)
+  mem_we_o <= mem_we and (not (excepttype(2)
 or excepttype(3)
 or excepttype(4)
 or excepttype(5)
