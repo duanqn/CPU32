@@ -119,8 +119,6 @@ begin
         write_data_sb <= (others => '0');
       when "011" => 
         state_SB <= "010";
-        ope_ce_sb <= '0';
-        ope_we_sb <= '0';
       when "010" => 
         case ram_addr_o(1 downto 0) is
           when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
