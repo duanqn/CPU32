@@ -291,7 +291,7 @@ begin
         data_ready_part <= '0';
 
       elsif addr(23 downto 22) = "11" then -- rom_read
-        data_out <= boot_rom(to_integer(unsigned(addr(5 downto 0))));
+        data_out <= boot_rom(to_integer(unsigned(addr(4 downto 0))));
         data_ready_part <= '1';
       else
         data_out <= (others => '0');
