@@ -53,7 +53,7 @@ END ram_simulate;
 
 ARCHITECTURE behavior OF ram_simulate IS
 
-type mem_array is array(1048575 downto 0) of std_logic_vector(31 downto 0);
+type mem_array is array(262143 downto 0) of std_logic_vector(31 downto 0);
 signal baseram: mem_array := (others => (others => '0'));
 signal extraram: mem_array := (others => (others => '0'));
 
