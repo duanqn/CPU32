@@ -36,20 +36,49 @@ ENTITY memcontrol is
 end memcontrol;
 
 architecture arch of memcontrol is
---signal state : integer := 0;
+signal state_SB : std_logic_vector(1 downto 0) := "00";
+signal data_ready_SB := '1'
 begin
-  process(inst_ce_o, ram_ce_o, ram_data_o, ram_we_o, ram_align, read_data, inst_addr_o, ram_addr_o)
+  process(inst_ce_o, ram_ce_o, ram_data_o, ram_we_o, ram_align, read_data, inst_addr_o, ram_addr_o, data_ready)
   begin
     if(inst_ce_o = '1') then
       if(ram_ce_o = '1') then
-        stallreq <= '1';
-        ope_ce <= '1';
-        ope_addr <= ram_addr_o;
-        ope_we <= ram_we_o;
-        align_type <= ram_align;
-        ram_data_i <= read_data;
-        write_data <= ram_data_o;
-        inst_data_i <= (others => '0');
+        if(ram_we_o /= '1' or ram_align /= ALIGN_TYPE_BYTE) then 
+          stallreq <= '1';
+          ope_ce <= '1';
+          ope_addr <= ram_addr_o;
+          ope_we <= ram_we_o;
+          align_type <= ram_align;
+          ram_data_i <= read_data;
+          write_data <= ram_data_o;
+          inst_data_i <= (others => '0');
+        else 
+          case state_SB is 
+          when "00" => 
+            state_SB <= "01";
+            data_ready_SB <= '0';
+            ope_ce <= '1';
+            ope_addr <= ram_addr_o;
+            ope_we <= '0';
+            align_type <= ram_align;
+          when "01" =>
+            if(data_ready = '1' and read_data /= (others => 'Z')) then
+              state_SB <= "11";
+              ope_we <= '1';
+              case ram_addr_o(1 downto 0) is
+              when "00" => write_data <= read_data(31 downto 8) & ram_data_o(7 downto 0);
+              when "01" => write_data <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
+              when "10" => write_data <= read_data(31 downto 24) & ram_data_o(23 downto 16) & read_data(15 downto 0);
+              when "11" => write_data <= ram_data_o(31 downto 24) & ram_data_o(23 downto 0);
+              when others => write_data <= read_data;
+              end case;
+              data_ready_SB <= '1';
+              stallreq <= '1';
+            end if;
+          when "11" => 
+            state_SB <= "00";
+          end case;
+        end if;
       else
         stallreq <= '0';
         ope_ce <= '1';
@@ -72,7 +101,27 @@ begin
     end if;
   end process;
 
-  stallreq_all <= not data_ready;
+  stallreq_all <= not (data_ready and data_ready_SB);
+
+  --process(clk, ram_ce_o, ram_data_o, ram_we_o, ram_align, read_data, inst_addr_o, ram_addr_o)
+  --begin
+  --  if(clk'event and clk = '1') then 
+  --    case state_SB is
+  --    when 0 => 
+  --      if(ram_ce_o = '1' and ram_we_o = '1' and ram_align = ALIGN_TYPE_BYTE) then
+  --        state_SB <= 1;
+  --        data_ready_SB <= '0';
+  --        ope_ce <= '1';
+  --        ope_addr <= ram_addr_o;
+  --        ope_we <= '0';
+  --        align_type <= ram_align;
+  --        ram_data_i <= read_data;
+  --        write_data <= ram_data_o;  
+  --    end if;
+  --    end case;
+  --  end if;
+  --end process;
+
 
 
 end architecture ; -- arch
