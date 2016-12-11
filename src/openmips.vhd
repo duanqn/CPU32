@@ -422,7 +422,8 @@ architecture arch of openmips is
     data_ready: in std_logic;
     ope_we: out std_logic;
     ope_ce: out std_logic;
-    align_type: out std_logic_vector(1 downto 0)
+    align_type: out std_logic_vector(1 downto 0);
+    signal_sb: out std_logic
     );
   end component;
 
@@ -438,6 +439,7 @@ architecture arch of openmips is
 
     read_data: out std_logic_vector(31 downto 0);
     ready : out std_logic;
+    signal_sb : in STD_LOGIC;
 
     -- about exception
     serial_int : out std_logic_vector(3 downto 0);
@@ -523,6 +525,7 @@ architecture arch of openmips is
   signal mmu_result_data: STD_LOGIC_VECTOR(31 downto 0);
   signal data_ready: STD_LOGIC;
   signal align_type: STD_LOGIC_VECTOR(1 downto 0);
+  signal signal_sb: STD_LOGIC;
 
 -- mmu -- Exception
   signal serial_int_mmu: STD_LOGIC_VECTOR(3 downto 0);
@@ -688,6 +691,8 @@ architecture arch of openmips is
 
 --CP0 to EX
   signal cp0_reg_data_i: STD_LOGIC_VECTOR(31 downto 0);
+
+
 
 begin
   inst_addr <= pc;
@@ -1033,7 +1038,8 @@ begin
     ope_we => ope_we, 
     ope_ce => ope_ce, 
     data_ready => data_ready, 
-    align_type => align_type
+    align_type => align_type,
+    signal_sb => signal_sb
     );
 
   mmu0: mmu port map(
@@ -1057,7 +1063,8 @@ begin
     from_physical_data => from_physical_data, 
     from_physical_ready => from_physical_ready, 
     from_physical_serial => from_physical_serial, 
-    bad_addr => bad_addr_mmu
+    bad_addr => bad_addr_mmu,
+    signal_sb => signal_sb
     );
 
 

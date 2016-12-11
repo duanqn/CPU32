@@ -17,6 +17,7 @@ port(
   ope_we: in std_logic;
   ope_ce: in std_logic;
   write_data: in std_logic_vector(31 downto 0);
+  signal_sb : in std_logic;
 
   -- during memory time slice
 
@@ -146,7 +147,10 @@ begin
       end if;
     -- tlb missing
     elsif tlb_missing = '1' then
-      if( ope_ce = '1' and ope_we = '0' )then
+      if(signal_sb = '1') then 
+        exc_code <= TLB_S;
+        bad_addr <= addr;
+      elsif( ope_ce = '1' and ope_we = '0')then
         exc_code <= TLB_L;
         bad_addr <= addr;
       elsif( ope_ce = '1' and ope_we = '1' ) then

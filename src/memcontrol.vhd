@@ -31,7 +31,8 @@ ENTITY memcontrol is
     data_ready: in std_logic;
     ope_we: out std_logic;
     ope_ce: out std_logic;
-    align_type: out std_logic_vector(1 downto 0)
+    align_type: out std_logic_vector(1 downto 0);
+    signal_sb: out std_logic
     );
 
 end memcontrol;
@@ -68,7 +69,9 @@ begin
           ope_ce_normal <= '0';
           ope_we_normal <= '0';
           write_data_normal <= (others => '0');
+          signal_sb <= '1';
         else
+          signal_sb <= '0';
           stallreq_normal <= '1';
           ope_ce_normal <= '1';
           ope_addr <= ram_addr_o;
@@ -79,6 +82,7 @@ begin
           inst_data_i <= (others => '0');
         end if;
       else
+        signal_sb <= '0';
         stallreq_normal <= '0';
         ope_ce_normal <= '1';
         ope_we_normal <= '0';
@@ -89,6 +93,7 @@ begin
         ram_data_i <= (others => '0');
       end if;
     else
+      signal_sb <= '0';
       ope_ce_normal <= '0';
       ope_we_normal <= '0';
       ope_addr <= (others => '0');
