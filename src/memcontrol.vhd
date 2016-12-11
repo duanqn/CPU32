@@ -126,7 +126,7 @@ begin
           when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
           when "01" => write_data_sb <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
           when "10" => write_data_sb <= read_data(31 downto 24) & ram_data_o(23 downto 16) & read_data(15 downto 0);
-          when "11" => write_data_sb <= ram_data_o(31 downto 24) & ram_data_o(23 downto 0);
+          when "11" => write_data_sb <= ram_data_o(31 downto 24) & read_data(23 downto 0);
           when others => write_data_sb <= read_data;
         end case;
         state_SB <= "110";
