@@ -1,5 +1,6 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use work.CPU32.all;
 
 ENTITY memcontrol is
@@ -70,7 +71,7 @@ begin
         else
           stallreq_normal <= '1';
           ope_ce_normal <= '1';
-          ope_addr_normal <= ram_addr_o;
+          ope_addr <= ram_addr_o;
           ope_we_normal <= ram_we_o;
           align_type <= ram_align;
           ram_data_i <= read_data;
@@ -81,7 +82,7 @@ begin
         stallreq_normal <= '0';
         ope_ce_normal <= '1';
         ope_we_normal <= '0';
-        ope_addr_normal <= inst_addr_o;
+        ope_addr <= inst_addr_o;
         align_type <= ALIGN_TYPE_WORD;
         write_data_normal <= (others => '0');
         inst_data_i <= read_data;
@@ -90,7 +91,7 @@ begin
     else
       ope_ce_normal <= '0';
       ope_we_normal <= '0';
-      ope_addr_normal <= (others => '0');
+      ope_addr <= (others => '0');
       write_data_normal <= (others => '0');
       align_type <= ALIGN_TYPE_WORD;
       stallreq_normal <= '0';
@@ -122,11 +123,11 @@ begin
         ope_we_sb <= '0';
       when "010" => 
         case ram_addr_o(1 downto 0) is
-          when "00" => write_data_sb <= from_physical_data(31 downto 8) & ram_data_o(7 downto 0);
-          when "01" => write_data_sb <= from_physical_data(31 downto 16) & ram_data_o(15 downto 8) & from_physical_data(7 downto 0);
-          when "10" => write_data_sb <= from_physical_data(31 downto 24) & ram_data_o(23 downto 16) & from_physical_data(15 downto 0);
+          when "00" => write_data_sb <= read_data(31 downto 8) & ram_data_o(7 downto 0);
+          when "01" => write_data_sb <= read_data(31 downto 16) & ram_data_o(15 downto 8) & read_data(7 downto 0);
+          when "10" => write_data_sb <= read_data(31 downto 24) & ram_data_o(23 downto 16) & read_data(15 downto 0);
           when "11" => write_data_sb <= ram_data_o(31 downto 24) & ram_data_o(23 downto 0);
-          when others => write_data_sb <= from_physical_data;
+          when others => write_data_sb <= read_data;
         end case;
         state_SB <= "110";
         ope_ce_sb <= '1';
