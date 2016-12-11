@@ -118,7 +118,7 @@ begin
         ope_we_sb <= '0';
         write_data_sb <= (others => '0');
       when "011" => 
-        state_SB <= "01";
+        state_SB <= "010";
         ope_ce_sb <= '0';
         ope_we_sb <= '0';
       when "010" => 
