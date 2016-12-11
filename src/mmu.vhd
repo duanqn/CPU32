@@ -100,18 +100,20 @@ architecture Behavioral of mmu is
   signal to_physical_read_enable_reg : std_logic := '0';
   signal to_physical_write_enable_reg : std_logic := '0';
 
+
+
 begin
 
--- serial logic
-  -- choose addr on posedge
-  --process(clk, rst)
-  --begin
-  --      if rst = '0' then
-  --          addr <= x"90000000";
-  --  elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
-  --    addr <= ope_addr;
-  --  end if;
-  --end process;
+
+  to_physical_read_enable_reg <= '1'
+                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '0' and ope_ce = '1')
+                    else '0';
+
+  to_physical_write_enable_reg <= '1'
+                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '1' and ope_ce = '1')
+                    else '0';
+
+        
 
   addr <= ope_addr;
 
@@ -218,14 +220,6 @@ begin
 
   to_physical_data_reg <= write_data;
 
-  to_physical_read_enable_reg <= '1'
-                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '0' and ope_ce = '1')
-                    else '0';
-
-  to_physical_write_enable_reg <= '1'
-                      when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '1' and ope_ce = '1')
-                    else '0';
-
   -- to top mem level
   read_data <= x"0000000" & "00" & serial_status_reg & "1"
           when (special_com1_status = '1')
@@ -252,6 +246,8 @@ begin
       tlb_low_temp_value(j)(i*2+1) <= tlb_which_low(i*2+1) and tlb_mem(i)(j+23);
     end generate tlb_temp;
   end generate tlb_check;
+
+
 
   -- generate lookup result
   -- tlb_lookup_result can be generated with "or reduce" operator in Verilog, but in VHDL it is difficult
