@@ -38,10 +38,10 @@ end memcontrol;
 architecture arch of memcontrol is
 signal state_SB : std_logic_vector(2 downto 0) := "000";
 signal data_ready_SB : std_logic := '1';
-signal ope_ce_sb : std_logic ：= '0';
-signal ope_ce_normal : std_logic ：= '0';
-signal ope_we_sb : std_logic ：= '0';
-signal ope_we_normal : std_logic ：= '0';
+signal ope_ce_sb : std_logic := '0';
+signal ope_ce_normal : std_logic := '0';
+signal ope_we_sb : std_logic := '0';
+signal ope_we_normal : std_logic := '0';
 signal write_data_sb : std_logic_vector(31 downto 0) := (others => '0');
 signal write_data_normal : std_logic_vector(31 downto 0) := (others => '0');
 signal stallreq_sb : std_logic := '0';
