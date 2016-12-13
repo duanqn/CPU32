@@ -104,7 +104,7 @@ port(
   );
 end component;
 
-signal debug_inst_valid_backup: std_logic_vector(31 downto 0);
+signal debug_inst_valid_backup: std_logic;
 -- CPU -- mem_phy
 signal physical_addr: STD_LOGIC_VECTOR(23 downto 0);
 signal physical_data_in: STD_LOGIC_VECTOR(31 downto 0);
