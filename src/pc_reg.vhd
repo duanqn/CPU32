@@ -15,8 +15,8 @@ entity pc_reg is
     flush: in STD_LOGIC;
     new_pc: in STD_LOGIC_VECTOR(31 downto 0);
 
-    pc: buffer STD_LOGIC_VECTOR(31 downto 0);
-    ce: buffer STD_LOGIC
+    pc: buffer STD_LOGIC_VECTOR(31 downto 0) := X"00000000";
+    ce: buffer STD_LOGIC := '0'
   );
 end pc_reg;
 
