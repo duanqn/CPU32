@@ -177,7 +177,7 @@ begin
         end case;
 
       -- sb 5
-      when "01010" =>
+      when "1010" =>
         state <= "1011";
 
       -- sb 6

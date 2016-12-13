@@ -192,7 +192,7 @@ begin
                       and tlb_missing = '0' and tlb_writable = '1'
                  else '0';
 
-  exc_code <= not no_exception_accur;                
+  exc_signal <= not no_exception_accur;                
 
 
   -- to physical_level
@@ -550,7 +550,7 @@ begin
                       tlb_which_low(28) or
                       tlb_which_low(29) or
                       tlb_which_low(30) or
-                      tlb_which_low(31);-- or
+                      tlb_which_low(31)-- or
                       --tlb_which_low(32) or
                       --tlb_which_low(33) or
                       --tlb_which_low(34) or
