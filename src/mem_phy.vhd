@@ -291,7 +291,7 @@ begin
         serialport_transmit_data <= (others => '0');
         flash_read_signal <= '0';
         data_out <= (others => '0');
-        data_ready_part <= '0';
+        data_ready_part <= '1';
       end if;
     end process;
 
