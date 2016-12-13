@@ -14,7 +14,7 @@ ENTITY DWPC is
     baseram_oe: out std_logic;
     baseram_we: out std_logic;
 	  debug_pc: out std_logic_vector(31 downto 0);
-    debug_inst_valid: out std_logic;
+    debug_inst_invalid: out std_logic;
 
     debug_data: out STD_LOGIC_VECTOR(15 downto 0);
 
@@ -48,7 +48,7 @@ port(
   rst: in STD_LOGIC;
   clk: in STD_LOGIC;
   debug_pc: out STD_logic_vector(31 downto 0);
-  debug_inst_invalid: out std_logic;
+  debug_inst_valid: out std_logic;
 
   to_physical_addr : out std_logic_vector(23 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
