@@ -7,6 +7,8 @@ ENTITY openmips is
   port(
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
+	debug_pc: out STD_LOGIC_vector(31 downto 0);
+    debug_inst_valid: out std_logic;
 
     to_physical_addr : out std_logic_vector(23 downto 0);
     to_physical_data : out std_logic_vector(31 downto 0);
@@ -95,6 +97,7 @@ architecture arch of openmips is
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
     stallreq:out STD_LOGIC; -- =1 -> stall pipeline
     ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0);
+    debug_inst_valid : out std_logic;
 
     -- exception
     excepttype_o:out STD_LOGIC_VECTOR(31 downto 0);
@@ -701,6 +704,7 @@ architecture arch of openmips is
 
 begin
   inst_addr <= pc;
+  debug_pc <= pc;
 
   clock0: clock port map(
     rst => rst,
@@ -766,7 +770,8 @@ begin
     inst_o => id_inst, 
     ex_aluop_i => ex_aluop, 
     excepttype_o => excepttype_id, 
-    current_inst_addr_o => current_inst_addr_id
+    current_inst_addr_o => current_inst_addr_id,
+    debug_inst_valid => debug_inst_valid
     );
 
   regfile0: regfile port map(

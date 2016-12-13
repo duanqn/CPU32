@@ -38,7 +38,8 @@ entity id is
     stallreq:out STD_LOGIC; -- =1 -> stall pipeline
     ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0);
     excepttype_o:out STD_LOGIC_VECTOR(31 downto 0);
-    current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0)
+    current_inst_addr_o: out STD_LOGIC_VECTOR(31 downto 0);
+    debug_inst_valid: out STD_LOGIC
   );
 end id;
 
@@ -62,6 +63,7 @@ signal excepttype_is_eret: STD_LOGIC;
 
 
 begin
+  debug_inst_valid <= instvalid;
   op<=inst_i(31 downto 26);
   op2<=inst_i(10 downto 6);
   op3<=inst_i(5 downto 0);
