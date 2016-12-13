@@ -258,9 +258,6 @@ begin
       -- write serial port
       elsif (write_enable = '1' and addr(23 downto 22) = "10") then
           serialport_transmit_data <= data_in(7 downto 0);
-
-          report integer'image(to_integer(unsigned(data_in(7 downto 0))));
-
           ram_ope_addr <= (others => '0');
           ram_write_data <= (others => '0');
           ram_ope_we <= '0';
@@ -316,6 +313,8 @@ begin
           when "010" =>
             serialport_state <= "110";
           when "110" =>
+            serialport_state <= "111";
+          when "111" =>
             serialport_state <= "000";
           when others => null;
         end case;

@@ -69,6 +69,9 @@ begin
             data_sb <= mem_data_o;
           else
             -- mem
+            if(mem_addr_o = VIRTUAL_SERIAL_DATA) then 
+              report integer'image(to_integer(unsigned(data_in(7 downto 0))));
+            end if;
             stallreq <= '1';
             state <= "0100";
             ope_ce <= '1';
