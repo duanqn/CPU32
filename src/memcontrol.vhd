@@ -43,6 +43,7 @@ architecture arch of memcontrol is
 signal state : std_logic_vector(3 downto 0) := "0000";
 signal state_backup : std_logic_vector(3 downto 0) := "0000";
 signal read_data_sb : std_logic_vector(31 downto 0) := (others => '0');
+signal position_sb: std_logic_vector(1 downto 0) := (others => '0');
 
 
 begin
@@ -63,6 +64,7 @@ begin
             align_type <= mem_align;
             write_data <= (others => '0');
             signal_sb <= '1';
+            position_sb <= mem_addr_o(1 downto 0);
           else
             -- mem
             stallreq <= '1';
@@ -174,7 +176,7 @@ begin
         state <= "1010";
         ope_ce <= '1';
         ope_we <= '1';
-        case mem_addr_o(1 downto 0) is
+        case position_sb(1 downto 0) is
           when "00" => write_data <= read_data_sb(31 downto 8) & mem_data_o(7 downto 0);
           when "01" => write_data <= read_data_sb(31 downto 16) & mem_data_o(15 downto 8) & read_data_sb(7 downto 0);
           when "10" => write_data <= read_data_sb(31 downto 24) & mem_data_o(23 downto 16) & read_data_sb(15 downto 0);
