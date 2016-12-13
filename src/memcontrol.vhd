@@ -1,7 +1,7 @@
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
-use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.numeric_std.all;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use work.CPU32.all;
 
 ENTITY memcontrol is
@@ -71,7 +71,7 @@ begin
           else
             -- mem
             if(mem_addr_o = VIRTUAL_SERIAL_DATA) then 
-              report integer'image(to_integer(unsigned(data_in(7 downto 0))));
+              report integer'image(to_integer(unsigned(mem_data_o(7 downto 0))));
             end if;
             stallreq <= '1';
             state <= "0100";
