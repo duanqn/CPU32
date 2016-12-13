@@ -224,7 +224,7 @@ begin
         ram_ope_we <= '0';
         ram_ope_ce1 <= not addr(20);
         ram_ope_ce2 <= addr(20);
-        data_ready_part <= '1';
+        data_ready_part <= ram_data_ready;
 
         serialport_transmit_data <= (others => '0');
         flash_read_signal <= '0';
@@ -330,7 +330,7 @@ begin
         data_ready <= data_ready_part;
       end if;
     end process;
-    
+
     busy <= not data_ready;
 
 end behave;

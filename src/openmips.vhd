@@ -404,12 +404,12 @@ architecture arch of openmips is
     inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
     inst_ce_o: in STD_LOGIC;
 
-    ram_data_i: out STD_LOGIC_VECTOR(31 downto 0);
-    ram_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
-    ram_data_o: in STD_LOGIC_VECTOR(31 downto 0);
-    ram_we_o: in STD_LOGIC;
-    ram_align: in STD_LOGIC_VECTOR(1 downto 0);
-    ram_ce_o: in STD_LOGIC;
+    mem_data_i: out STD_LOGIC_VECTOR(31 downto 0);
+    mem_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
+    mem_data_o: in STD_LOGIC_VECTOR(31 downto 0);
+    mem_we_o: in STD_LOGIC;
+    mem_align: in STD_LOGIC_VECTOR(1 downto 0);
+    mem_ce_o: in STD_LOGIC;
 
     --mix
     stallreq: out STD_LOGIC;
@@ -510,12 +510,12 @@ architecture arch of openmips is
   signal inst_addr: STD_LOGIC_VECTOR(31 downto 0);
   signal inst_ce: STD_LOGIC;
 
-  signal ram_data_i: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_addr_o: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_data_o: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_we_o: STD_LOGIC;
-  signal ram_align: STD_LOGIC_VECTOR(1 downto 0);
-  signal ram_ce_o: STD_LOGIC;
+  signal mem_data_i: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_addr_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_data_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_we_o: STD_LOGIC;
+  signal mem_align: STD_LOGIC_VECTOR(1 downto 0);
+  signal mem_ce_o: STD_LOGIC;
 
 -- about memcontrol -- mmu
   signal ope_data: STD_LOGIC_VECTOR(31 downto 0);
@@ -901,12 +901,12 @@ begin
     whilo_i => mem_whilo_i,
     hi_i => mem_hi_i, 
     lo_i => mem_lo_i,
-    mem_data_i => ram_data_i, 
-    mem_addr_o => ram_addr_o,
-    mem_we_o => ram_we_o, 
-    mem_align => ram_align,
-    mem_data_o => ram_data_o, 
-    mem_ce_o => ram_ce_o,
+    mem_data_i => mem_data_i, 
+    mem_addr_o => mem_addr_o,
+    mem_we_o => mem_we_o, 
+    mem_align => mem_align,
+    mem_data_o => mem_data_o, 
+    mem_ce_o => mem_ce_o,
     wd_o => mem_wd_o, 
     wreg_o => mem_wreg_o,
     wdata_o => mem_wdata_o, 
@@ -1024,12 +1024,12 @@ begin
     inst_data_i => inst_data, 
     inst_addr_o => inst_addr, 
     inst_ce_o => inst_ce, 
-    ram_data_i => ram_data_i,
-    ram_addr_o => ram_addr_o, 
-    ram_data_o => ram_data_o, 
-    ram_we_o => ram_we_o, 
-    ram_align => ram_align, 
-    ram_ce_o => ram_ce_o, 
+    mem_data_i => mem_data_i,
+    mem_addr_o => mem_addr_o, 
+    mem_data_o => mem_data_o, 
+    mem_we_o => mem_we_o, 
+    mem_align => mem_align, 
+    mem_ce_o => mem_ce_o, 
     stallreq => stallreq_from_mem,
     stallreq_all => stallreq_from_mem_all,
     ope_addr => ope_addr, 
