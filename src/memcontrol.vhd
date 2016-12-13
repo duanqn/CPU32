@@ -62,6 +62,7 @@ begin
             ope_addr <= mem_addr_o;
             align_type <= mem_align;
             write_data <= (others => '0');
+            signal_sb <= '1';
           else
             -- mem
             stallreq <= '1';
@@ -71,6 +72,7 @@ begin
             ope_addr <= mem_addr_o;
             align_type <= mem_align;
             write_data <= mem_data_o;
+            signal_sb <= '0';
           end if;
         elsif (inst_ce_o = '1') then
           stallreq <= '0';
@@ -80,6 +82,7 @@ begin
           ope_addr <= inst_addr_o;
           align_type <= ALIGN_TYPE_WORD;
           write_data <= (others => '0');
+          signal_sb <= '0';
         else
           stallreq <= '0';
           state <= "0000";
@@ -88,6 +91,7 @@ begin
           ope_addr <= (others => '0');
           align_type <= ALIGN_TYPE_WORD;
           write_data <= (others => '0');
+          signal_sb <= '0';
         end if;
 
       -- inst 1
