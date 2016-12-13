@@ -41,7 +41,6 @@ architecture Behavioral of ram is
     --     write ram 2: 00000 -> 01000 -> 00000
 
 begin
-    data_ready <= '1';
     process(clk, rst)
     begin
         if (rst = '0') then
@@ -56,6 +55,7 @@ begin
             extraram_ce <= '1';
             extraram_oe <= '1';
             extraram_we <= '1';
+            data_ready <= '1';
 
         elsif (clk'event and clk = '1') then
             case state is
@@ -70,7 +70,9 @@ begin
                                     extraram_oe <= '1';
                                     extraram_we <= '1';
                                     baseram_addr <= ope_addr;
+                                    data_ready <= '0';
                                     state <= "00001";
+
                                 elsif (ope_we = '0' and ope_ce1 = '1') then
                                     -- write  ram(ram1)
                                     baseram_oe <= '1';
@@ -81,6 +83,7 @@ begin
                                     extraram_we <= '1';
                                     baseram_addr <= ope_addr;
                                     baseram_data <= write_data;
+                                    data_ready <= '0';
                                     state <= "10000";
                                 elsif (ope_we = '0' and ope_ce2 = '1') then
                                     -- write  ram(ram2)
@@ -92,6 +95,7 @@ begin
                                     baseram_we <= '1';
                                     extraram_addr <= ope_addr;
                                     extraram_data <= write_data;
+                                    data_ready <= '0';
                                     state <= "01000";
                                 elsif (ope_we = '1' and ope_ce2 = '1') then
                                     -- read  ram(ram2)
@@ -102,30 +106,36 @@ begin
                                     baseram_we <= '1';
                                     extraram_we <= '1';
                                     extraram_addr <= ope_addr;
+                                    data_ready <= '0';
                                     state <= "00010";
                                 else
+                                    data_ready <= '1';
                                     state <= "00000";
                                 end if;
                 -- read ram 1
                 when "00001" => 
                                 baseram_ce <= '1';
                                 baseram_oe <= '1';
+                                data_ready <= '1';
                                 state <= "00000";
 
                 -- write ram 1
                 when "10000" => baseram_we <= '1';
                                 baseram_ce <= '1';
+                                data_ready <= '1';
                                 state <= "00000";
 
                 -- read ram 2
                 when "00010" => 
                                 extraram_ce <= '1';
                                 extraram_oe <= '1';
+                                data_ready <= '1';
                                 state <= "00000";
 
                 -- write ram 2
                 when "01000" => extraram_we <= '1';
                                 extraram_ce <= '1';
+                                data_ready <= '1';
                                 state <= "00000";
 
                 when others =>  state <= (others => '0');
@@ -137,6 +147,7 @@ begin
                                 extraram_ce <= '1';
                                 extraram_oe <= '1';
                                 extraram_we <= '1';
+                                data_ready <= '1';
             end case;
         end if;
     end process;

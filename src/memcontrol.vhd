@@ -48,7 +48,7 @@ signal write_data_sb : std_logic_vector(31 downto 0) := (others => '0');
 signal write_data_normal : std_logic_vector(31 downto 0) := (others => '0');
 signal stallreq_sb : std_logic := '0';
 signal stallreq_normal : std_logic := '0';
-signal signal_sb_buffer : std_logic;
+signal signal_sb_buffer : std_logic;  -- sb signal
 
 
 begin
@@ -66,13 +66,17 @@ begin
       if(ram_ce_o = '1') then
         align_type <= ram_align;
         ope_addr <= ram_addr_o;
+        -- judge whether sb
         if(ram_we_o = '1' and ram_align = ALIGN_TYPE_BYTE and ram_addr_o /= VIRTUAL_SERIAL_DATA and ram_addr_o /= VIRTUAL_SERIAL_STATUS) then 
           ope_ce_normal <= '0';
           ope_we_normal <= '0';
           write_data_normal <= (others => '0');
+
           signal_sb_buffer <= '1';
+
         else
           signal_sb_buffer <= '0';
+
           stallreq_normal <= '1';
           ope_ce_normal <= '1';
           ope_addr <= ram_addr_o;
@@ -85,6 +89,7 @@ begin
       else
         signal_sb_buffer <= '0';
         stallreq_normal <= '0';
+
         ope_ce_normal <= '1';
         ope_we_normal <= '0';
         ope_addr <= inst_addr_o;
@@ -95,6 +100,7 @@ begin
       end if;
     else
       signal_sb_buffer <= '0';
+      
       ope_ce_normal <= '0';
       ope_we_normal <= '0';
       ope_addr <= (others => '0');
@@ -109,7 +115,7 @@ begin
   stallreq_all <= not (data_ready and data_ready_SB);
   stallreq <= stallreq_sb or stallreq_normal;
 
-  process(clk, ram_ce_o, ram_data_o, ram_we_o, ram_align, inst_addr_o, ram_addr_o)
+  process(clk)
   begin
     if(clk'event and clk = '1') then 
       case state_SB is
