@@ -37,15 +37,17 @@ begin
   PROCESS(clk)
   begin
     if (clk'event and clk = '1') then
-      if (ce = '0') then
-        pc <= x"90000000";
-      elsif (flush = '1') then
-        pc <= new_pc;
-      elsif (stall(0) = '0') then
-        if (branch_flag_i = '1') then
-          pc <= branch_target_address_i;
-        else
-          pc <= pc + x"00000004";
+      if(rst = '1') then
+        if (ce = '0') then
+          pc <= x"90000000";
+        elsif (flush = '1') then
+          pc <= new_pc;
+        elsif (stall(0) = '0') then
+          if (branch_flag_i = '1') then
+            pc <= branch_target_address_i;
+          else
+            pc <= pc + x"00000004";
+          end if;
         end if;
       end if;
     end if;
