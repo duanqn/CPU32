@@ -48,7 +48,7 @@ port(
   rst: in STD_LOGIC;
   clk: in STD_LOGIC;
   debug_pc: out STD_logic_vector(31 downto 0);
-  debug_inst_valid: out std_logic;
+  debug_inst_invalid: out std_logic;
 
   to_physical_addr : out std_logic_vector(23 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
@@ -104,7 +104,7 @@ port(
   );
 end component;
 
-signal pc: std_logic_vector(31 downto 0);
+signal debug_inst_valid_backup: std_logic_vector(31 downto 0);
 -- CPU -- mem_phy
 signal physical_addr: STD_LOGIC_VECTOR(23 downto 0);
 signal physical_data_in: STD_LOGIC_VECTOR(31 downto 0);
@@ -124,7 +124,7 @@ begin
 cpu0: openmips port map(
   rst => rst, clk => clk, to_physical_addr => physical_addr, to_physical_data => physical_data_in,
   to_physical_read_enable => read_enable, to_physical_write_enable => write_enable,
-  from_physical_data => physical_data_out, from_physical_ready => ready_data, from_physical_serial => serialport_data_ready, debug_pc => debug_pc, debug_inst_valid => debug_inst_valid
+  from_physical_data => physical_data_out, from_physical_ready => ready_data, from_physical_serial => serialport_data_ready, debug_pc => debug_pc, debug_inst_valid => debug_inst_valid_backup
   );
 
 ready_data <= not busy;
@@ -148,4 +148,14 @@ begin
     debug_data <= baseram_data(15 downto 0);
   end if;
 end process;
+
+process(debug_inst_valid_backup, rst)
+begin
+  if(rst = '0') then
+    debug_inst_invalid <= '0';
+  elsif(debug_inst_valid_backup = '0') then
+    debug_inst_invalid <= '1';
+  end if;
+end process;
+
 end architecture ; -- arch
