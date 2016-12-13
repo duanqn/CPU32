@@ -9,7 +9,7 @@ ENTITY memcontrol is
     --up
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
-    inst_data_i: out STD_LOGIC_VECTOR(31 downto 0);
+    inst_data_i: out STD_LOGIC_VECTOR(31 downto 0) := X"00000000";
     inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
     inst_ce_o: in STD_LOGIC;
 
@@ -92,6 +92,8 @@ begin
           align_type <= ALIGN_TYPE_WORD;
           write_data <= (others => '0');
           signal_sb <= '0';
+          inst_data_i <= (others => '0');
+          mem_data_i <= (others => '0');
         end if;
 
       -- inst 1
