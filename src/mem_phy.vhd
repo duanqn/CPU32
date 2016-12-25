@@ -315,6 +315,8 @@ begin
           when "110" =>
             serialport_state <= "111";
           when "111" =>
+            serialport_state <= "101";
+          when "101" =>
             serialport_state <= "000";
           when others => null;
         end case;
