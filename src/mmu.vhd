@@ -47,7 +47,7 @@ port(
   -- RAM:"00" + "0" + address(20 downto 0)
   -- Flash:"01" + address(21 downto 0)
   -- Serial:"10" + "0000000000000000000000";
-  to_physical_addr : out std_logic_vector(23 downto 0);
+  to_physical_addr : out std_logic_vector(24 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
 
   to_physical_read_enable : out std_logic;
@@ -207,15 +207,15 @@ begin
                     else '0'; 
 
  
-  to_physical_addr <= "00" & physical_addr(22 downto 1) -- Flash
+  to_physical_addr <= "100" & physical_addr(22 downto 1) -- Flash
                     when physical_addr(31 downto 24) = x"1E"
-                  else  "010" & physical_addr(22 downto 2)    -- RAM
+                  else  "0010" & physical_addr(22 downto 2)    -- RAM
                     when physical_addr(31 downto 23) = "000000000"
-                  else "1000" & x"00000"              -- serial
+                  else "01000" & x"00000"              -- serial
                     when physical_addr(31 downto 0) = PHYSICAL_SERIAL_DATA
-                  else "11" & x"000" & physical_addr(11 downto 2)
+                  else "011" & x"000" & physical_addr(11 downto 2)
                     when physical_addr(31 downto 12) = x"10000"
-                  else x"FFFFFF";
+                  else "0111111111111111111111111";
 
   to_physical_data <= write_data;
 

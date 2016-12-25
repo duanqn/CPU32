@@ -117,9 +117,10 @@ begin
       when "0010" =>
         if(data_ready = '1') then
           stallreq_all <= '0';
-          inst_data_i <= read_data;
+          ope_addr <= (others => '0');
           ope_ce <= '0';
           ope_we <= '0';
+          inst_data_i <= read_data;
           state <= "0011";
         else 
           state_backup <= state;
@@ -140,9 +141,10 @@ begin
       when "0101" => 
         if(data_ready = '1') then
           stallreq_all <= '0';
-          mem_data_i <= read_data;
+          ope_addr <= (others => '0');
           ope_ce <= '0';
           ope_we <= '0';
+          mem_data_i <= read_data;
           state <= "0011";
         else 
           state_backup <= state;
@@ -163,9 +165,9 @@ begin
       when "0111" =>
         if(data_ready = '1') then
           stallreq_all <= '0';
-          read_data_sb <= read_data;
           ope_ce <= '0';
           ope_we <= '0';
+          read_data_sb <= read_data;
           state <= "1000";
         else 
           state_backup <= state;
@@ -198,6 +200,7 @@ begin
       when "1011" =>
         if(data_ready = '1') then
           stallreq_all <= '0';
+          ope_addr <= (others => '0');
           ope_ce <= '0';
           ope_we <= '0';
           state <= "0011";

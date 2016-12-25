@@ -7,7 +7,7 @@ use work.rom.ALL;
 entity mem_phy is
     Port (
       clk : in  STD_LOGIC;
-      addr : in  STD_LOGIC_VECTOR (23 downto 0);
+      addr : in  STD_LOGIC_VECTOR (24 downto 0);
       data_in : in  STD_LOGIC_VECTOR (31 downto 0);
       data_out : out  STD_LOGIC_VECTOR (31 downto 0) := X"FFFFFFFF";
       write_enable : in  STD_LOGIC;
@@ -203,7 +203,7 @@ begin
       end if;
 
       -- read flash
-      if (read_enable = '1' and addr(23 downto 22) = "00") then
+      if (read_enable = '1' and addr(24 downto 22) = "100") then
         flash_ope_addr <= addr(21 downto 0);
         flash_read_signal <= '1';
         data_out <= flash_read_data & flash_read_data;        
@@ -218,7 +218,7 @@ begin
         serialport_transmit_data <= (others => '0');
 
       -- write ram
-      elsif (write_enable = '1' and addr(23 downto 22) = "01") then
+      elsif (write_enable = '1' and addr(24 downto 22) = "001") then
         ram_ope_addr <= addr(19 downto 0);
         ram_write_data <= data_in;
         ram_ope_we <= '0';
@@ -230,7 +230,7 @@ begin
         flash_read_signal <= '0';
 
       -- read ram
-      elsif (read_enable = '1' and addr(23 downto 22) = "01") then
+      elsif (read_enable = '1' and addr(24 downto 22) = "001") then
         ram_ope_addr <= addr(19 downto 0);
         ram_ope_we <= '1';
         ram_ope_ce1 <= not addr(20);
@@ -243,7 +243,7 @@ begin
         flash_read_signal <= '0';
 
       -- read serial port
-      elsif (read_enable = '1' and addr(23 downto 22) = "10") then
+      elsif (read_enable = '1' and addr(24 downto 22) = "010") then
         ram_ope_addr <= (others => '0');
         ram_write_data <= (others => '0');
         ram_ope_we <= '0';
@@ -256,7 +256,7 @@ begin
         flash_read_signal <= '0';
 
       -- write serial port
-      elsif (write_enable = '1' and addr(23 downto 22) = "10") then
+      elsif (write_enable = '1' and addr(24 downto 22) = "010") then
           serialport_transmit_data <= data_in(7 downto 0);
           ram_ope_addr <= (others => '0');
           ram_write_data <= (others => '0');
@@ -266,7 +266,7 @@ begin
           flash_read_signal <= '0';
 
       -- read rom
-      elsif (read_enable = '1' and addr(23 downto 22) = "11") then
+      elsif (read_enable = '1' and addr(24 downto 22) = "011") then
         data_out <= boot_rom(to_integer(unsigned(addr(4 downto 0))));
         data_ready_part <= '1';
 

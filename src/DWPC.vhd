@@ -50,7 +50,7 @@ port(
   debug_pc: out STD_logic_vector(31 downto 0);
   debug_inst_valid: out std_logic;
 
-  to_physical_addr : out std_logic_vector(23 downto 0);
+  to_physical_addr : out std_logic_vector(24 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
 
   to_physical_read_enable : out std_logic;
@@ -66,7 +66,7 @@ end component;
 component mem_phy
 port(
   clk : in  STD_LOGIC;
-  addr : in  STD_LOGIC_VECTOR (23 downto 0);
+  addr : in  STD_LOGIC_VECTOR (24 downto 0);
   data_in : in  STD_LOGIC_VECTOR (31 downto 0);
   data_out : out  STD_LOGIC_VECTOR (31 downto 0) := X"FFFFFFFF";
   write_enable : in  STD_LOGIC;
@@ -107,7 +107,7 @@ end component;
 signal debug_inst_valid_backup: std_logic;
 signal pc: STD_LOGIC_VECTOR(31 downto 0);
 -- CPU -- mem_phy
-signal physical_addr: STD_LOGIC_VECTOR(23 downto 0);
+signal physical_addr: STD_LOGIC_VECTOR(24 downto 0);
 signal physical_data_in: STD_LOGIC_VECTOR(31 downto 0);
 signal physical_data_out: STD_LOGIC_VECTOR(31 downto 0);
 signal write_enable: STD_LOGIC;

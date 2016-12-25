@@ -9,9 +9,12 @@ sll 7 7 16
 or 1 1 7
 addu 8 5 3
 sw 1 8 0
+lui 6 BFD0
+addiu 6 6 3F8
+sw 1 6 0
 addiu 3 3 4
 subu 6 2 3
-bgtz 6 FFF6
+bgtz 6 FFF3
 nop
 xor 1 1 1
 ori 2 0 1

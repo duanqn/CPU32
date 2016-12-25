@@ -10,7 +10,7 @@ ENTITY openmips is
 	debug_pc: out STD_LOGIC_vector(31 downto 0);
     debug_inst_valid: out std_logic;
 
-    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_addr : out std_logic_vector(24 downto 0);
     to_physical_data : out std_logic_vector(31 downto 0);
 
     to_physical_read_enable : out std_logic;
@@ -460,7 +460,7 @@ architecture arch of openmips is
 
     align_type : in std_logic_vector(1 downto 0);
 
-    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_addr : out std_logic_vector(24 downto 0);
     to_physical_data : out std_logic_vector(31 downto 0);
 
     to_physical_read_enable : out std_logic;
