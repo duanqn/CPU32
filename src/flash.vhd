@@ -53,6 +53,7 @@ begin
                     if (read_enable = '1') then
                     -- read state 0
                         flash_control_we <= '0';
+                        flash_control_oe <= '1';
                         flash_data <= X"00FF";
                         data_ready <= '0';
                         addr_backup <= addr;
