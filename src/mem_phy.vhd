@@ -7,7 +7,7 @@ use work.rom.ALL;
 entity mem_phy is
     Port (
       clk : in  STD_LOGIC;
-      addr : in  STD_LOGIC_VECTOR (23 downto 0);
+      addr : in  STD_LOGIC_VECTOR (24 downto 0);
       data_in : in  STD_LOGIC_VECTOR (31 downto 0);
       data_out : out  STD_LOGIC_VECTOR (31 downto 0) := X"FFFFFFFF";
       write_enable : in  STD_LOGIC;
@@ -189,8 +189,10 @@ begin
 
     serialport_transmit_signal <= serialport_write_enable and (not serialport_transmit_busy);
 
-    process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in)
+    process(serialport_receive_signal, read_enable, addr, write_enable, serialport_receive_data, data_in, 
+      flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data)
     begin
+
       if (serialport_receive_signal = '1') then
         -- if have data incoming, latch it
         serialport_data_latch <= serialport_receive_data;
@@ -199,103 +201,94 @@ begin
         serialport_data_latch <= (others => '0');
         serialport_data_ready <= '0';
       end if;
+
       -- read flash
-      if (read_enable = '1' and addr(23 downto 22) = "00") then
-          flash_ope_addr <= addr(21 downto 0);
-          flash_read_signal <= '1';
-          serialport_data_ready <= '0';
-          ram_ope_addr <= (others => '0');
-          ram_write_data <= (others => '0');
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= '0';
-          ram_ope_ce2 <= '0';
-          serialport_transmit_data <= (others => '0');
-
-      -- write ram
-      elsif (write_enable = '1' and addr(23 downto 22) = "01") then
-          ram_ope_addr <= addr(19 downto 0);
-          ram_write_data <= data_in;
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= not addr(20);
-          ram_ope_ce2 <= addr(20);
-          serialport_data_ready <= '0';
-          serialport_transmit_data <= (others => '0');
-          flash_read_signal <= '0';
-      -- read ram
-      elsif (read_enable = '1' and addr(23 downto 22) = "01") then
-          ram_ope_addr <= addr(19 downto 0);
-          ram_ope_we <= '1';
-          ram_ope_ce1 <= not addr(20);
-          ram_ope_ce2 <= addr(20);
-          serialport_data_ready <= '0';
-          ram_write_data <= (others => '0');
-          serialport_transmit_data <= (others => '0');
-          flash_read_signal <= '0';
-      -- read serial port
-      elsif (read_enable = '1' and addr(23 downto 22) = "10") then
-          serialport_data_ready <= '0';
-          ram_ope_addr <= (others => '0');
-          ram_write_data <= (others => '0');
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= '0';
-          ram_ope_ce2 <= '0';
-          serialport_transmit_data <= (others => '0');
-          flash_read_signal <= '0';
-      -- write serial port
-      elsif (write_enable = '1' and addr(23 downto 22) = "10") then
-          serialport_transmit_data <= data_in(7 downto 0);
-
-          report integer'image(to_integer(unsigned(data_in(7 downto 0))));
-
-          serialport_data_ready <= '0';
-          ram_ope_addr <= (others => '0');
-          ram_write_data <= (others => '0');
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= '0';
-          ram_ope_ce2 <= '0';
-          flash_read_signal <= '0';
-      -- read rom
-      elsif (read_enable = '1' and addr(23 downto 22) = "11") then
-          serialport_data_ready <= '0';
-          ram_ope_addr <= (others => '0');
-          ram_write_data <= (others => '0');
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= '0';
-          ram_ope_ce2 <= '0';
-          serialport_transmit_data <= (others => '0');
-          flash_read_signal <= '0';
-      else
-          flash_read_signal <= '0';
-          serialport_data_ready <= '0';
-          ram_ope_addr <= (others => '0');
-          ram_write_data <= (others => '0');
-          ram_ope_we <= '0';
-          ram_ope_ce1 <= '0';
-          ram_ope_ce2 <= '0';
-          serialport_transmit_data <= (others => '0');
-          flash_read_signal <= '0';
-      end if;
-    end process;
-
-    process(flash_data_ready, ram_data_ready, serialport_transmit_busy, flash_read_data, ram_read_data, serialport_data_latch, write_enable, addr)
-    begin
-      if addr(23 downto 22) = "00" then -- flash read
+      if (read_enable = '1' and addr(24 downto 22) = "100") then
+        flash_ope_addr <= addr(21 downto 0);
+        flash_read_signal <= '1';
         data_out <= flash_read_data & flash_read_data;        
         data_ready_part <= flash_data_ready;
-      elsif addr(23 downto 22) = "01" then -- ram write/read
+
+        ram_ope_addr <= (others => '0');
+        ram_write_data <= (others => '0');
+        ram_ope_we <= '0';
+        ram_ope_ce1 <= '0';
+        ram_ope_ce2 <= '0';
+
+        serialport_transmit_data <= (others => '0');
+
+      -- write ram
+      elsif (write_enable = '1' and addr(24 downto 22) = "001") then
+        ram_ope_addr <= addr(19 downto 0);
+        ram_write_data <= data_in;
+        ram_ope_we <= '0';
+        ram_ope_ce1 <= not addr(20);
+        ram_ope_ce2 <= addr(20);
+        data_ready_part <= ram_data_ready;
+
+        serialport_transmit_data <= (others => '0');
+        flash_read_signal <= '0';
+
+      -- read ram
+      elsif (read_enable = '1' and addr(24 downto 22) = "001") then
+        ram_ope_addr <= addr(19 downto 0);
+        ram_ope_we <= '1';
+        ram_ope_ce1 <= not addr(20);
+        ram_ope_ce2 <= addr(20);
+        ram_write_data <= (others => '0');
         data_ready_part <= '1';
         data_out <= ram_read_data;
-      elsif addr(23 downto 22) = "10" then
-       -- serialport_read/write
-        data_out <= X"000000" & serialport_data_latch;
-        data_ready_part <= '0';
 
-      elsif addr(23 downto 22) = "11" then -- rom_read
+        serialport_transmit_data <= (others => '0');
+        flash_read_signal <= '0';
+
+      -- read serial port
+      elsif (read_enable = '1' and addr(24 downto 22) = "010") then
+        ram_ope_addr <= (others => '0');
+        ram_write_data <= (others => '0');
+        ram_ope_we <= '0';
+        ram_ope_ce1 <= '0';
+        ram_ope_ce2 <= '0';
+        data_out <= X"000000" & serialport_data_latch;
+        data_ready_part <= '1';
+
+        serialport_transmit_data <= (others => '0');
+        flash_read_signal <= '0';
+
+      -- write serial port
+      elsif (write_enable = '1' and addr(24 downto 22) = "010") then
+          serialport_transmit_data <= data_in(7 downto 0);
+          ram_ope_addr <= (others => '0');
+          ram_write_data <= (others => '0');
+          ram_ope_we <= '0';
+          ram_ope_ce1 <= '0';
+          ram_ope_ce2 <= '0';
+          flash_read_signal <= '0';
+
+      -- read rom
+      elsif (read_enable = '1' and addr(24 downto 22) = "011") then
         data_out <= boot_rom(to_integer(unsigned(addr(4 downto 0))));
         data_ready_part <= '1';
+
+        ram_ope_addr <= (others => '0');
+        ram_write_data <= (others => '0');
+        ram_ope_we <= '0';
+        ram_ope_ce1 <= '0';
+        ram_ope_ce2 <= '0';
+        serialport_transmit_data <= (others => '0');
+        flash_read_signal <= '0';
+
       else
+        flash_read_signal <= '0';
+        ram_ope_addr <= (others => '0');
+        ram_write_data <= (others => '0');
+        ram_ope_we <= '0';
+        ram_ope_ce1 <= '0';
+        ram_ope_ce2 <= '0';
+        serialport_transmit_data <= (others => '0');
+        flash_read_signal <= '0';
         data_out <= (others => '0');
-        data_ready_part <= '0';
+        data_ready_part <= '1';
       end if;
     end process;
 
@@ -320,6 +313,10 @@ begin
           when "010" =>
             serialport_state <= "110";
           when "110" =>
+            serialport_state <= "111";
+          when "111" =>
+            serialport_state <= "101";
+          when "101" =>
             serialport_state <= "000";
           when others => null;
         end case;
@@ -334,6 +331,7 @@ begin
         data_ready <= data_ready_part;
       end if;
     end process;
+
     busy <= not data_ready;
 
 end behave;

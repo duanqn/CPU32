@@ -1,4 +1,4 @@
-library IEEE;
+ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.NUMERIC_STD.ALL;
@@ -17,11 +17,14 @@ port(
   ope_we: in std_logic;
   ope_ce: in std_logic;
   write_data: in std_logic_vector(31 downto 0);
+  signal_sb : in std_logic;
 
   -- during memory time slice
 
   read_data: out std_logic_vector(31 downto 0);
   ready : out std_logic;      -- memory access is ready ready
+  exc_signal : out std_logic;
+
 
   -- about exception
   -- 0001: ps2     0010: com1    0100: com2     1000: mmu extra
@@ -44,7 +47,7 @@ port(
   -- RAM:"00" + "0" + address(20 downto 0)
   -- Flash:"01" + address(21 downto 0)
   -- Serial:"10" + "0000000000000000000000";
-  to_physical_addr : out std_logic_vector(23 downto 0);
+  to_physical_addr : out std_logic_vector(24 downto 0);
   to_physical_data : out std_logic_vector(31 downto 0);
 
   to_physical_read_enable : out std_logic;
@@ -100,25 +103,15 @@ architecture Behavioral of mmu is
   signal to_physical_read_enable_reg : std_logic := '0';
   signal to_physical_write_enable_reg : std_logic := '0';
 
+
+
 begin
 
--- serial logic
-  -- choose addr on posedge
-  --process(clk, rst)
-  --begin
-  --      if rst = '0' then
-  --          addr <= x"90000000";
-  --  elsif clk'event and clk = '1' and from_physical_ready = '1' and ope_ce = '1'  then
-  --    addr <= ope_addr;
-  --  end if;
-  --end process;
 
-  addr <= ope_addr;
-
-
+  
   -- handle TLBWI
   process(clk)
-    variable tlb_index : integer range 127 downto 0 := 0;
+    variable tlb_index : integer range tlb_num_entry-1 downto 0 := 0;
   begin
     if clk'event and clk = '1' then
       if tlb_write_enable = '1' then
@@ -144,7 +137,10 @@ begin
       end if;
     -- tlb missing
     elsif tlb_missing = '1' then
-      if( ope_ce = '1' and ope_we = '0' )then
+      if(signal_sb = '1') then 
+        exc_code <= TLB_S;
+        bad_addr <= addr;
+      elsif( ope_ce = '1' and ope_we = '0')then
         exc_code <= TLB_L;
         bad_addr <= addr;
       elsif( ope_ce = '1' and ope_we = '1' ) then
@@ -169,17 +165,8 @@ begin
     end if;
   end process;
 
+  addr <= ope_addr;
 
-
-  -- clear enable and data and addr on posedge
-  -- send information to physical level on negedge
-  to_physical_addr <= to_physical_addr_reg;
-  to_physical_data <= to_physical_data_reg;
-  to_physical_read_enable <= to_physical_read_enable_reg;
-  to_physical_write_enable <= to_physical_write_enable_reg;
-
--- combination logic
-  -- control signal
   process(addr)
   begin
     if (addr(31 downto 29) = "100" or addr(31 downto 29) = "101" or addr = X"00000000") then
@@ -205,26 +192,38 @@ begin
                       and tlb_missing = '0' and tlb_writable = '1'
                  else '0';
 
+  exc_signal <= not no_exception_accur;                
+
+
   -- to physical_level
-  to_physical_addr_reg <= "00" & physical_addr(22 downto 1) -- Flash
-                    when physical_addr(31 downto 24) = x"1E"
-                  else  "010" & physical_addr(22 downto 2)    -- RAM
-                    when physical_addr(31 downto 23) = "000000000"
-                  else "1000" & x"00000"              -- serial
-                    when physical_addr(31 downto 0) = PHYSICAL_SERIAL_DATA
-                  else "11" & x"000" & physical_addr(11 downto 2)
-                    when physical_addr(31 downto 12) = x"10000"
-                  else x"FFFFFF";
-
-  to_physical_data_reg <= write_data;
-
-  to_physical_read_enable_reg <= '1'
+  -- combination logic
+  -- control signal
+  to_physical_read_enable <= '1'
                       when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '0' and ope_ce = '1')
                     else '0';
 
-  to_physical_write_enable_reg <= '1'
+  to_physical_write_enable <= '1'
                       when( special_com1_status = '0' and no_exception_accur = '1' and ope_we = '1' and ope_ce = '1')
-                    else '0';
+                    else '0'; 
+
+ 
+  to_physical_addr <= "100" & physical_addr(22 downto 1) -- Flash
+                    when physical_addr(31 downto 24) = x"1E"
+                  else  "0010" & physical_addr(22 downto 2)    -- RAM
+                    when physical_addr(31 downto 23) = "000000000"
+                  else "01000" & x"00000"              -- serial
+                    when physical_addr(31 downto 0) = PHYSICAL_SERIAL_DATA
+                  else "011" & x"000" & physical_addr(11 downto 2)
+                    when physical_addr(31 downto 12) = x"10000"
+                  else "0111111111111111111111111";
+
+  to_physical_data <= write_data;
+
+  --to_physical_addr <= to_physical_addr_reg;
+  --to_physical_data <= to_physical_data_reg;
+  --to_physical_read_enable <= to_physical_read_enable_reg;
+  --to_physical_write_enable <= to_physical_write_enable_reg;
+
 
   -- to top mem level
   read_data <= x"0000000" & "00" & serial_status_reg & "1"
@@ -240,6 +239,8 @@ begin
                 when (from_physical_serial = '1')
                 else '0';
 
+
+
   -- which EntryLo is selected and generate tlb_temp
   tlb_check : for i in tlb_num_entry-1 downto 0 generate
     tlb_which_equal(i) <= '1' when (tlb_mem(i)(62 downto 44) = addr(31 downto 13))
@@ -252,6 +253,8 @@ begin
       tlb_low_temp_value(j)(i*2+1) <= tlb_which_low(i*2+1) and tlb_mem(i)(j+23);
     end generate tlb_temp;
   end generate tlb_check;
+
+
 
   -- generate lookup result
   -- tlb_lookup_result can be generated with "or reduce" operator in Verilog, but in VHDL it is difficult
@@ -287,103 +290,103 @@ begin
                             tlb_low_temp_value(i)(28) or
                             tlb_low_temp_value(i)(29) or
                             tlb_low_temp_value(i)(30) or
-                            tlb_low_temp_value(i)(31) or
-                            tlb_low_temp_value(i)(32) or
-                            tlb_low_temp_value(i)(33) or
-                            tlb_low_temp_value(i)(34) or
-                            tlb_low_temp_value(i)(35) or
-                            tlb_low_temp_value(i)(36) or
-                            tlb_low_temp_value(i)(37) or
-                            tlb_low_temp_value(i)(38) or
-                            tlb_low_temp_value(i)(39) or
-                            tlb_low_temp_value(i)(40) or
-                            tlb_low_temp_value(i)(41) or
-                            tlb_low_temp_value(i)(42) or
-                            tlb_low_temp_value(i)(43) or
-                            tlb_low_temp_value(i)(44) or
-                            tlb_low_temp_value(i)(45) or
-                            tlb_low_temp_value(i)(46) or
-                            tlb_low_temp_value(i)(47) or
-                            tlb_low_temp_value(i)(48) or
-                            tlb_low_temp_value(i)(49) or
-                            tlb_low_temp_value(i)(50) or
-                            tlb_low_temp_value(i)(51) or
-                            tlb_low_temp_value(i)(52) or
-                            tlb_low_temp_value(i)(53) or
-                            tlb_low_temp_value(i)(54) or
-                            tlb_low_temp_value(i)(55) or
-                            tlb_low_temp_value(i)(56) or
-                            tlb_low_temp_value(i)(57) or
-                            tlb_low_temp_value(i)(58) or
-                            tlb_low_temp_value(i)(59) or
-                            tlb_low_temp_value(i)(60) or
-                            tlb_low_temp_value(i)(61) or
-                            tlb_low_temp_value(i)(62) or
-                            tlb_low_temp_value(i)(63) or
-                            tlb_low_temp_value(i)(64) or
-                            tlb_low_temp_value(i)(65) or
-                            tlb_low_temp_value(i)(66) or
-                            tlb_low_temp_value(i)(67) or
-                            tlb_low_temp_value(i)(68) or
-                            tlb_low_temp_value(i)(69) or
-                            tlb_low_temp_value(i)(70) or
-                            tlb_low_temp_value(i)(71) or
-                            tlb_low_temp_value(i)(72) or
-                            tlb_low_temp_value(i)(73) or
-                            tlb_low_temp_value(i)(74) or
-                            tlb_low_temp_value(i)(75) or
-                            tlb_low_temp_value(i)(76) or
-                            tlb_low_temp_value(i)(77) or
-                            tlb_low_temp_value(i)(78) or
-                            tlb_low_temp_value(i)(79) or
-                            tlb_low_temp_value(i)(80) or
-                            tlb_low_temp_value(i)(81) or
-                            tlb_low_temp_value(i)(82) or
-                            tlb_low_temp_value(i)(83) or
-                            tlb_low_temp_value(i)(84) or
-                            tlb_low_temp_value(i)(85) or
-                            tlb_low_temp_value(i)(86) or
-                            tlb_low_temp_value(i)(87) or
-                            tlb_low_temp_value(i)(88) or
-                            tlb_low_temp_value(i)(89) or
-                            tlb_low_temp_value(i)(90) or
-                            tlb_low_temp_value(i)(91) or
-                            tlb_low_temp_value(i)(92) or
-                            tlb_low_temp_value(i)(93) or
-                            tlb_low_temp_value(i)(94) or
-                            tlb_low_temp_value(i)(95) or
-                            tlb_low_temp_value(i)(96) or
-                            tlb_low_temp_value(i)(97) or
-                            tlb_low_temp_value(i)(98) or
-                            tlb_low_temp_value(i)(99) or
-                            tlb_low_temp_value(i)(100) or
-                            tlb_low_temp_value(i)(101) or
-                            tlb_low_temp_value(i)(102) or
-                            tlb_low_temp_value(i)(103) or
-                            tlb_low_temp_value(i)(104) or
-                            tlb_low_temp_value(i)(105) or
-                            tlb_low_temp_value(i)(106) or
-                            tlb_low_temp_value(i)(107) or
-                            tlb_low_temp_value(i)(108) or
-                            tlb_low_temp_value(i)(109) or
-                            tlb_low_temp_value(i)(110) or
-                            tlb_low_temp_value(i)(111) or
-                            tlb_low_temp_value(i)(112) or
-                            tlb_low_temp_value(i)(113) or
-                            tlb_low_temp_value(i)(114) or
-                            tlb_low_temp_value(i)(115) or
-                            tlb_low_temp_value(i)(116) or
-                            tlb_low_temp_value(i)(117) or
-                            tlb_low_temp_value(i)(118) or
-                            tlb_low_temp_value(i)(119) or
-                            tlb_low_temp_value(i)(120) or
-                            tlb_low_temp_value(i)(121) or
-                            tlb_low_temp_value(i)(122) or
-                            tlb_low_temp_value(i)(123) or
-                            tlb_low_temp_value(i)(124) or
-                            tlb_low_temp_value(i)(125) or
-                            tlb_low_temp_value(i)(126) or
-                            tlb_low_temp_value(i)(127);-- or
+                            tlb_low_temp_value(i)(31);-- or
+                            --tlb_low_temp_value(i)(32) or
+                            --tlb_low_temp_value(i)(33) or
+                            --tlb_low_temp_value(i)(34) or
+                            --tlb_low_temp_value(i)(35) or
+                            --tlb_low_temp_value(i)(36) or
+                            --tlb_low_temp_value(i)(37) or
+                            --tlb_low_temp_value(i)(38) or
+                            --tlb_low_temp_value(i)(39) or
+                            --tlb_low_temp_value(i)(40) or
+                            --tlb_low_temp_value(i)(41) or
+                            --tlb_low_temp_value(i)(42) or
+                            --tlb_low_temp_value(i)(43) or
+                            --tlb_low_temp_value(i)(44) or
+                            --tlb_low_temp_value(i)(45) or
+                            --tlb_low_temp_value(i)(46) or
+                            --tlb_low_temp_value(i)(47) or
+                            --tlb_low_temp_value(i)(48) or
+                            --tlb_low_temp_value(i)(49) or
+                            --tlb_low_temp_value(i)(50) or
+                            --tlb_low_temp_value(i)(51) or
+                            --tlb_low_temp_value(i)(52) or
+                            --tlb_low_temp_value(i)(53) or
+                            --tlb_low_temp_value(i)(54) or
+                            --tlb_low_temp_value(i)(55) or
+                            --tlb_low_temp_value(i)(56) or
+                            --tlb_low_temp_value(i)(57) or
+                            --tlb_low_temp_value(i)(58) or
+                            --tlb_low_temp_value(i)(59) or
+                            --tlb_low_temp_value(i)(60) or
+                            --tlb_low_temp_value(i)(61) or
+                            --tlb_low_temp_value(i)(62) or
+                            --tlb_low_temp_value(i)(63) or
+                            --tlb_low_temp_value(i)(64) or
+                            --tlb_low_temp_value(i)(65) or
+                            --tlb_low_temp_value(i)(66) or
+                            --tlb_low_temp_value(i)(67) or
+                            --tlb_low_temp_value(i)(68) or
+                            --tlb_low_temp_value(i)(69) or
+                            --tlb_low_temp_value(i)(70) or
+                            --tlb_low_temp_value(i)(71) or
+                            --tlb_low_temp_value(i)(72) or
+                            --tlb_low_temp_value(i)(73) or
+                            --tlb_low_temp_value(i)(74) or
+                            --tlb_low_temp_value(i)(75) or
+                            --tlb_low_temp_value(i)(76) or
+                            --tlb_low_temp_value(i)(77) or
+                            --tlb_low_temp_value(i)(78) or
+                            --tlb_low_temp_value(i)(79) or
+                            --tlb_low_temp_value(i)(80) or
+                            --tlb_low_temp_value(i)(81) or
+                            --tlb_low_temp_value(i)(82) or
+                            --tlb_low_temp_value(i)(83) or
+                            --tlb_low_temp_value(i)(84) or
+                            --tlb_low_temp_value(i)(85) or
+                            --tlb_low_temp_value(i)(86) or
+                            --tlb_low_temp_value(i)(87) or
+                            --tlb_low_temp_value(i)(88) or
+                            --tlb_low_temp_value(i)(89) or
+                            --tlb_low_temp_value(i)(90) or
+                            --tlb_low_temp_value(i)(91) or
+                            --tlb_low_temp_value(i)(92) or
+                            --tlb_low_temp_value(i)(93) or
+                            --tlb_low_temp_value(i)(94) or
+                            --tlb_low_temp_value(i)(95) or
+                            --tlb_low_temp_value(i)(96) or
+                            --tlb_low_temp_value(i)(97) or
+                            --tlb_low_temp_value(i)(98) or
+                            --tlb_low_temp_value(i)(99) or
+                            --tlb_low_temp_value(i)(100) or
+                            --tlb_low_temp_value(i)(101) or
+                            --tlb_low_temp_value(i)(102) or
+                            --tlb_low_temp_value(i)(103) or
+                            --tlb_low_temp_value(i)(104) or
+                            --tlb_low_temp_value(i)(105) or
+                            --tlb_low_temp_value(i)(106) or
+                            --tlb_low_temp_value(i)(107) or
+                            --tlb_low_temp_value(i)(108) or
+                            --tlb_low_temp_value(i)(109) or
+                            --tlb_low_temp_value(i)(110) or
+                            --tlb_low_temp_value(i)(111) or
+                            --tlb_low_temp_value(i)(112) or
+                            --tlb_low_temp_value(i)(113) or
+                            --tlb_low_temp_value(i)(114) or
+                            --tlb_low_temp_value(i)(115) or
+                            --tlb_low_temp_value(i)(116) or
+                            --tlb_low_temp_value(i)(117) or
+                            --tlb_low_temp_value(i)(118) or
+                            --tlb_low_temp_value(i)(119) or
+                            --tlb_low_temp_value(i)(120) or
+                            --tlb_low_temp_value(i)(121) or
+                            --tlb_low_temp_value(i)(122) or
+                            --tlb_low_temp_value(i)(123) or
+                            --tlb_low_temp_value(i)(124) or
+                            --tlb_low_temp_value(i)(125) or
+                            --tlb_low_temp_value(i)(126) or
+                            --tlb_low_temp_value(i)(127) or
                             --tlb_low_temp_value(i)(128) or
                             --tlb_low_temp_value(i)(129) or
                             --tlb_low_temp_value(i)(130) or
@@ -547,103 +550,103 @@ begin
                       tlb_which_low(28) or
                       tlb_which_low(29) or
                       tlb_which_low(30) or
-                      tlb_which_low(31) or
-                      tlb_which_low(32) or
-                      tlb_which_low(33) or
-                      tlb_which_low(34) or
-                      tlb_which_low(35) or
-                      tlb_which_low(36) or
-                      tlb_which_low(37) or
-                      tlb_which_low(38) or
-                      tlb_which_low(39) or
-                      tlb_which_low(40) or
-                      tlb_which_low(41) or
-                      tlb_which_low(42) or
-                      tlb_which_low(43) or
-                      tlb_which_low(44) or
-                      tlb_which_low(45) or
-                      tlb_which_low(46) or
-                      tlb_which_low(47) or
-                      tlb_which_low(48) or
-                      tlb_which_low(49) or
-                      tlb_which_low(50) or
-                      tlb_which_low(51) or
-                      tlb_which_low(52) or
-                      tlb_which_low(53) or
-                      tlb_which_low(54) or
-                      tlb_which_low(55) or
-                      tlb_which_low(56) or
-                      tlb_which_low(57) or
-                      tlb_which_low(58) or
-                      tlb_which_low(59) or
-                      tlb_which_low(60) or
-                      tlb_which_low(61) or
-                      tlb_which_low(62) or
-                      tlb_which_low(63) or
-                      tlb_which_low(64) or
-                      tlb_which_low(65) or
-                      tlb_which_low(66) or
-                      tlb_which_low(67) or
-                      tlb_which_low(68) or
-                      tlb_which_low(69) or
-                      tlb_which_low(70) or
-                      tlb_which_low(71) or
-                      tlb_which_low(72) or
-                      tlb_which_low(73) or
-                      tlb_which_low(74) or
-                      tlb_which_low(75) or
-                      tlb_which_low(76) or
-                      tlb_which_low(77) or
-                      tlb_which_low(78) or
-                      tlb_which_low(79) or
-                      tlb_which_low(80) or
-                      tlb_which_low(81) or
-                      tlb_which_low(82) or
-                      tlb_which_low(83) or
-                      tlb_which_low(84) or
-                      tlb_which_low(85) or
-                      tlb_which_low(86) or
-                      tlb_which_low(87) or
-                      tlb_which_low(88) or
-                      tlb_which_low(89) or
-                      tlb_which_low(90) or
-                      tlb_which_low(91) or
-                      tlb_which_low(92) or
-                      tlb_which_low(93) or
-                      tlb_which_low(94) or
-                      tlb_which_low(95) or
-                      tlb_which_low(96) or
-                      tlb_which_low(97) or
-                      tlb_which_low(98) or
-                      tlb_which_low(99) or
-                      tlb_which_low(100) or
-                      tlb_which_low(101) or
-                      tlb_which_low(102) or
-                      tlb_which_low(103) or
-                      tlb_which_low(104) or
-                      tlb_which_low(105) or
-                      tlb_which_low(106) or
-                      tlb_which_low(107) or
-                      tlb_which_low(108) or
-                      tlb_which_low(109) or
-                      tlb_which_low(110) or
-                      tlb_which_low(111) or
-                      tlb_which_low(112) or
-                      tlb_which_low(113) or
-                      tlb_which_low(114) or
-                      tlb_which_low(115) or
-                      tlb_which_low(116) or
-                      tlb_which_low(117) or
-                      tlb_which_low(118) or
-                      tlb_which_low(119) or
-                      tlb_which_low(120) or
-                      tlb_which_low(121) or
-                      tlb_which_low(122) or
-                      tlb_which_low(123) or
-                      tlb_which_low(124) or
-                      tlb_which_low(125) or
-                      tlb_which_low(126) or
-                      tlb_which_low(127) --or
+                      tlb_which_low(31)-- or
+                      --tlb_which_low(32) or
+                      --tlb_which_low(33) or
+                      --tlb_which_low(34) or
+                      --tlb_which_low(35) or
+                      --tlb_which_low(36) or
+                      --tlb_which_low(37) or
+                      --tlb_which_low(38) or
+                      --tlb_which_low(39) or
+                      --tlb_which_low(40) or
+                      --tlb_which_low(41) or
+                      --tlb_which_low(42) or
+                      --tlb_which_low(43) or
+                      --tlb_which_low(44) or
+                      --tlb_which_low(45) or
+                      --tlb_which_low(46) or
+                      --tlb_which_low(47) or
+                      --tlb_which_low(48) or
+                      --tlb_which_low(49) or
+                      --tlb_which_low(50) or
+                      --tlb_which_low(51) or
+                      --tlb_which_low(52) or
+                      --tlb_which_low(53) or
+                      --tlb_which_low(54) or
+                      --tlb_which_low(55) or
+                      --tlb_which_low(56) or
+                      --tlb_which_low(57) or
+                      --tlb_which_low(58) or
+                      --tlb_which_low(59) or
+                      --tlb_which_low(60) or
+                      --tlb_which_low(61) or
+                      --tlb_which_low(62) or
+                      --tlb_which_low(63) or
+                      --tlb_which_low(64) or
+                      --tlb_which_low(65) or
+                      --tlb_which_low(66) or
+                      --tlb_which_low(67) or
+                      --tlb_which_low(68) or
+                      --tlb_which_low(69) or
+                      --tlb_which_low(70) or
+                      --tlb_which_low(71) or
+                      --tlb_which_low(72) or
+                      --tlb_which_low(73) or
+                      --tlb_which_low(74) or
+                      --tlb_which_low(75) or
+                      --tlb_which_low(76) or
+                      --tlb_which_low(77) or
+                      --tlb_which_low(78) or
+                      --tlb_which_low(79) or
+                      --tlb_which_low(80) or
+                      --tlb_which_low(81) or
+                      --tlb_which_low(82) or
+                      --tlb_which_low(83) or
+                      --tlb_which_low(84) or
+                      --tlb_which_low(85) or
+                      --tlb_which_low(86) or
+                      --tlb_which_low(87) or
+                      --tlb_which_low(88) or
+                      --tlb_which_low(89) or
+                      --tlb_which_low(90) or
+                      --tlb_which_low(91) or
+                      --tlb_which_low(92) or
+                      --tlb_which_low(93) or
+                      --tlb_which_low(94) or
+                      --tlb_which_low(95) or
+                      --tlb_which_low(96) or
+                      --tlb_which_low(97) or
+                      --tlb_which_low(98) or
+                      --tlb_which_low(99) or
+                      --tlb_which_low(100) or
+                      --tlb_which_low(101) or
+                      --tlb_which_low(102) or
+                      --tlb_which_low(103) or
+                      --tlb_which_low(104) or
+                      --tlb_which_low(105) or
+                      --tlb_which_low(106) or
+                      --tlb_which_low(107) or
+                      --tlb_which_low(108) or
+                      --tlb_which_low(109) or
+                      --tlb_which_low(110) or
+                      --tlb_which_low(111) or
+                      --tlb_which_low(112) or
+                      --tlb_which_low(113) or
+                      --tlb_which_low(114) or
+                      --tlb_which_low(115) or
+                      --tlb_which_low(116) or
+                      --tlb_which_low(117) or
+                      --tlb_which_low(118) or
+                      --tlb_which_low(119) or
+                      --tlb_which_low(120) or
+                      --tlb_which_low(121) or
+                      --tlb_which_low(122) or
+                      --tlb_which_low(123) or
+                      --tlb_which_low(124) or
+                      --tlb_which_low(125) or
+                      --tlb_which_low(126) or
+                      --tlb_which_low(127) --or
                       --tlb_which_low(128) or
                       --tlb_which_low(129) or
                       --tlb_which_low(130) or

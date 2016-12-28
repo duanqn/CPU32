@@ -7,8 +7,10 @@ ENTITY openmips is
   port(
     rst: in STD_LOGIC;
     clk: in STD_LOGIC;
+	debug_pc: out STD_LOGIC_vector(31 downto 0);
+    debug_inst_valid: out std_logic;
 
-    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_addr : out std_logic_vector(24 downto 0);
     to_physical_data : out std_logic_vector(31 downto 0);
 
     to_physical_read_enable : out std_logic;
@@ -25,6 +27,7 @@ architecture arch of openmips is
 
   component clock
   port(
+    rst: in STD_LOGIC;
     clk: in STD_LOGIC;
     clk_new: out STD_LOGIC
     );
@@ -94,6 +97,7 @@ architecture arch of openmips is
     inst_o:out STD_LOGIC_VECTOR(31 downto 0);
     stallreq:out STD_LOGIC; -- =1 -> stall pipeline
     ex_aluop_i:in STD_LOGIC_VECTOR(7 downto 0);
+    debug_inst_valid : out std_logic;
 
     -- exception
     excepttype_o:out STD_LOGIC_VECTOR(31 downto 0);
@@ -404,12 +408,12 @@ architecture arch of openmips is
     inst_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
     inst_ce_o: in STD_LOGIC;
 
-    ram_data_i: out STD_LOGIC_VECTOR(31 downto 0);
-    ram_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
-    ram_data_o: in STD_LOGIC_VECTOR(31 downto 0);
-    ram_we_o: in STD_LOGIC;
-    ram_align: in STD_LOGIC_VECTOR(1 downto 0);
-    ram_ce_o: in STD_LOGIC;
+    mem_data_i: out STD_LOGIC_VECTOR(31 downto 0);
+    mem_addr_o: in STD_LOGIC_VECTOR(31 downto 0);
+    mem_data_o: in STD_LOGIC_VECTOR(31 downto 0);
+    mem_we_o: in STD_LOGIC;
+    mem_align: in STD_LOGIC_VECTOR(1 downto 0);
+    mem_ce_o: in STD_LOGIC;
 
     --mix
     stallreq: out STD_LOGIC;
@@ -418,11 +422,14 @@ architecture arch of openmips is
     --down
     ope_addr: out std_logic_vector(31 downto 0);
     write_data: out std_logic_vector(31 downto 0);
-    read_data: in std_logic_vector(31 downto 0);
-    data_ready: in std_logic;
     ope_we: out std_logic;
     ope_ce: out std_logic;
-    align_type: out std_logic_vector(1 downto 0)
+    align_type: out std_logic_vector(1 downto 0);
+    signal_sb: out std_logic;
+
+    read_data: in std_logic_vector(31 downto 0);
+    data_ready: in std_logic;
+    exc_signal : in STD_LOGIC
     );
   end component;
 
@@ -438,6 +445,8 @@ architecture arch of openmips is
 
     read_data: out std_logic_vector(31 downto 0);
     ready : out std_logic;
+    signal_sb : in STD_LOGIC;
+    exc_signal : out STD_LOGIC;
 
     -- about exception
     serial_int : out std_logic_vector(3 downto 0);
@@ -451,7 +460,7 @@ architecture arch of openmips is
 
     align_type : in std_logic_vector(1 downto 0);
 
-    to_physical_addr : out std_logic_vector(23 downto 0);
+    to_physical_addr : out std_logic_vector(24 downto 0);
     to_physical_data : out std_logic_vector(31 downto 0);
 
     to_physical_read_enable : out std_logic;
@@ -508,12 +517,12 @@ architecture arch of openmips is
   signal inst_addr: STD_LOGIC_VECTOR(31 downto 0);
   signal inst_ce: STD_LOGIC;
 
-  signal ram_data_i: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_addr_o: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_data_o: STD_LOGIC_VECTOR(31 downto 0);
-  signal ram_we_o: STD_LOGIC;
-  signal ram_align: STD_LOGIC_VECTOR(1 downto 0);
-  signal ram_ce_o: STD_LOGIC;
+  signal mem_data_i: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_addr_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_data_o: STD_LOGIC_VECTOR(31 downto 0);
+  signal mem_we_o: STD_LOGIC;
+  signal mem_align: STD_LOGIC_VECTOR(1 downto 0);
+  signal mem_ce_o: STD_LOGIC;
 
 -- about memcontrol -- mmu
   signal ope_data: STD_LOGIC_VECTOR(31 downto 0);
@@ -523,6 +532,8 @@ architecture arch of openmips is
   signal mmu_result_data: STD_LOGIC_VECTOR(31 downto 0);
   signal data_ready: STD_LOGIC;
   signal align_type: STD_LOGIC_VECTOR(1 downto 0);
+  signal signal_sb: STD_LOGIC;
+  signal exc_signal: STD_LOGIC;
 
 -- mmu -- Exception
   signal serial_int_mmu: STD_LOGIC_VECTOR(3 downto 0);
@@ -689,10 +700,14 @@ architecture arch of openmips is
 --CP0 to EX
   signal cp0_reg_data_i: STD_LOGIC_VECTOR(31 downto 0);
 
+
+
 begin
   inst_addr <= pc;
+  debug_pc <= pc;
 
   clock0: clock port map(
+    rst => rst,
     clk => clk, 
     clk_new => clk_new
     );
@@ -755,7 +770,8 @@ begin
     inst_o => id_inst, 
     ex_aluop_i => ex_aluop, 
     excepttype_o => excepttype_id, 
-    current_inst_addr_o => current_inst_addr_id
+    current_inst_addr_o => current_inst_addr_id,
+    debug_inst_valid => debug_inst_valid
     );
 
   regfile0: regfile port map(
@@ -896,12 +912,12 @@ begin
     whilo_i => mem_whilo_i,
     hi_i => mem_hi_i, 
     lo_i => mem_lo_i,
-    mem_data_i => ram_data_i, 
-    mem_addr_o => ram_addr_o,
-    mem_we_o => ram_we_o, 
-    mem_align => ram_align,
-    mem_data_o => ram_data_o, 
-    mem_ce_o => ram_ce_o,
+    mem_data_i => mem_data_i, 
+    mem_addr_o => mem_addr_o,
+    mem_we_o => mem_we_o, 
+    mem_align => mem_align,
+    mem_data_o => mem_data_o, 
+    mem_ce_o => mem_ce_o,
     wd_o => mem_wd_o, 
     wreg_o => mem_wreg_o,
     wdata_o => mem_wdata_o, 
@@ -1019,12 +1035,12 @@ begin
     inst_data_i => inst_data, 
     inst_addr_o => inst_addr, 
     inst_ce_o => inst_ce, 
-    ram_data_i => ram_data_i,
-    ram_addr_o => ram_addr_o, 
-    ram_data_o => ram_data_o, 
-    ram_we_o => ram_we_o, 
-    ram_align => ram_align, 
-    ram_ce_o => ram_ce_o, 
+    mem_data_i => mem_data_i,
+    mem_addr_o => mem_addr_o, 
+    mem_data_o => mem_data_o, 
+    mem_we_o => mem_we_o, 
+    mem_align => mem_align, 
+    mem_ce_o => mem_ce_o, 
     stallreq => stallreq_from_mem,
     stallreq_all => stallreq_from_mem_all,
     ope_addr => ope_addr, 
@@ -1033,7 +1049,9 @@ begin
     ope_we => ope_we, 
     ope_ce => ope_ce, 
     data_ready => data_ready, 
-    align_type => align_type
+    align_type => align_type,
+    signal_sb => signal_sb,
+    exc_signal => exc_signal
     );
 
   mmu0: mmu port map(
@@ -1057,7 +1075,9 @@ begin
     from_physical_data => from_physical_data, 
     from_physical_ready => from_physical_ready, 
     from_physical_serial => from_physical_serial, 
-    bad_addr => bad_addr_mmu
+    bad_addr => bad_addr_mmu,
+    signal_sb => signal_sb,
+    exc_signal => exc_signal
     );
 
 
