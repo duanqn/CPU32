@@ -63,7 +63,7 @@ begin
   EBase_o <= register_values(15);
 
   register_values(13)(14 downto 11) <= mmu_int_i;
-  --timer_int_o <= register_values(13)(10);
+  --timer_int_o <= register_values(13)(15);
 
   write_operation : process(rst, clk, we_i, waddr_i, data_i)
   begin
@@ -86,7 +86,6 @@ begin
       register_values(12) <= X"10000000";
       --Cause_o init
       register_values(13)(31 downto 16) <= x"0000";
-      register_values(13)(15) <= '0';
       register_values(13)(9 downto 0) <= "0000000000";
       --EPC_o init
       register_values(14) <= X"00000000";
@@ -106,15 +105,15 @@ begin
 
       if(register_values(11) /= X"00000000" and register_values(9) = register_values(11)) then
         if(we_i = '1' and waddr_i /= "01011") then
-          register_values(13)(10) <= '1';
+          register_values(13)(15) <= '1';
           -- reset operation done by OS
         elsif (we_i = '0') then
-          register_values(13)(10) <= '1';
+          register_values(13)(15) <= '1';
         else
-          register_values(13)(10) <= '0';
+          register_values(13)(15) <= '0';
         end if;
       else
-        register_values(13)(10) <= '0';
+        register_values(13)(15) <= '0';
         register_values(9) <= register_values(9) + 1;
       end if;
 
